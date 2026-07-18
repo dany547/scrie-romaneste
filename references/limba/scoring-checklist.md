@@ -9,14 +9,20 @@ criteriile 4-5, SEO/GEO și densitatea informației).
 1. **Naturalitate (lipsa clișeelor AI)** — 0-2 pct
    Verifică față de `anti-tipare-ai.md`: tranziții mecanice, introduceri formulaice,
    umpluturi meta-text, adjective corporatiste, cuantificări vagi, hedging.
+   *Intrare mecanică:* `scripts/check-tipare.py`. Orice rezultat `critic` rămas
+   înseamnă maximum 1 punct. Două sau mai multe înseamnă 0.
 
 2. **Ritm și burstiness** — 0-2 pct
    Alternanță de fraze scurte/lungi; paragrafe de lungime variabilă; fără structură de
    eseu școlar repetitivă.
+   *Intrare mecanică:* `scripts/check-ritm.py`. Dacă raportează `ritm_uniform` sau
+   `fraze_egale`, nu-ți da 2/2 — indiferent cât de bine sună la citit. Dacă
+   raportează `capcana_concluziei`, taie secțiunea înainte de a reevalua.
 
 3. **Corectitudine gramaticală și lexicală (fără romgleză)** — 0-2 pct
-   Verifică față de `gramatica-stil.md`: acord subiect-predicat, punctuație (dialog,
-   incidente, apoziții), pleonasme/tautologii, calcuri din engleză.
+   Verifică față de `gramatica-stil.md` (normă) și `tipare-ro.md` (tipare de eșec
+   ale modelelor): acord la distanță, regim prepozițional, flexiune, calcuri din
+   engleză, pleonasme, diacritice cu virgulă nu cu sedilă.
 
 ## Prag minim: 8/10 (pe rubrica completă, limbă + SEO)
 

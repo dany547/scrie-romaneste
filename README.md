@@ -10,11 +10,13 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 
 ### Key features
 
-- **Anti-AI patterns** — catches mechanical transitions ("în concluzie", "prin urmare"), corporate jargon, hedging, Romgleză (Romanian-English calques)
-- **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers, common mistakes (400+ rules extracted from Romanian school manuals)
-- **Writing techniques** — rhythm, conciseness, structure, audience calibration (230+ lines from writing methodology)
-- **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search (460+ rules from current Google documentation)
-- **Verification scripts** — `check-tipare.py` (pattern scanner) and `check-seo.py` (heading/keyword checks)
+- **Three modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits)
+- **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
+- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, syntactic calques, false friends, borrowed-word articulation, diacritic restoration
+- **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
+- **Writing techniques** — rhythm, conciseness, structure, audience calibration
+- **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search
+- **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker
 
 ## Installation
 
@@ -165,32 +167,51 @@ scrie-romaneste/
 ├── SKILL.md                        # Main skill definition (load this)
 ├── references/
 │   ├── limba/
-│   │   ├── anti-tipare-ai.md       # AI clichés, Romgleză, tone — check always
+│   │   ├── anti-tipare-ai.md       # AI clichés with replacements + thresholds
+│   │   ├── tipare-ro.md            # Romanian-specific failure modes
 │   │   ├── gramatica-stil.md       # Agreement, punctuation, spelling, pleonasms
 │   │   ├── scris-eficient.md       # Process techniques: draft/edit, rhythm, concision
 │   │   └── scoring-checklist.md    # 1-10 rubric, language criteria (1-3)
 │   └── seo/
 │       ├── seo-geo.md              # SEO technical/on-page/e-commerce/blog/local + GEO
 │       └── scoring-checklist.md    # 1-10 rubric, SEO criteria (4-5)
-└── scripts/
-    ├── check-tipare.py             # Scan text for AI clichés
-    └── check-seo.py                # Check headings and keyword stuffing
+├── scripts/
+│   ├── check-tipare.py             # AI clichés, calques, generation artefacts
+│   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
+│   └── check-seo.py                # Headings and keyword stuffing
+└── tests/                          # Fixtures + unittest suite (stdlib only)
 ```
 
 ## Verification scripts
 
 ```bash
-# Scan a file for AI patterns
-python3 scripts/check-tipare.py <file>
+python3 scripts/check-tipare.py <file>     # AI clichés and calques
+python3 scripts/check-ritm.py <file>       # rhythm uniformity
+python3 scripts/check-seo.py <file>        # SEO structure
 
-# Check SEO structure
-python3 scripts/check-seo.py <file>
+python3 scripts/check-tipare.py <file> --scor   # signal score only
+python3 scripts/check-tipare.py <file> --prag 8 # occurrences per 1000 words
+python3 scripts/check-tipare.py <file> --tot    # include sub-threshold matches
 ```
 
-Exit 0 = clean, exit 1 = issues found. Use `--help` for details.
+Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.
+
+Matching ignores diacritics, so text written without them — or with the legacy
+cedilla `ş/ţ` instead of the correct comma-below `ș/ț` — is scanned correctly.
+Patterns cover inflected forms, not just dictionary forms.
+
+**On `check-ritm.py`**: its thresholds derive from English-language corpora and
+over-flag formal registers. Published false-positive rates for this class of
+detector exceed 60% on non-native writers. Treat a bad score as "worth
+rereading", never as proof of machine authorship.
+
+```bash
+python3 -m unittest discover tests
+```
 
 ## Version
 
+- **v0.2.0** — Three modes (rewrite/audit/edit), two-pass self-correction, voice profiles. Diacritic-insensitive and morphology-aware pattern matching (previously, text without diacritics went entirely undetected). Severity levels and density thresholds instead of binary bans. New `tipare-ro.md` covering Romanian-specific failure modes. New stylometric rhythm analyser. Test suite added.
 - **v0.1.0-alpha** — Initial release. Grammar/style from 7 Romanian school manuals, writing techniques from efficiency methodology, SEO/GEO from current Google documentation.
 
 ## License

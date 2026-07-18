@@ -1,2 +1,4 @@
 GROUNDING_DONT_COMMIT/
 .claude/
+__pycache__/
+*.pyc

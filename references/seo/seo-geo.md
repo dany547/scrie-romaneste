@@ -80,7 +80,7 @@ pentru interdicția de keyword stuffing și clișee. Un text optimizat SEO care 
 ## 5. SEO pentru blog și pagini de conținut
 
 - Titlu + introducere care promit clar ce oferă articolul, fără deschideri formulaice.
-- Structură pe subtitluri (H2/H3) pentru scanabilitate — vezi și `references/limba/scris-eficient.md` §6.
+- Structură pe subtitluri (H2/H3) pentru scanabilitate — vezi și `references/limba/scris-eficient.md` §8.
 - Liste și bold pentru puncte cheie, fără să transformi tot textul în liste.
 - Scrie pentru cititor, nu pentru robot — conținutul util, convingător și orientat spre
   oameni va influența prezența în rezultate mai mult decât orice altă sugestie tehnică.

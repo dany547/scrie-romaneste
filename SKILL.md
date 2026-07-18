@@ -12,55 +12,91 @@ description: >
 
 # Scrie Românește
 
-Skill pentru generarea și revizuirea de text în limba română care sună natural și uman,
-nu ca text produs de un model lingvistic. Combină reguli de limbă (gramatică, stil,
-anti-tipare AI) cu reguli de optimizare SEO/GEO — fără ca una să o strice pe cealaltă.
+Skill pentru generarea și revizuirea de text în limba română care sună natural și
+uman, nu ca text produs de un model lingvistic. Combină reguli de limbă
+(gramatică, stil, anti-tipare AI) cu reguli de optimizare SEO/GEO — fără ca una
+să o strice pe cealaltă.
+
+## Moduri
+
+Alege modul din cerință. Dacă nu e clar, e **rescriere**.
+
+- **rescriere** (implicit) — livrează textul final, curat. Fără metacomentarii,
+  fără „Iată textul rescris conform regulilor", fără listă de modificări. Doar
+  textul.
+- **audit** — raportează tiparele găsite, grupate pe severitate (`critic`,
+  `important`, `minor`), fiecare cu citatul și motivul. **Nu rescrie.** Unele
+  alegeri sunt intenționate; decizia e a autorului. Se cere cu „ce e în neregulă
+  cu textul", „verifică", „analizează".
+- **editare** — modificări minime și țintite în fișier. Păstrează intacte
+  pasajele care sunt deja bune. Nu rescrie ce nu e stricat.
+
+## Profil de voce
+
+Dacă cerința indică un ton, aplică-l consecvent; altfel alege după canal și
+public. Detalii de registru în `references/limba/gramatica-stil.md` §7.
+
+`publicistic` · `tehnic` · `colocvial` · `direct` · `cald`
+
+Profilul schimbă lexicul și lungimea frazei, nu regulile de corectitudine.
+Stabilește de la început și **tu** sau **dumneavoastră**, și nu comuta.
 
 ## Reguli critice (rezumat — detalii în references/)
 
-**Interzis** (vezi `references/limba/anti-tipare-ai.md` pentru lista completă):
-- Tranziții mecanice: „în concluzie", „prin urmare", „de asemenea", „totodată", „mai mult
-  decât atât", „pe de o parte... pe de altă parte".
-- Introduceri formulaice: „în lumea de astăzi", „în era digitală", „în societatea modernă".
-- Umpluturi meta-text: „este important de menționat că", „merită subliniat faptul că".
-- Adjective corporatiste/dramatice: „revoluționar", „impresionant", „remarcabil"; sintagme
-  ca „adoptă o abordare", „schimbare de paradigmă", „un pilon fundamental".
+**Interzis** (vezi `references/limba/anti-tipare-ai.md` pentru liste complete și
+praguri):
+- Tranziții mecanice: „în concluzie", „prin urmare", „de asemenea", „totodată",
+  „mai mult decât atât", „pe de o parte... pe de altă parte".
+- Introduceri formulaice: „în lumea de astăzi", „în era digitală", „în contextul
+  actual".
+- Umpluturi meta-text: „este important de menționat că", „merită subliniat".
+- Adjective corporatiste: „revoluționar", „impresionant"; sintagme ca „adoptă o
+  abordare", „schimbare de paradigmă", „abordare holistică".
 - Cuantificări vagi: „o serie de", „un număr semnificativ", „o gamă largă de".
 - Hedging: „este posibil ca", „s-ar putea ca" — fii asertiv.
-- Romgleză: „face sens" → „are sens"; „joacă un rol crucial" → „are un rol esențial"/„e
-  determinant"; „la sfârșitul zilei" → „în cele din urmă"; „în termeni de" → „în ceea ce
-  privește".
-- „Capcana concluziei" — nu încheia texte cu un rezumat forțat care repetă ce s-a spus deja.
-- Paragrafe simetrice și ritm monoton — variază lungimea frazelor (burstiness).
+- Romgleză și calcuri: „face sens" → „are sens"; „a adresa o problemă" → „a
+  aborda"; „în termeni de" → „în ceea ce privește".
+- „Capcana concluziei" — nu încheia cu un rezumat forțat.
+- Paragrafe simetrice și ritm monoton — variază lungimea frazelor.
 
 **Obligatoriu**:
-- Diateza activă în locul pasivului birocratic (vezi `references/limba/gramatica-stil.md`).
-- Un cititor-țintă concret în minte înainte de a scrie (vezi `references/limba/scris-eficient.md`).
-- Verifică sursele înainte de a afirma fapte/statistici/citate.
+- Diateza activă în locul pasivului birocratic (`references/limba/gramatica-stil.md` §4).
+- Un cititor-țintă concret în minte înainte de a scrie (`references/limba/scris-eficient.md`).
+- Verifică sursele înainte de a afirma fapte, cifre sau citate. Nu inventa
+  precizie (`references/limba/tipare-ro.md`, `sursa_fabricata`).
+- Diacritice cu virgulă (`ș`, `ț`), nu cu sedilă (`ş`, `ţ`).
 
 ## Fluxul de lucru
 
-1. **LOAD** — citește cerința. Dacă textul are destinație online/comercială, încarcă și
-   `references/seo/seo-geo.md`; dacă e text pur literar, sari peste partea SEO.
-2. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi propoziție
-   cu propoziție (vezi `references/limba/scris-eficient.md` §1).
-3. **SELF-CORRECTION** — scanează draftul după `references/limba/anti-tipare-ai.md`.
-   Opțional: rulează `scripts/check-tipare.py <fișier>` pentru o verificare mecanică
-   rapidă a tiparelor, și — pentru conținut destinat publicării — `scripts/check-seo.py
-   <fișier>` pentru structura de heading-uri și keyword stuffing.
-4. **EVALUATE** — acordă un scor intern conform rubricilor din `references/limba/scoring-checklist.md`
-   (naturalitate, ritm, gramatică) și `references/seo/scoring-checklist.md` (SEO/GEO,
-   densitate informație). Prag minim: **8/10**. Sub prag → refactorizează și reevaluează.
-5. **OUTPUT** — livrează textul final, curat, fără metacomentarii („Iată textul rescris
-   conform regulilor..."). Livrează direct textul.
+1. **LOAD** — citește cerința, stabilește modul și profilul de voce. Încarcă
+   `references/limba/anti-tipare-ai.md` mereu. Dacă textul are destinație
+   online/comercială, încarcă și `references/seo/seo-geo.md`; dacă e text pur
+   literar, sari peste partea SEO.
+2. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
+   propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
+3. **AUTOCORECȚIE** — scanează draftul după `anti-tipare-ai.md` și
+   `tipare-ro.md`. Opțional, verificare mecanică:
+   `scripts/check-tipare.py <fișier>` pentru clișee și calcuri,
+   `scripts/check-ritm.py <fișier>` pentru uniformitatea frazelor, și — pentru
+   conținut destinat publicării — `scripts/check-seo.py <fișier>`.
+4. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
+   își introduce propriile tipare: tranziții reciclate, sinonime rotite peste
+   aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
+   uniformizat la curățenie. Pasul ăsta prinde ce a apărut la pasul 3.
+5. **EVALUARE** — acordă un scor conform rubricilor din
+   `references/limba/scoring-checklist.md` (naturalitate, ritm, gramatică) și
+   `references/seo/scoring-checklist.md` (SEO/GEO, densitate informație). Prag
+   minim: **8/10**. Sub prag → refactorizează și reevaluează.
+6. **LIVRARE** — conform modului ales la pasul 1.
 
 ## Structura references/
 
 ```
 references/
 ├── limba/
-│   ├── anti-tipare-ai.md      # clișee AI, romgleză, ton — verifică mereu
-│   ├── gramatica-stil.md      # acord, punctuație, ortografie, pleonasm
+│   ├── anti-tipare-ai.md      # clișee, vocabular, praguri — verifică mereu
+│   ├── tipare-ro.md           # acord, prepoziții, flexiune, calc sintactic
+│   ├── gramatica-stil.md      # punctuație, ortografie, pleonasm — normă
 │   ├── scris-eficient.md      # tehnici de proces: draft/editare, ritm, concizie
 │   └── scoring-checklist.md   # rubrica 1-10, criteriile de limbă (1-3)
 └── seo/
@@ -68,15 +104,21 @@ references/
     └── scoring-checklist.md   # rubrica 1-10, criteriile SEO (4-5)
 ```
 
-Încarcă doar fișierele relevante pentru sarcina curentă — nu e nevoie să citești tot
-`references/` pentru o singură propoziție de rescris.
+Încarcă doar fișierele relevante — nu e nevoie să citești tot `references/` pentru
+o singură propoziție de rescris.
 
 ## scripts/
 
-- `check-tipare.py` — scanează un text pentru clișeele din `anti-tipare-ai.md`. Exit 0
-  = curat, exit 1 = găsite potriviri. `--help` pentru detalii.
-- `check-seo.py` — verifică heading-uri (H1 unic, fără sărituri de nivel) și keyword
-  stuffing într-un fișier Markdown/HTML. Exit 0/1 la fel. `--help` pentru detalii.
+- `check-tipare.py` — clișee, calcuri, artefacte de generare. Potrivirea ignoră
+  diacriticele, deci merge și pe text scris fără ele sau cu sedilă. Raportează
+  severitate și praguri de densitate.
+- `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
+  capcana concluziei.
+- `check-seo.py` — heading-uri (H1 unic, fără sărituri) și keyword stuffing.
 
-Ambele sunt instrumente de sprijin pentru pasul SELF-CORRECTION — nu înlocuiesc judecata
-asupra ritmului, naturaleții sau relevanței reale a conținutului.
+Exit 0 = curat, 1 = potriviri, 2 = eroare de input. `--help` pentru detalii,
+`--scor` pentru scorul de semnale.
+
+Sunt instrumente de sprijin, nu verdicte. `check-ritm.py` mai ales: pragurile lui
+vin din corpusuri englezești și dau fals pozitiv pe registru formal. Nu înlocuiesc
+judecata asupra ritmului, naturaleții sau relevanței conținutului.

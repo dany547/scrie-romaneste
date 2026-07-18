@@ -12,7 +12,7 @@ vezi `references/limba/scoring-checklist.md` pentru criteriile 1-3, limbă/natur
 
 5. **Valoare și densitatea informației (fără over-explanation)** — 0-2 pct
    Fiecare propoziție adaugă ceva; nimic nu repetă o idee deja spusă doar ca umplutură.
-   Vezi regula celor 10% din `references/limba/scris-eficient.md` §5.
+   Vezi regula celor 10% din `references/limba/scris-eficient.md` §9.
 
 ## Total combinat și prag
 
