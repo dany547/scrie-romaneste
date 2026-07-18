@@ -108,6 +108,69 @@ class TestRitm(unittest.TestCase):
         self.assertIn("prea scurt", iesire)
 
 
+class TestSeo(unittest.TestCase):
+
+    def test_text_curat_nu_e_semnalat(self):
+        cod, iesire = ruleaza("check-seo.py", str(FIXTURES / "bun-articol.md"))
+        self.assertEqual(cod, 0, f"articol corect semnalat gresit:\n{iesire}")
+        self.assertIn("0 probleme SEO", iesire)
+
+    def test_h1_multiplu(self):
+        cod, iesire = ruleaza_stdin("check-seo.py", "# Unu\n\ntext\n\n# Doi\n\ntext")
+        self.assertEqual(cod, 1)
+        self.assertIn("2 H1", iesire)
+
+    def test_salt_de_nivel(self):
+        cod, iesire = ruleaza_stdin("check-seo.py", "# Unu\n\ntext\n\n### Trei\n\ntext")
+        self.assertEqual(cod, 1)
+        self.assertIn("salt H1->H3", iesire)
+
+    def test_sedila_e_semnalata(self):
+        """Sedila (U+015F) in loc de virgula (U+0219) — greseala de norma."""
+        cod, iesire = ruleaza_stdin("check-seo.py", "# Titlu\n\nAcesta eşte textul.")
+        self.assertEqual(cod, 1)
+        self.assertIn("sedila", iesire)
+
+    def test_virgula_corecta_nu_e_semnalata(self):
+        cod, iesire = ruleaza_stdin("check-seo.py", "# Titlu\n\nAceșția sunt corecți.")
+        self.assertNotIn("sedila", iesire, f"diacritice corecte semnalate:\n{iesire}")
+
+    def test_diacritice_in_url(self):
+        text = "# Titlu\n\nVezi [ghidul](https://exemplu.ro/mașină-de-spălat) aici."
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("url_diacritice", iesire)
+
+    def test_url_transliterat_e_acceptat(self):
+        text = "# Titlu\n\nVezi [ghidul](https://exemplu.ro/masina-de-spalat) aici."
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertNotIn("url_diacritice", iesire,
+                         f"slug ASCII corect semnalat:\n{iesire}")
+
+    def test_sectiune_prea_lunga(self):
+        text = "# Titlu\n\n" + ("cuvant " * 500)
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("sectiune_lunga", iesire)
+
+    def test_sectiune_de_dimensiune_buna(self):
+        text = "# Titlu\n\n" + ("cuvant " * 150) + "\n\n## Alta\n\n" + ("cuvant " * 150)
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertNotIn("sectiune_lunga", iesire,
+                         f"sectiune de dimensiune optima semnalata:\n{iesire}")
+
+    def test_keyword_stuffing(self):
+        text = "# Titlu\n\n" + ("cea mai buna oferta de vara. " * 12)
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("keyword_stuffing", iesire)
+
+    def test_headinguri_html(self):
+        text = "<h1>Unu</h1><p>text</p><h3>Trei</h3><p>text</p>"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertIn("salt H1->H3", iesire)
+
+
 class TestContractCLI(unittest.TestCase):
 
     def test_help_pe_toate(self):
@@ -117,7 +180,7 @@ class TestContractCLI(unittest.TestCase):
             self.assertIn("Usage", iesire, script)
 
     def test_fisier_lipsa_da_exit_2(self):
-        for script in ("check-tipare.py", "check-ritm.py"):
+        for script in ("check-tipare.py", "check-ritm.py", "check-seo.py"):
             cod, _ = ruleaza(script, "/nu/exista.md")
             self.assertEqual(cod, 2, script)
 

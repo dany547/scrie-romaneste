@@ -63,7 +63,9 @@ praguri):
 - Diateza activă în locul pasivului birocratic (`references/limba/gramatica-stil.md` §4).
 - Un cititor-țintă concret în minte înainte de a scrie (`references/limba/scris-eficient.md`).
 - Verifică sursele înainte de a afirma fapte, cifre sau citate. Nu inventa
-  precizie (`references/limba/tipare-ro.md`, `sursa_fabricata`).
+  precizie (`references/limba/tipare-ro.md`, `sursa_fabricata`). Se aplică și
+  datelor de business — nume, adrese, telefoane, prețuri, autori: dacă nu le ai
+  confirmate, cere-le sau lasă `[DE COMPLETAT: …]`.
 - Diacritice cu virgulă (`ș`, `ț`), nu cu sedilă (`ş`, `ţ`).
 
 ## Fluxul de lucru
@@ -72,22 +74,31 @@ praguri):
    `references/limba/anti-tipare-ai.md` mereu. Dacă textul are destinație
    online/comercială, încarcă și `references/seo/seo-geo.md`; dacă e text pur
    literar, sari peste partea SEO.
-2. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
+2. **CONTEXT** — pentru conținut comercial, adună datele reale de care ai nevoie
+   înainte de a scrie: caută un brif în proiect (`BRIEF.md`, `CONTEXT.md`,
+   `SEO.md`, `docs/`), apoi surse deja existente (pagina Contact, schema JSON-LD
+   de pe site, `robots.txt`, sitemap). Ce nu găsești și e necesar — **întreabă
+   utilizatorul o singură dată, grupat**. Nu inventa nume de firmă, adrese,
+   telefoane, prețuri, autori sau statistici proprii; vezi
+   `references/seo/seo-geo.md` §0 pentru lista de câmpuri și pentru ce faci când
+   lipsesc. Pentru text literar sau fără date de business, sari peste pas.
+3. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
    propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
-3. **AUTOCORECȚIE** — scanează draftul după `anti-tipare-ai.md` și
+4. **AUTOCORECȚIE** — scanează draftul după `anti-tipare-ai.md` și
    `tipare-ro.md`. Opțional, verificare mecanică:
    `scripts/check-tipare.py <fișier>` pentru clișee și calcuri,
    `scripts/check-ritm.py <fișier>` pentru uniformitatea frazelor, și — pentru
    conținut destinat publicării — `scripts/check-seo.py <fișier>`.
-4. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
+5. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
    își introduce propriile tipare: tranziții reciclate, sinonime rotite peste
    aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
    uniformizat la curățenie. Pasul ăsta prinde ce a apărut la pasul 3.
-5. **EVALUARE** — acordă un scor conform rubricilor din
+6. **EVALUARE** — acordă un scor conform rubricilor din
    `references/limba/scoring-checklist.md` (naturalitate, ritm, gramatică) și
    `references/seo/scoring-checklist.md` (SEO/GEO, densitate informație). Prag
    minim: **8/10**. Sub prag → refactorizează și reevaluează.
-6. **LIVRARE** — conform modului ales la pasul 1.
+7. **LIVRARE** — conform modului ales la pasul 1. Semnalează separat, la final,
+   orice `[DE COMPLETAT: …]` rămas în text.
 
 ## Structura references/
 
@@ -114,7 +125,8 @@ o singură propoziție de rescris.
   severitate și praguri de densitate.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
-- `check-seo.py` — heading-uri (H1 unic, fără sărituri) și keyword stuffing.
+- `check-seo.py` — heading-uri (H1 unic, fără sărituri), keyword stuffing,
+  secțiuni prea lungi între heading-uri, diacritice în URL-uri, sedilă.
 
 Exit 0 = curat, 1 = potriviri, 2 = eroare de input. `--help` pentru detalii,
 `--scor` pentru scorul de semnale.

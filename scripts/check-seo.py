@@ -10,6 +10,9 @@ Verifică:
     - fără sărituri de nivel de heading (H1 -> H3 fără H2)
     - fără keyword stuffing (aceeași frază de 3+ cuvinte repetată excesiv)
     - scanabilitate: text lung fără nicio listă/heading
+    - secțiuni prea lungi între heading-uri (citabilitate GEO)
+    - diacritice în URL-uri/slug-uri (trebuie transliterate ASCII)
+    - sedilă (ş/ţ) în loc de virgulă (ș/ț)
 
 Usage:
     check-seo.py <fisier_sau_->
@@ -30,6 +33,16 @@ LISTA = re.compile(r"^\s*([-*+]|\d+\.)\s+", re.MULTILINE)
 
 LUNGIME_MIN_PENTRU_SCANABILITATE = 1500
 
+# Secțiunile de 120-180 de cuvinte între heading-uri se citează cel mai des în
+# motoarele generative. Pragul e permisiv intenționat: semnalăm doar blocurile
+# clar prea mari, nu abaterile de la optim.
+CUVINTE_MAX_PER_SECTIUNE = 400
+
+SEDILA = re.compile(r"[şţŞŢ]")
+DIACRITICE = "ăâîșțĂÂÎȘȚşţŞŢ"
+# URL-uri în markdown, HTML sau text simplu
+URL = re.compile(r"(?:\]\(|href=[\"']|https?://)([^\s\"'()<>]+)")
+
 
 def extrage_headinguri(text):
     headinguri = [(len(h), t.strip()) for h, t in MARKDOWN_HEADING.findall(text)]
@@ -37,6 +50,23 @@ def extrage_headinguri(text):
         headinguri = [(int(n), re.sub(r"<[^>]+>", "", t).strip())
                        for n, t in HTML_HEADING.findall(text)]
     return headinguri
+
+
+def sectiuni_prea_lungi(text):
+    """Blocuri de text între două heading-uri markdown, peste pragul de citabilitate."""
+    pozitii = [(m.start(), m.group(2).strip()) for m in MARKDOWN_HEADING.finditer(text)]
+    if not pozitii:
+        return []
+
+    probleme = []
+    for i, (start, titlu) in enumerate(pozitii):
+        end = pozitii[i + 1][0] if i + 1 < len(pozitii) else len(text)
+        corp = text[start:end]
+        corp = corp[corp.find("\n") + 1:] if "\n" in corp else ""
+        n = len(corp.split())
+        if n > CUVINTE_MAX_PER_SECTIUNE:
+            probleme.append(("sectiune_lunga", f"{n} cuvinte", titlu[:40]))
+    return probleme
 
 
 def verifica(text):
@@ -66,6 +96,24 @@ def verifica(text):
     for fraza, n in contor.items():
         if n >= prag_stuffing and len(fraza) > 8:
             probleme.append(("keyword_stuffing", f"x{n}", fraza))
+
+    for m in SEDILA.finditer(text):
+        start = max(0, m.start() - 20)
+        probleme.append((
+            "sedila",
+            m.group(0),
+            text[start:m.end() + 20].replace("\n", " ").strip(),
+        ))
+        if len(probleme) > 200:  # text integral cu sedilă — un semnal e destul
+            break
+
+    for m in URL.finditer(text):
+        url = m.group(1)
+        gasite = sorted({c for c in url if c in DIACRITICE})
+        if gasite:
+            probleme.append(("url_diacritice", "".join(gasite), url[:60]))
+
+    probleme.extend(sectiuni_prea_lungi(text))
 
     are_lista = bool(LISTA.search(text))
     if len(text) > LUNGIME_MIN_PENTRU_SCANABILITATE and not headinguri and not are_lista:

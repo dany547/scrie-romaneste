@@ -4,6 +4,48 @@ Aplică aceste reguli **fără a compromite naturalitatea textului** — vezi `r
 pentru interdicția de keyword stuffing și clișee. Un text optimizat SEO care sună robotizat
 și-a ratat scopul.
 
+## 0. Date care nu se inventă
+
+O bună parte din regulile de aici cer date reale despre afacere. Nu le presupune și
+nu le completa cu exemple plauzibile — un NAP inventat, un preț aproximat sau un
+autor fictiv într-un `Article` sunt erori mai grave decât lipsa lor. Se aplică
+aceeași regulă ca la fapte și cifre din `references/limba/tipare-ro.md`
+(`sursa_fabricata`).
+
+**Înainte de a scrie conținut cu destinație comercială, caută briful de proiect**
+în ordinea asta:
+
+1. Un fișier de context în proiect: `BRIEF.md`, `CONTEXT.md`, `SEO.md`,
+   `brand.md`, `.seo/brief.md` sau echivalent — verifică rădăcina proiectului și
+   `docs/`.
+2. Fișiere de configurare cu date deja prezente: `package.json`, sitemap,
+   `robots.txt`, schema JSON-LD existentă pe site, pagina „Contact"/„Despre noi".
+3. Dacă nu găsești, **întreabă utilizatorul** — o singură dată, grupat, doar
+   câmpurile de care ai efectiv nevoie pentru textul cerut.
+
+**Câmpuri care necesită confirmare, pe tip de conținut**:
+
+| Ai nevoie de… | Când |
+|---|---|
+| nume brand, domeniu, URL canonic | orice pagină |
+| public țintă și nivelul lui de expertiză | orice text |
+| cuvântul-cheie principal + 2-3 secundare, cu volume | pagină optimizată |
+| autor real (nume, funcție, credențiale) | `Article`, semnal E-E-A-T |
+| NAP complet: denumire exactă, adresă, telefon | local SEO, `LocalBusiness` |
+| program de funcționare, inclusiv zile speciale | Google Business Profile |
+| preț, monedă, disponibilitate, SKU/GTIN | `Product`, pagini de produs |
+| politici de retur, livrare, garanție | e-commerce, `Organization` |
+| profiluri oficiale pentru `sameAs` | dezambiguizare entitate |
+| date proprii (studii, teste, statistici interne) | conținut non-commodity, GEO |
+
+**Ce faci când lipsesc**: scrie textul fără porțiunea afectată și semnalează
+explicit ce lipsește, cu marcaj vizibil (`[DE COMPLETAT: telefon sediu]`).
+Niciodată placeholder-e care arată a date reale („0721 123 456",
+„Str. Exemplu nr. 1") — ajung publicate.
+
+Excepție: dacă utilizatorul cere explicit un exemplu, un șablon sau o demonstrație,
+datele fictive sunt în regulă — marchează-le ca atare.
+
 ## 1. SEO tehnic și on-page (bazele)
 
 - **Titlu de pagină (`<title>`)**: unic pentru fiecare pagină, descrie exact conținutul,
@@ -182,12 +224,40 @@ pentru interdicția de keyword stuffing și clișee. Un text optimizat SEO care 
   - `Product` — pentru pagini de produs (preț, disponibilitate, recenzii)
   - `Article` / `NewsArticle` — pentru articole de blog și știri (headline, author,
     datePublished, dateModified)
-  - `FAQPage` — pentru secțiuni de întrebări frecvente
-  - `HowTo` — pentru tutoriale pas-cu-pas
   - `LocalBusiness` — pentru afaceri locale (adresă, telefon, program)
   - `BreadcrumbList` — pentru navigarea ierarhică (breadcrumbs)
-  - `Organization` — pentru identitatea companiei (logo, social media)
+  - `Organization` — pentru identitatea companiei (logo, social media, `sameAs`)
   - `Review` / `AggregateRating` — pentru recenzii și evaluări
+  - `FAQPage` — **nu mai produce rich results** (vezi mai jos), dar rămâne tip
+    valid schema.org, util ca semnal semantic
+  - `HowTo` — deprecat pe desktop din 2023; nu mai produce rich results
+
+- **Tipuri retrase de Google (nu mai afișează rich results)**:
+  - `FAQPage` — retras pe **7 mai 2026**. Raportarea în Search Console se oprește
+    în iunie 2026, suportul API în august 2026. Markup-ul poate rămâne pe pagină
+    fără probleme, iar rankingul nu e afectat — e o schimbare de afișare, nu de
+    algoritm. Conținutul de tip întrebare-răspuns rămâne valoros pentru GEO (§11),
+    doar că nu-ți mai extinde listarea în SERP.
+  - `HowTo` — deprecat pe desktop din septembrie 2023.
+  - Retrase în iunie 2025: `Book Actions`, `Course Info`, `ClaimReview`,
+    `EstimatedSalary`, `LearningVideo`, `SpecialAnnouncement`, `VehicleListing`.
+  - Tiparul de fond: când un tip de rich result e exploatat masiv de tool-uri SEO
+    și încetează să descrie fidel pagina, Google îl restrânge și apoi îl elimină.
+    Nu construi o strategie pe un rich result; construiește pe conținut corect
+    descris.
+
+- **Rolul nou al schemei (din 2026)**: AI Mode (Gemini) citește datele structurate
+  ca **semnal de încredere și de verificare a entității**, nu ca declanșator de
+  afișare. Schema exactă, care corespunde conținutului vizibil, crește
+  probabilitatea de a fi citat într-un răspuns AI chiar și când nu se afișează
+  niciun rich result. Nu există markup special „pentru AI" — e același markup pe
+  care îl implementezi oricum pentru căutarea organică.
+
+- **`sameAs` pentru dezambiguizarea entității**: leagă `Organization`/`Person` de
+  profilurile canonice (Wikipedia, Wikidata, LinkedIn, pagini sociale oficiale).
+  Un studiu controlat Schema App a măsurat +46% impresii și +42% clicuri pe 85 de
+  zile după adăugarea `sameAs`. Pentru un brand românesc, include și profilurile
+  locale relevante (Google Business Profile, pagina de firmă).
 
 - **Schema Product — proprietăți obligatorii**:
   - `name`: numele produsului (string)
@@ -237,7 +307,8 @@ pentru interdicția de keyword stuffing și clișee. Un text optimizat SEO care 
 }
 ```
 
-- **Exemplu JSON-LD FAQPage**:
+- **Exemplu JSON-LD FAQPage** (nu mai produce rich results din mai 2026; păstrat
+  ca semnal semantic pentru sistemele generative):
 ```json
 {
   "@context": "https://schema.org/",
@@ -392,6 +463,92 @@ experiența de căutare.
   markup schema.org special. Folosește-l ca parte a strategiei SEO generale pentru
   a fi eligibil pentru rich results.
 
+### Tactici GEO cu dovezi măsurate (studii independente, nu declarații Google)
+
+Secțiunea de mituri de mai sus reflectă ce spune Google oficial. Ce urmează vine din
+studii terțe care au măsurat corelații pe corpusuri mari. Cele două nu se contrazic
+neapărat: Google spune „nu e nevoie să rescrii pentru AI", iar studiile arată că
+textele bine scrise, dense factual și structurate cu răspunsul în față sunt citate
+mai des. Aplică-le pentru că fac textul mai bun, nu ca pe niște trucuri.
+
+**La nivel de scriitură** (studiul Princeton/Georgia Tech/IIT Delhi/Allen AI,
+KDD 2024, ~10.000 de query-uri — cel mai riguros de până acum). Cinci modificări
+au crescut vizibilitatea în răspunsurile generative cu 30-41%:
+
+1. **Adaugă statistici** — cea mai eficientă modificare (+41%). „Aproape un sfert
+   din căutări afișează un AI Overview" e mai citabil decât „tot mai multe căutări
+   afișează un AI Overview". Vezi și regula anti-cuantificări-vagi din
+   `references/limba/anti-tipare-ai.md` — aici cele două se suprapun perfect.
+2. **Citează sursele** — atribuire explicită, cu numele sursei în text, nu doar
+   un link ascuns în „aici".
+3. **Include citate directe** (+28-40%) — o frază între ghilimele, atribuită unei
+   persoane sau instituții reale.
+4. **Voce autoritară** — afirmă, nu ezita. Coincide cu interdicția de hedging.
+5. **Fluență** — fraze curate, fără îmbâcseală. Coincide cu tot ce cere
+   `references/limba/scris-eficient.md`.
+
+Atenție: regula de bază rămâne cea din `references/limba/tipare-ro.md` — **nu
+inventa cifre, citate sau surse** ca să bifezi punctele de mai sus. O statistică
+fabricată e o greșeală mai gravă decât absența ei.
+
+**La nivel de structură**:
+
+- **Răspunsul în prima treime a paginii**: o analiză pe 100 de AI Overviews a găsit
+  că 55% dintre citări provin din primele 30% ale paginii. Concret: pune răspunsul
+  direct la întrebarea principală în primele ~200 de cuvinte, nu după trei paragrafe
+  de context. Se potrivește oricum cu regula anti-introduceri-formulaice.
+- **Secțiuni de 120-180 de cuvinte** între heading-uri: pe 216.000 de pagini,
+  acestea au avut în medie 4,6 citări, față de 2,7 pentru secțiuni mai scurte.
+  Nu fragmenta artificial (Google confirmă că înțelege pagini lungi), dar nici nu
+  lăsa blocuri de 600 de cuvinte fără subtitlu.
+- **Heading-uri formulate ca întrebarea utilizatorului**: „Ce este GEO?" se
+  potrivește mai bine cu interogarea decât „Despre GEO" sau „Prezentare generală".
+  În română, formulează subtitlul cum ar tasta cititorul, nu cum sună într-un
+  cuprins academic.
+- **Paragrafe autonome**: fiecare paragraf trebuie să aibă sens scos din context —
+  motoarele generative extrag fragmente izolate. Evită deschideri de paragraf care
+  depind de anafora din paragraful anterior („Acest lucru înseamnă că…").
+- **Definiții explicite** pentru termenii centrali, într-o singură propoziție.
+
+**La nivel de pagină și site**:
+
+- **Prospețime**: 76,4% dintre paginile cel mai citate de ChatGPT fuseseră
+  actualizate în ultimele 30 de zile (Ahrefs, 17M citări); conținutul actualizat în
+  ultimele 90 de zile e de ~2x mai probabil să fie citat. Actualizări de substanță,
+  nu schimbarea datei. Afișează vizibil „Ultima actualizare: …".
+- **Randare server-side obligatorie**: măsurători pe 500M de fetch-uri (Vercel/MERJ)
+  nu au găsit **nicio** execuție de JavaScript la GPTBot, ClaudeBot sau
+  PerplexityBot. Conținutul randat exclusiv client-side este invizibil pentru
+  ChatGPT, Perplexity și Claude. Pentru SPA-uri: SSR sau prerendering.
+- **Nu bloca crawlerele AI** în `robots.txt` (GPTBot, ClaudeBot, PerplexityBot,
+  OAI-SearchBot) dacă vrei vizibilitate în ele — e o decizie de business, dar
+  trebuie luată conștient, nu moștenită dintr-un `robots.txt` copiat.
+- **Mențiuni pe surse terțe > backlinks**: pe 75.000 de branduri (Ahrefs),
+  mențiunile de brand corelează 0,664 cu vizibilitatea în AI Overviews, față de
+  0,218 pentru backlinks. Sursele terțe sunt citate de ~6,5x mai des decât
+  conținutul propriu. Presa de specialitate, forumurile și comunitățile contează.
+  (Google avertizează separat că mențiunile *fabricate* nu ajută — diferența e
+  între acoperire reală câștigată și mențiuni cumpărate.)
+- **Acoperirea sub-întrebărilor (fan-out)**: paginile care se poziționează pe
+  sub-interogările conexe sunt cu 161% mai probabil citate în AI Overviews. Tratează
+  subiectul cu întrebările lui satelit, nu doar cu interogarea principală.
+- **Cercetare proprie**: paginile cu date proprii obțin de ~4,3x mai multe citări
+  decât listările generice. Un mic set de date propriu (un test, o comparație de
+  prețuri pe piața românească, un sondaj în rândul clienților) valorează mai mult
+  decât încă un articol de sinteză.
+- **Viteza contează și pentru citare**: paginile cu FCP sub 0,4s au avut de ~3x mai
+  multe citări în ChatGPT decât cele peste 1,13s.
+
+**Ce e speculativ sau riscant** (nu investi):
+
+- `llms.txt` — adoptat de ~10% dintre domenii, fără nicio corelație măsurată cu
+  citările; Google confirmă că nu îl folosește.
+- Conținut servit diferit agenților AI față de utilizatori („shadow sites") — e
+  cloaking clasic, încălcare de spam.
+- Injectare adversarială de conținut pentru a influența modelele — risc de
+  penalizare și de daună reputațională, fără beneficiu demonstrat.
+- Schema `speakable` — nicio platformă AI nu a confirmat că o folosește.
+
 ### Măsoară vizibilitatea în AI features
 
 - Folosește **Generative AI performance report** din Search Console pentru a vedea
@@ -446,7 +603,82 @@ experiența de căutare.
 7. **Testează pe mobil**: asigură-te că experiența mobilă este identică cu cea desktop
    (conținut, imagini, funcționalități).
 
-## 13. SEO competitiv
+## 13. Specific pentru limba română
+
+Regulile de mai sus sunt valabile în orice limbă. Cele de aici apar doar când
+scrii pentru un public românesc.
+
+### Diacriticele — cea mai frecventă confuzie
+
+Google tratează **separat** căutările cu și fără diacritice: „masina de spalat" și
+„mașină de spălat" sunt interogări distincte, cu volume și rezultate diferite,
+chiar dacă Google cunoaște legătura dintre ele. Majoritatea utilizatorilor români
+tastează fără diacritice.
+
+De aici, regula practică:
+
+- **Scrie textul cu diacritice.** Corectitudinea limbii nu se negociază, iar
+  Google potrivește oricum textul cu diacritice la interogările fără. Textele cu
+  diacritice sunt și dezambiguizate mai bine (`fata`/`fața`, `tara`/`țara`,
+  `pastele`/`Paștele`, `sanie`/`sânie`).
+- **Nu scrie două versiuni ale aceluiași text** ca să „prinzi" ambele forme — e
+  conținut duplicat și keyword stuffing deodată.
+- **Slug-uri și URL-uri fără diacritice**, transliterate ASCII:
+  `masina-de-spalat`, nu `mașină-de-spălat`. Diacriticele în URL ajung
+  percent-encoded (`ma%C8%99in%C4%83`), urât la partajare și predispus la erori.
+  Transliterare: `ă→a`, `â→a`, `î→i`, `ș→s`, `ț→t`.
+- **Diacritice cu virgulă, nu cu sedilă**: `ș`/`ț` (U+0219/U+021B), nu `ş`/`ţ`
+  (U+015F/U+0163, caractere turcești). Sedila strică potrivirea în unele sisteme
+  și e o greșeală de normă. Vezi `references/limba/gramatica-stil.md`.
+- **Verifică volumele pentru ambele forme** în Keyword Planner înainte de a alege
+  formularea din titlu — uneori diferența e de un ordin de mărime.
+- **`alt` la imagini și numele fișierelor**: fără diacritice în numele fișierului;
+  în `alt` scrie normal, cu diacritice.
+
+### Romgleza în cercetarea de cuvinte-cheie
+
+`references/limba/anti-tipare-ai.md` interzice romgleza **în text**. Pentru
+cuvinte-cheie situația e alta: dacă publicul caută efectiv „review", „second
+hand", „delivery" sau „laptop gaming", ignorarea termenului te scoate din
+rezultate. Împacă-le astfel:
+
+- Folosește termenul căutat acolo unde e necesar tehnic (titlu, un H2, o dată în
+  text), cu forma românească alături: „Recenzie (review) …" sau alternând natural.
+- Nu importa romgleza în restul textului doar pentru consecvență cu keyword-ul.
+- Termenii consacrați în română au prioritate când există și se caută:
+  „livrare" bate „delivery", „telefon mobil" bate „mobile phone".
+
+### Configurare regională
+
+- **`hreflang="ro-RO"`** pentru conținutul destinat României; `ro-MD` dacă
+  targetezi separat Republica Moldova (vocabular și realități diferite). Include
+  `x-default`.
+- **`lang="ro"`** pe `<html>` — banal, dar des omis; afectează și cititoarele de
+  ecran, și segmentarea corectă a textului.
+- **Monedă `RON`** în schema `Offer`, prețuri afișate în lei, cu TVA menționat
+  explicit (obligatoriu legal pentru consumatori).
+- **Formate locale**: dată `15.01.2026` sau „15 ianuarie 2026" în text, dar
+  `2026-01-15` (ISO) în schema markup; separator zecimal virgulă (`119,99 lei`)
+  în text, punct în JSON-LD.
+- **Adrese și NAP**: aceeași formă exactă peste tot, inclusiv abrevierile
+  („Str." vs. „Strada", „nr." vs. „numărul", sectorul pentru București).
+
+### GEO în română — ce e diferit
+
+Modelele generative citează **mai puține surse externe** când întrebarea e pusă
+în română decât în engleză, iar pe subiecte tehnice sau reglementate calitatea
+răspunsurilor scade și apar confuzii de terminologie. Practic:
+
+- Competiția pentru citare în română e mai slabă decât în engleză — un conținut
+  bine structurat, cu date verificabile, are șanse disproporționat de mari.
+- Zonele reglementate (fiscalitate, sănătate, dreptul muncii, asigurări) sunt
+  exact acolo unde modelele greșesc cel mai des în română. Conținut corect,
+  datat, cu referință la actul normativ concret (număr, an, articol) e valoros și
+  citabil.
+- Include explicit termenii instituționali românești (ANAF, ANPC, CASMB,
+  Monitorul Oficial) — ancorează pagina la entitățile locale corecte.
+
+## 14. SEO competitiv
 
 - Analizează **primele 5-10 rezultate** pentru cuvântul-cheie țintă: ce tip de conținut
   au (articol, ghid, listă, video), cât de lung este, ce structură au, ce date structurate
