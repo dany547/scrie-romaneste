@@ -74,14 +74,17 @@ praguri):
    `references/limba/anti-tipare-ai.md` mereu. Dacă textul are destinație
    online/comercială, încarcă și `references/seo/seo-geo.md`; dacă e text pur
    literar, sari peste partea SEO.
-2. **CONTEXT** — pentru conținut comercial, adună datele reale de care ai nevoie
-   înainte de a scrie: caută un brif în proiect (`BRIEF.md`, `CONTEXT.md`,
-   `SEO.md`, `docs/`), apoi surse deja existente (pagina Contact, schema JSON-LD
-   de pe site, `robots.txt`, sitemap). Ce nu găsești și e necesar — **întreabă
-   utilizatorul o singură dată, grupat**. Nu inventa nume de firmă, adrese,
-   telefoane, prețuri, autori sau statistici proprii; vezi
-   `references/seo/seo-geo.md` §0 pentru lista de câmpuri și pentru ce faci când
-   lipsesc. Pentru text literar sau fără date de business, sari peste pas.
+2. **CONTEXT** — pentru conținut comercial, adună datele reale înainte de a scrie.
+   Grounding-ul poate fi în orice format (Markdown, YAML, JSON, PDF, o pagină
+   publicată, un mesaj din conversație) — **caută conținutul, nu un nume de
+   fișier**. Ordine: ce a indicat utilizatorul explicit → instrucțiunile
+   proiectului (`CLAUDE.md`/`AGENTS.md`) → un brif sub orice nume → date deja
+   prezente în cod și pe site → întreabă, o singură dată și grupat. Nu inventa
+   nume de firmă, adrese, telefoane, prețuri, autori sau statistici proprii. După
+   ce afli date noi, oferă-te să le salvezi în formatul proiectului. Detalii,
+   tabelul de câmpuri și tratarea surselor contradictorii:
+   `references/seo/seo-geo.md` §0. Pentru text literar sau fără date de business,
+   sari peste pas.
 3. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
    propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
 4. **AUTOCORECȚIE** — scanează draftul după `anti-tipare-ai.md` și
