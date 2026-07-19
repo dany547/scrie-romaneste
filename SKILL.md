@@ -27,7 +27,10 @@ Alege modul din cerință. Dacă nu e clar, e **rescriere**.
 - **audit** — raportează tiparele găsite, grupate pe severitate (`critic`,
   `important`, `minor`), fiecare cu citatul și motivul. **Nu rescrie.** Unele
   alegeri sunt intenționate; decizia e a autorului. Se cere cu „ce e în neregulă
-  cu textul", „verifică", „analizează".
+  cu textul", „verifică", „analizează". **Începe cu `scripts/verifica.py
+  <fișier>`** — raportul dă direct citatele, severitatea și sugestiile de
+  corecție; încarcă din `references/` doar ce-ți trebuie pentru judecata
+  calitativă (ritm, naturalitate) sau pentru categoriile semnalate.
 - **editare** — modificări minime și țintite în fișier. Păstrează intacte
   pasajele care sunt deja bune. Nu rescrie ce nu e stricat.
 
@@ -70,10 +73,14 @@ praguri):
 
 ## Fluxul de lucru
 
-1. **LOAD** — citește cerința, stabilește modul și profilul de voce. Încarcă
-   `references/limba/anti-tipare-ai.md` mereu. Dacă textul are destinație
-   online/comercială, încarcă și `references/seo/seo-geo.md`; dacă e text pur
-   literar, sari peste partea SEO.
+1. **LOAD** — citește cerința, stabilește modul și profilul de voce.
+   - **audit**: nu încărca nimic încă — rulează întâi `scripts/verifica.py`
+     (pasul 4) și încarcă referințe doar la nevoie.
+   - **rescriere/editare**: încarcă `references/limba/anti-tipare-ai.md`
+     (interdicțiile trebuie știute *înainte* de a scrie — scriptul doar
+     detectează, nu previne). Dacă textul are destinație online/comercială,
+     alege din `references/seo/` după tabelul de rutare de mai jos; dacă e text
+     pur literar, sari peste partea SEO.
 2. **CONTEXT** — pentru conținut comercial, adună datele reale înainte de a scrie.
    Grounding-ul poate fi în orice format (Markdown, YAML, JSON, PDF, o pagină
    publicată, un mesaj din conversație) — **caută conținutul, nu un nume de
@@ -83,23 +90,28 @@ praguri):
    nume de firmă, adrese, telefoane, prețuri, autori sau statistici proprii. După
    ce afli date noi, oferă-te să le salvezi în formatul proiectului. Detalii,
    tabelul de câmpuri și tratarea surselor contradictorii:
-   `references/seo/seo-geo.md` §0. Pentru text literar sau fără date de business,
+   `references/seo/grounding.md`. Pentru text literar sau fără date de business,
    sari peste pas.
 3. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
    propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
-4. **AUTOCORECȚIE** — scanează draftul după `anti-tipare-ai.md` și
-   `tipare-ro.md`. Opțional, verificare mecanică:
-   `scripts/check-tipare.py <fișier>` pentru clișee și calcuri,
-   `scripts/check-ritm.py <fișier>` pentru uniformitatea frazelor, și — pentru
-   conținut destinat publicării — `scripts/check-seo.py <fișier>`.
+4. **AUTOCORECȚIE** — rulează `scripts/verifica.py <fișier>` (sau `-` cu textul
+   pe stdin; `--fara-seo` pentru text literar). Raportul acoperă clișee AI,
+   calcuri, pleonasme, paronime, ritm și SEO dintr-o singură trecere, cu
+   sugestia de corecție inline (`|→ …`) unde există una canonică. Aplică
+   sugestiile cu judecată — potrivirea e mecanică, corecția cere acord și
+   topică. Pentru problemele semnalate fără sugestie, sau ca să înțelegi o
+   categorie, deschide referința relevantă (`anti-tipare-ai.md`,
+   `tipare-ro.md`, `modelisme.md`).
 5. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
    își introduce propriile tipare: tranziții reciclate, sinonime rotite peste
    aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
    uniformizat la curățenie. Pasul ăsta prinde ce a apărut la pasul 3.
-6. **EVALUARE** — acordă un scor conform rubricilor din
-   `references/limba/scoring-checklist.md` (naturalitate, ritm, gramatică) și
-   `references/seo/scoring-checklist.md` (SEO/GEO, densitate informație). Prag
-   minim: **8/10**. Sub prag → refactorizează și reevaluează.
+6. **EVALUARE** — `scripts/verifica.py <fișier> --scor` dă partea deterministă
+   (`scor_automat=X/13`). Evaluează manual restul: naturalitate, densitate de
+   informație, fapte/surse — rubricile din
+   `references/limba/scoring-checklist.md` și
+   `references/seo/scoring-checklist.md`. Prag minim: **8/10** pe rubrica
+   combinată. Sub prag → refactorizează și reevaluează.
 7. **LIVRARE** — conform modului ales la pasul 1. Semnalează separat, la final,
    orice `[DE COMPLETAT: …]` rămas în text.
 
@@ -108,31 +120,57 @@ praguri):
 ```
 references/
 ├── limba/
-│   ├── anti-tipare-ai.md      # clișee, vocabular, praguri — verifică mereu
+│   ├── anti-tipare-ai.md      # clișee, vocabular, praguri — obligatoriu la scriere
 │   ├── tipare-ro.md           # acord, prepoziții, flexiune, calc sintactic
 │   ├── gramatica-stil.md      # punctuație, ortografie, pleonasm — normă
 │   ├── scris-eficient.md      # tehnici de proces: draft/editare, ritm, concizie
+│   ├── modelisme.md           # pleonasme etimologice, anglicisme, paronimie
 │   └── scoring-checklist.md   # rubrica 1-10, criteriile de limbă (1-3)
 └── seo/
-    ├── seo-geo.md             # SEO tehnic/on-page/e-commerce/blog/local + GEO
+    ├── core.md                # tehnic, on-page, conținut, specific română
+    ├── grounding.md           # date care nu se inventă + salvarea lor
+    ├── geo.md                 # optimizare pentru AI search
+    ├── schema.md              # JSON-LD / structured data
+    ├── ecommerce.md           # pagini de produs și categorie
+    ├── blog-keyword.md        # blog + cercetarea cuvintelor-cheie
+    ├── local.md               # NAP, Google Business Profile
+    ├── avansat.md             # link building, tehnic avansat, audit, competitiv
     └── scoring-checklist.md   # rubrica 1-10, criteriile SEO (4-5)
 ```
+
+Rutare SEO — încarcă doar ce cere task-ul (plus `grounding.md` la orice conținut
+comercial):
+
+| Task | Fișiere |
+|---|---|
+| articol de blog | `core.md`, `blog-keyword.md`, `geo.md` |
+| pagină de produs/categorie | `core.md`, `ecommerce.md` |
+| afacere locală / pagină de contact | `core.md`, `local.md` |
+| schema / date structurate | `schema.md` |
+| audit SEO complet, link building | `core.md`, `avansat.md` |
 
 Încarcă doar fișierele relevante — nu e nevoie să citești tot `references/` pentru
 o singură propoziție de rescris.
 
 ## scripts/
 
+- **`verifica.py` — punctul de intrare recomandat.** Rulează toate verificările
+  dintr-un singur apel și calculează scorul combinat
+  (`scor_automat=X/13`). Flags: `--fara-seo` (text literar), `--scor` (doar
+  scorurile), `--json` (output structurat), `--prag N`.
 - `check-tipare.py` — clișee, calcuri, artefacte de generare. Potrivirea ignoră
   diacriticele, deci merge și pe text scris fără ele sau cu sedilă. Raportează
   severitate și praguri de densitate.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
+- `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),
+  anglicisme, paronime.
 - `check-seo.py` — heading-uri (H1 unic, fără sărituri), keyword stuffing,
   secțiuni prea lungi între heading-uri, diacritice în URL-uri, sedilă.
 
-Exit 0 = curat, 1 = potriviri, 2 = eroare de input. `--help` pentru detalii,
-`--scor` pentru scorul de semnale.
+Exit 0 = curat, 1 = potriviri, 2 = eroare de input. `--help` pentru detalii.
+Unde tiparele au o corecție canonică, raportul o dă inline după fragment
+(`|→ are sens`) — aplic-o adaptând acordul și topica, nu prin înlocuire oarbă.
 
 Sunt instrumente de sprijin, nu verdicte. `check-ritm.py` mai ales: pragurile lui
 vin din corpusuri englezești și dau fals pozitiv pe registru formal. Nu înlocuiesc

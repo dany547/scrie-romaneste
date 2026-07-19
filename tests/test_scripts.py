@@ -108,6 +108,132 @@ class TestRitm(unittest.TestCase):
         self.assertIn("prea scurt", iesire)
 
 
+class TestModelisme(unittest.TestCase):
+
+    def test_pleonasm_detectat_cu_sugestie(self):
+        cod, iesire = ruleaza_stdin("check-modelisme.py",
+                                    "A avut o hemoragie de sânge severă.")
+        self.assertEqual(cod, 1)
+        self.assertIn("pleonasm_etimologic", iesire)
+        self.assertIn("→ hemoragie", iesire)
+
+    def test_text_curat_trece(self):
+        cod, iesire = ruleaza("check-modelisme.py", str(FIXTURES / "bun-articol.md"))
+        self.assertEqual(cod, 0, f"text curat semnalat gresit:\n{iesire}")
+
+    def test_paronimia_da_explicatia_sensurilor(self):
+        cod, iesire = ruleaza_stdin("check-modelisme.py",
+                                    "Un savant eminent a anuntat un pericol iminent.")
+        self.assertEqual(cod, 1)
+        self.assertIn("paronimie", iesire)
+        self.assertIn("eminent=remarcabil", iesire)
+
+    def test_fara_diacritice_e_prins(self):
+        cod, iesire = ruleaza_stdin("check-modelisme.py",
+                                    "Mijloacele mass-media au relatat totul.")
+        self.assertEqual(cod, 1)
+        self.assertIn("pleonasm", iesire)
+
+    def test_fals_pozitive_reparate(self):
+        """Regresie: 'caut sa adopt' si 'de aceea' erau semnalate desi sunt corecte."""
+        cod, iesire = ruleaza_stdin(
+            "check-modelisme.py",
+            "Caut să adopt un câine. De aceea am venit abia acum la adăpost.")
+        self.assertEqual(cod, 0, f"text corect semnalat:\n{iesire}")
+
+
+class TestVerifica(unittest.TestCase):
+
+    def test_agrega_scorurile(self):
+        cod, iesire = ruleaza("verifica.py", str(FIXTURES / "rau-cu-diacritice.md"))
+        self.assertEqual(cod, 1)
+        self.assertIn("== tipare AI", iesire)
+        self.assertIn("scor_automat=", iesire)
+        self.assertIn("/13", iesire)
+
+    def test_text_curat_da_exit_0(self):
+        cod, iesire = ruleaza("verifica.py", str(FIXTURES / "bun-articol.md"))
+        self.assertEqual(cod, 0, f"text curat semnalat:\n{iesire}")
+        self.assertIn("curat", iesire)
+
+    def test_json_e_valid_si_are_sugestii(self):
+        import json
+        cod, iesire = ruleaza_stdin_cu_flags("verifica.py", "Asta face sens.", "--json")
+        date = json.loads(iesire)
+        self.assertEqual(cod, 1)
+        self.assertEqual(date["scor_maxim"], 13)
+        romgleza = [t for t in date["tipare"] if t["categorie"] == "romgleza"]
+        self.assertTrue(romgleza)
+        self.assertEqual(romgleza[0]["sugestie"], "are sens")
+
+    def test_fara_seo_sare_verificarea_seo(self):
+        text = "# Unu\n\ntext\n\n# Doi\n\ntext"  # doua H1 = problema SEO
+        cod_cu, iesire_cu = ruleaza_stdin("verifica.py", text)
+        self.assertIn("heading", iesire_cu)
+        cod_fara, iesire_fara = ruleaza_stdin_cu_flags("verifica.py", text, "--fara-seo")
+        self.assertNotIn("heading|", iesire_fara)
+
+    def test_scor_compact(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py", "Un text scurt si cuminte despre nimic.", "--scor")
+        self.assertIn("scor_automat=0/13", iesire)
+        self.assertEqual(cod, 0)
+
+
+class TestIgienaTiparelor(unittest.TestCase):
+    """Tiparele din CATEGORII ruleaza pe text pliat — diacriticele din regex
+    sunt ramuri moarte care nu se potrivesc niciodata."""
+
+    DIACRITICE = set("ăâîșțĂÂÎȘȚşţŞŢ")
+
+    def _verifica_modul(self, nume_script):
+        import importlib.util
+        cale = SCRIPTS / nume_script
+        spec = importlib.util.spec_from_file_location(
+            nume_script.replace("-", "_").replace(".py", ""), cale)
+        modul = importlib.util.module_from_spec(spec)
+        sys.path.insert(0, str(SCRIPTS))
+        try:
+            spec.loader.exec_module(modul)
+        finally:
+            sys.path.remove(str(SCRIPTS))
+        for categorie, (_sev, tipare) in modul.CATEGORII.items():
+            for intrare in tipare:
+                tipar = intrare[0]
+                gasite = self.DIACRITICE & set(tipar)
+                self.assertFalse(
+                    gasite,
+                    f"{nume_script}:{categorie}: diacritice moarte {gasite} in {tipar!r}")
+
+    def test_check_tipare_fara_diacritice(self):
+        self._verifica_modul("check-tipare.py")
+
+    def test_check_modelisme_fara_diacritice(self):
+        self._verifica_modul("check-modelisme.py")
+
+
+class TestDriftGuard(unittest.TestCase):
+    """Expresiile interzise promise in SKILL.md trebuie sa fie prinse de
+    check-tipare.py — altfel documentatia si scriptul au divergat."""
+
+    EXPRESII = [
+        "În concluzie, asta e tot.",
+        "Trăim în era digitală.",
+        "Este important de menționat că plouă.",
+        "Compania are o abordare holistică.",
+        "Oferim o multitudine de servicii.",
+        "Asta face sens pentru noi.",
+        "Vrem să adresăm această problemă rapid.",
+        "Mai mult decât atât, e ieftin.",
+    ]
+
+    def test_expresiile_din_skill_sunt_acoperite(self):
+        for text in self.EXPRESII:
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertEqual(
+                cod, 1, f"expresie interzisa neprinsă: {text!r}\n{iesire}")
+
+
 class TestSeo(unittest.TestCase):
 
     def test_text_curat_nu_e_semnalat(self):
@@ -173,14 +299,17 @@ class TestSeo(unittest.TestCase):
 
 class TestContractCLI(unittest.TestCase):
 
+    TOATE = ("check-tipare.py", "check-ritm.py", "check-seo.py",
+             "check-modelisme.py", "verifica.py")
+
     def test_help_pe_toate(self):
-        for script in ("check-tipare.py", "check-ritm.py", "check-seo.py"):
+        for script in self.TOATE:
             cod, iesire = ruleaza(script, "--help")
             self.assertEqual(cod, 0, script)
             self.assertIn("Usage", iesire, script)
 
     def test_fisier_lipsa_da_exit_2(self):
-        for script in ("check-tipare.py", "check-ritm.py", "check-seo.py"):
+        for script in self.TOATE:
             cod, _ = ruleaza(script, "/nu/exista.md")
             self.assertEqual(cod, 2, script)
 
@@ -188,6 +317,13 @@ class TestContractCLI(unittest.TestCase):
 def ruleaza_stdin(script, text):
     r = subprocess.run(
         [sys.executable, str(SCRIPTS / script), "-"],
+        input=text, capture_output=True, text=True)
+    return r.returncode, r.stdout
+
+
+def ruleaza_stdin_cu_flags(script, text, *flags):
+    r = subprocess.run(
+        [sys.executable, str(SCRIPTS / script), "-", *flags],
         input=text, capture_output=True, text=True)
     return r.returncode, r.stdout
 

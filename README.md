@@ -171,30 +171,46 @@ scrie-romaneste/
 │   │   ├── tipare-ro.md            # Romanian-specific failure modes
 │   │   ├── gramatica-stil.md       # Agreement, punctuation, spelling, pleonasms
 │   │   ├── scris-eficient.md       # Process techniques: draft/edit, rhythm, concision
+│   │   ├── modelisme.md            # Etymological pleonasms, anglicisms, paronyms
 │   │   └── scoring-checklist.md    # 1-10 rubric, language criteria (1-3)
-│   └── seo/
-│       ├── seo-geo.md              # SEO technical/on-page/e-commerce/blog/local + GEO
+│   └── seo/                        # Split by topic so agents load only what a task needs
+│       ├── core.md                 # Technical, on-page, content, Romanian-specific
+│       ├── grounding.md            # Business data that must never be invented
+│       ├── geo.md                  # Generative Engine Optimization (AI search)
+│       ├── schema.md               # JSON-LD / structured data
+│       ├── ecommerce.md            # Product and category pages
+│       ├── blog-keyword.md         # Blog content + keyword research
+│       ├── local.md                # NAP, Google Business Profile
+│       ├── avansat.md              # Link building, advanced technical, audits
 │       └── scoring-checklist.md    # 1-10 rubric, SEO criteria (4-5)
 ├── scripts/
+│   ├── verifica.py                 # Orchestrator: all checks, one call, combined score
 │   ├── check-tipare.py             # AI clichés, calques, generation artefacts
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
-│   └── check-seo.py                # Headings and keyword stuffing
+│   ├── check-modelisme.py          # Etymological pleonasms, anglicisms, paronyms
+│   ├── check-seo.py                # Headings and keyword stuffing
+│   └── _comun.py                   # Shared scanning engine (not a CLI)
 └── tests/                          # Fixtures + unittest suite (stdlib only)
 ```
 
 ## Verification scripts
 
 ```bash
-python3 scripts/check-tipare.py <file>     # AI clichés and calques
-python3 scripts/check-ritm.py <file>       # rhythm uniformity
-python3 scripts/check-seo.py <file>        # SEO structure
+python3 scripts/verifica.py <file>          # all checks in one pass + combined score
+python3 scripts/verifica.py <file> --json   # structured output for programmatic use
+python3 scripts/verifica.py <file> --scor   # scores only
+python3 scripts/verifica.py <file> --fara-seo  # skip SEO checks (literary text)
 
-python3 scripts/check-tipare.py <file> --scor   # signal score only
-python3 scripts/check-tipare.py <file> --prag 8 # occurrences per 1000 words
-python3 scripts/check-tipare.py <file> --tot    # include sub-threshold matches
+python3 scripts/check-tipare.py <file>      # AI clichés and calques only
+python3 scripts/check-ritm.py <file>        # rhythm uniformity only
+python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
+python3 scripts/check-seo.py <file>         # SEO structure only
 ```
 
 Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.
+Where a pattern has a canonical fix, the report includes it inline after the
+quote (`|→ are sens`), so an agent can correct without loading the reference
+files first.
 
 Matching ignores diacritics, so text written without them — or with the legacy
 cedilla `ş/ţ` instead of the correct comma-below `ș/ț` — is scanned correctly.
@@ -211,6 +227,17 @@ python3 -m unittest discover tests
 
 ## Version
 
+- **v0.4.0** — Agent-efficiency release. New `verifica.py` orchestrator runs all
+  checks in one call with a combined deterministic score (`X/13`), `--json`
+  output and `--fara-seo`. Reports now include the canonical fix inline
+  (`|→ are sens`; paronyms get sense explanations), so audits no longer require
+  loading the reference files. `seo-geo.md` (43KB) split into 8 topic files with
+  a routing table in SKILL.md — a blog task loads ~23KB instead of 43KB. Shared
+  scanning engine extracted to `_comun.py` (~150 duplicated lines removed). New
+  `check-modelisme.py` for etymological pleonasms/anglicisms/paronyms, with dead
+  diacritic branches and guaranteed false positives ("caut să adopt", "de aceea")
+  fixed. Test suite 24 → 39: modelisme coverage, orchestrator tests, a pattern
+  hygiene test (no diacritics in folded regexes) and a SKILL↔script drift guard.
 - **v0.3.1** — Grounding discovery is now format-agnostic: the skill looks for business data by content across any file type, published page or prior message, rather than matching a fixed list of filenames. Adds handling for contradictory sources, and a flow for saving confirmed data back into the project's own format. No blank brief template ships on purpose — a half-filled one produces plausible-but-false data.
 - **v0.3.0** — SEO/GEO refresh for 2026. Corrected deprecated structured data guidance (FAQ rich results retired May 2026, `HowTo` since 2023) and documented schema's new role as a trust/entity signal for AI Mode. Added evidence-backed GEO tactics from the Princeton/KDD 2024 study and large-corpus analyses, kept distinct from Google's official position. New Romanian-specific SEO section: diacritics in queries vs. body text vs. slugs, romgleză in keyword research, `ro-RO`/`ro-MD` targeting. New §0 on business data that must be sourced or asked for, never invented, wired into the workflow as a CONTEXT step. `check-seo.py` gained cedilla, URL-diacritic and section-length checks, and its first tests. CI on Python 3.9/3.11/3.13.
 - **v0.2.0** — Three modes (rewrite/audit/edit), two-pass self-correction, voice profiles. Diacritic-insensitive and morphology-aware pattern matching (previously, text without diacritics went entirely undetected). Severity levels and density thresholds instead of binary bans. New `tipare-ro.md` covering Romanian-specific failure modes. New stylometric rhythm analyser. Test suite added.

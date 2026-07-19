@@ -6,11 +6,11 @@ vezi `references/limba/scoring-checklist.md` pentru criteriile 1-3, limbă/natur
 ## Criterii (0-2 puncte fiecare, max 4 pentru această jumătate)
 
 4. **Aderență la SEO/GEO (fără a strica stilul)** — 0-2 pct
-   Verifică față de `seo-geo.md`: titlu unic și descriptiv, ierarhie de heading-uri
+   Verifică față de `core.md`: titlu unic și descriptiv, ierarhie de heading-uri
    coerentă (un singur H1, fără sărituri de nivel), fără keyword stuffing, structură
    scanabilă când conținutul o cere (liste, bold cu moderație).
 
-   Pentru conținut destinat publicării, verifică suplimentar (`seo-geo.md` §11,
+   Pentru conținut destinat publicării, verifică suplimentar (`geo.md`,
    „tactici GEO cu dovezi măsurate"):
    - Răspunsul la întrebarea principală apare în primele ~200 de cuvinte, nu după
      trei paragrafe de context.
@@ -21,7 +21,7 @@ vezi `references/limba/scoring-checklist.md` pentru criteriile 1-3, limbă/natur
      înseamnă că…" care depind de paragraful anterior).
    - Termenii centrali au o definiție explicită, autonomă.
 
-   Specific pentru română (`seo-geo.md` §13): text cu diacritice, diacritice cu
+   Specific pentru română (`core.md`, secțiunea specifică românei): text cu diacritice, diacritice cu
    virgulă (`ș`/`ț`) nu cu sedilă, slug-uri transliterate ASCII, romgleză doar
    acolo unde e cerută de interogarea reală.
 
@@ -38,7 +38,7 @@ vezi `references/limba/scoring-checklist.md` pentru criteriile 1-3, limbă/natur
    **Fără să inventezi nimic.** O statistică fabricată, o sursă inexistentă sau un
    preț aproximat scad criteriul la 0, indiferent cât de bine sună textul. Dacă
    datele reale lipsesc, textul rămâne mai sărac și se marchează
-   `[DE COMPLETAT: …]` — vezi `seo-geo.md` §0.
+   `[DE COMPLETAT: …]` — vezi `grounding.md`.
 
 ## Total combinat și prag
 
