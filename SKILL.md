@@ -61,6 +61,9 @@ praguri):
   aborda"; „în termeni de" → „în ceea ce privește".
 - „Capcana concluziei" — nu încheia cu un rezumat forțat.
 - Paragrafe simetrice și ritm monoton — variază lungimea frazelor.
+- Abuz de simboluri: emoji decorative, liste cu „-" în locul prozei, liniuța ca
+  paranteză improvizată, bold/italic dese — toate cu prag de abuz, nu interzicere
+  absolută (`references/limba/anti-tipare-ai.md` §I).
 
 **Obligatoriu**:
 - Diateza activă în locul pasivului birocratic (`references/limba/gramatica-stil.md` §4).

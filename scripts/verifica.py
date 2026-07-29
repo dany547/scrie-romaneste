@@ -40,7 +40,8 @@ SCOR_MAXIM = tipare.SCOR_MAXIM + 3 + modelisme.SCOR_MAXIM  # 6 + 3 + 4 = 13
 def analizeaza_tot(text, prag, cu_seo=True):
     """Returnează un dict cu rezultatele tuturor verificărilor."""
     rap_t, dep_t, cuvinte = _comun.scaneaza(
-        text, tipare.CATEGORII, tipare.CATEGORII_ORIGINAL, prag)
+        text, tipare.CATEGORII, tipare.CATEGORII_ORIGINAL, prag,
+        detectoare_extra=tipare.DETECTOARE_EXTRA)
     semnale_t, scor_t = tipare.calculeaza_scor(rap_t, dep_t)
 
     rap_m, dep_m, _ = _comun.scaneaza(text, modelisme.CATEGORII, None, prag)

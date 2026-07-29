@@ -76,6 +76,32 @@ class TestTipare(unittest.TestCase):
         self.assertIn("artefact_chatbot", iesire)
         self.assertIn("amprenta_unealta", iesire)
 
+    def test_lista_scurta_normala_nu_e_semnalata(self):
+        """O lista de 3 puncte intr-un articol scurt e continut SEO normal,
+        nu abuz — nu trebuie semnalata doar pentru ca atinge 50% din linii."""
+        text = ("Cafeaua de specialitate a devenit populara in ultimii ani. "
+                "Diferenta vine din boabele selectate manual.\n\n"
+                "Cateva criterii merita atentie:\n\n"
+                "- originea boabelor\n- data prajirii\n- metoda de preparare\n\n"
+                "Pretul variaza intre 35 si 60 de lei. Cafeaua proaspat prajita "
+                "pastreaza arome pe care cea de supermarket le pierde.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("simboluri_excesive", iesire,
+                         f"lista scurta normala semnalata gresit:\n{iesire}")
+        self.assertEqual(cod, 0)
+
+    def test_proza_transformata_in_liste_e_semnalata(self):
+        """Cand majoritatea unui text de lungime normala devine fragmente
+        marcate cu '-', semnalul de proportie trebuie sa se declanseze."""
+        linii = "\n".join(
+            f"- Beneficiul numarul {i} explicat pe scurt in cateva cuvinte"
+            for i in range(1, 10))
+        text = "Introducere scurta despre produs.\n\n" + linii + "\n\nInchidere scurta."
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("simboluri_excesive", iesire)
+        self.assertIn("proportie", iesire)
+        self.assertEqual(cod, 1)
+
 
 class TestRitm(unittest.TestCase):
 

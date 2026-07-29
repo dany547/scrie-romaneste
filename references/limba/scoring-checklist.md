@@ -8,9 +8,11 @@ criteriile 4-5, SEO/GEO și densitatea informației).
 
 1. **Naturalitate (lipsa clișeelor AI)** — 0-2 pct
    Verifică față de `anti-tipare-ai.md`: tranziții mecanice, introduceri formulaice,
-   umpluturi meta-text, adjective corporatiste, cuantificări vagi, hedging.
-   *Intrare mecanică:* `scripts/check-tipare.py`. Orice rezultat `critic` rămas
-   înseamnă maximum 1 punct. Două sau mai multe înseamnă 0.
+   umpluturi meta-text, adjective corporatiste, cuantificări vagi, hedging, abuz de
+   simboluri (emoji, liste cu „-", liniuță ca paranteză, bold/italic — §I).
+   *Intrare mecanică:* `scripts/check-tipare.py`, categoria `simboluri_excesive`
+   inclusă. Orice rezultat `critic` rămas înseamnă maximum 1 punct. Două sau mai
+   multe înseamnă 0.
 
 2. **Ritm și burstiness** — 0-2 pct
    Alternanță de fraze scurte/lungi; paragrafe de lungime variabilă; fără structură de

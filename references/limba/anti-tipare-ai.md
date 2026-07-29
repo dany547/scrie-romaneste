@@ -161,6 +161,26 @@ proiectul", nu „Proiectul a fost realizat de către echipă"). Detaliu tehnic 
 - **Fără echilibru forțat**: nu compensa fiecare afirmație cu o rezervă. Detalii
   în `tipare-ro.md`, secțiunea `echilibru_fortat`.
 
+## I. Simboluri și formatare excesivă
+
+Ca și restul listei, pragul contează mai mult decât interdicția absolută. Emoji e
+legitim în profil `colocvial`/`cald`; o listă ocazională cu „-" e normală; o singură
+paranteză cu liniuță nu strică nimic. Semnalul apare doar la aglomerare sau densitate
+mare.
+
+- **Emoji decorative**: emoji folosite ca marcatori de listă sau presărate în proză fără
+  rol semantic („🚀 Lansăm produsul!", „✅ Beneficiu 1"). 1-2 emoji într-un text lung sau
+  colocvial e ton, nu tipar; 5+ la 500 de cuvinte e semnal. Prag: `la_densitate`.
+- **Liste cu „-" abuzate**: transformarea prozei în liste marcate cu „-" fără necesitate
+  reală — vezi și regula „Fără structură excesivă" din secțiunea A. O listă de
+  funcționalități sau un FAQ nu e abuz; semnalul e proporția majoritară de linii-listă
+  față de proză. Prag: proporție dedicată, nu densitate/1000 cuvinte.
+- **Liniuța ca paranteză improvizată**: „text - precizare - continuare" sau „text —
+  precizare — continuare" repetat ca tic sintactic în loc de virgulă, paranteză sau frază
+  nouă. Prag: `la_aglomerare`.
+- **Bold/italic excesiv**: `**text**` / `*text*` pentru accentuare deasă — tipic markdown
+  de chat, nepotrivit pentru text publicat. Prag: `la_densitate`.
+
 ## Verificare rapidă înainte de livrare
 
 1. Caută tranzițiile din tabelul A. Numără-le. Peste trei într-un text scurt,
@@ -172,6 +192,8 @@ proiectul", nu „Proiectul a fost realizat de către echipă"). Detaliu tehnic 
 4. Caută calcurile din tabelul G și din `tipare-ro.md`.
 5. Caută reziduuri de conversație și placeholdere necompletate
    (`tipare-ro.md`, `artefact_chatbot` și `amprenta_unealta`).
+6. Verifică emoji, liste cu „-" și bold/italic față de proporția de text din jur
+   (secțiunea I) — un abuz izolat trece neobservat la citire, dar sare în ochi agregat.
 
 Pentru verificarea mecanică: `scripts/check-tipare.py` acoperă tabelele de mai
 sus, iar `scripts/check-ritm.py` măsoară punctul 2.

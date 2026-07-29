@@ -67,8 +67,16 @@ def _desfa(intrare):
 
 
 def scaneaza(text, categorii, categorii_original=None,
-             prag_densitate=PRAG_DENSITATE_IMPLICIT, arata_tot=False):
+             prag_densitate=PRAG_DENSITATE_IMPLICIT, arata_tot=False,
+             detectoare_extra=None):
     """Rulează categoriile pe textul pliat (și, opțional, pe cel original).
+
+    `detectoare_extra` e o listă de funcții text -> (gasituri, depasire|None),
+    pentru semnale care nu se reduc la un regex cu prag de aglomerare/densitate
+    (ex. proporția de linii-listă dintr-un text — vezi
+    `check-tipare.detecteaza_liste_abuzate`). `gasituri` sunt dict-uri în același
+    format ca restul potrivirilor; `depasire` e un tuplu (categorie, tipar, n,
+    motiv) sau None.
 
     Returnează (raportate, depasiri, cuvinte). Fiecare potrivire raportată e un
     dict cu categorie, severitate, linie, fragment, sugestie (sau None).
@@ -140,6 +148,13 @@ def scaneaza(text, categorii, categorii_original=None,
                 a["severitate"] = "sub_prag"
             raportate.extend(aparitii)
 
+    for detector in detectoare_extra or []:
+        gasituri, depasire = detector(text)
+        if gasituri:
+            raportate.extend(gasituri)
+        if depasire:
+            depasiri.append(depasire)
+
     raportate.sort(key=lambda b: b["offset"])
     return dedupleaza(raportate), depasiri, cuvinte
 
@@ -207,7 +222,7 @@ def citeste_intrare(sursa):
 
 
 def ruleaza_cli(doc, argv, categorii, categorii_original, calculeaza_scor,
-                scor_maxim, eticheta, nota_scor=None):
+                scor_maxim, eticheta, nota_scor=None, detectoare_extra=None):
     """main() comun pentru scripturile bazate pe categorii de tipare."""
     if not argv or argv[0] in ("-h", "--help"):
         print(doc)
@@ -231,7 +246,7 @@ def ruleaza_cli(doc, argv, categorii, categorii_original, calculeaza_scor,
         return 2
 
     raportate, depasiri, cuvinte = scaneaza(
-        text, categorii, categorii_original, prag, arata_tot)
+        text, categorii, categorii_original, prag, arata_tot, detectoare_extra)
     semnale, scor = calculeaza_scor(raportate, depasiri)
 
     if doar_scor:

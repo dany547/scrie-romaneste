@@ -5,6 +5,12 @@ Potrivirea ignoră diacriticele, deci prinde și textul scris fără ele sau cu
 sedilă (ş/ţ) în loc de virgulă (ș/ț). Tiparele acoperă formele flexionare, nu
 doar forma de dicționar.
 
+Categoria `simboluri_excesive` acoperă abuzul de formatare — emoji decorative,
+liniuța ca paranteză improvizată în frază, bold/italic dese și (separat, pe
+proporție de linii, nu pe regex) liste cu „-" în locul prozei. Toate au prag
+de abuz, nu interdicție absolută — o listă de funcționalități sau un singur
+bold nu sunt semnal.
+
 Fiecare tipar are o severitate (critic/important/minor) și un prag:
     mereu          — semnalat la orice apariție
     la_aglomerare  — semnalat la 3+ în același paragraf sau peste densitate
@@ -25,6 +31,7 @@ Exit codes:
     1 = potriviri raportate
     2 = eroare de input (fișier lipsă etc.)
 """
+import re
 import sys
 
 import _comun
@@ -192,7 +199,71 @@ CATEGORII_ORIGINAL = {
         (r"\b\d+\.\d+\s*(%|la suta|lei|euro)", "mereu", "virgulă zecimală: 3,5"),
         (r"\s—\s.{0,80}\s—\s", "la_aglomerare", "reformulează fără incidentă între linii de pauză"),
     ]),
+    "simboluri_excesive": ("minor", [
+        # emoji decorative — presărate în proză sau ca marcatori de listă
+        (r"[\U0001F300-\U0001FAFF☀-➿←-⇿⬀-⯿️]", "la_densitate",
+         "taie emoji decorativ, sau păstrează unul singur dacă tonul e colocvial"),
+        # liniuța „-" ca paranteză improvizată în frază (nu cuvânt compus).
+        # [ \t], nu \s — \s prinde și newline-ul dinaintea unui marcator de
+        # listă („text.\n- alt item"), care nu e deloc același tipar.
+        (r"[ \t]-[ \t].{0,80}[ \t]-[ \t]", "la_aglomerare",
+         "virgulă, paranteză sau frază nouă în loc de liniuță"),
+        # bold/italic dese, tipic markdown de chat, nepotrivit pt. text publicat
+        (r"\*\*[^*\n]{2,40}\*\*", "la_densitate", "taie accentuarea sau rezervă-o pentru un singur termen cheie"),
+        (r"(?<!\*)\*[^*\n]{2,40}\*(?!\*)", "la_densitate",
+         "taie accentuarea sau rezervă-o pentru un singur termen cheie"),
+    ]),
 }
+
+# Liste cu „-" nu intră în tabelul generic: o listă de 3+ funcționalități sau
+# întrebări FAQ e conținut SEO normal, nu abuz — aglomerarea per-paragraf din
+# motorul generic ar semnala orice listă obișnuită. Semnalul real e proporția:
+# proza integrală transformată în fragmente cu „-" în loc de fraze. Pragurile
+# sunt calibrate ca un articol scurt cu o singură listă de 3 puncte (frecvent
+# și legitim în conținut SEO) să nu treacă de prag — vezi tests/test_scripts.py
+# TestTipare.test_lista_scurta_normala_nu_e_semnalata.
+LINIE_LISTA = re.compile(r"^[ \t]*-[ \t]+\S.*$", re.MULTILINE)
+PROPORTIE_LISTA_ABUZATA = 0.65
+MIN_LINII_PT_PROPORTIE = 10
+MIN_CUVINTE_PT_PROPORTIE = 60
+
+
+def detecteaza_liste_abuzate(text):
+    """Detector extra pentru `_comun.scaneaza` — vezi contractul acolo."""
+    linii_continut = [l for l in text.splitlines() if l.strip()]
+    if (len(linii_continut) < MIN_LINII_PT_PROPORTIE
+            or _comun.numara_cuvinte(text) < MIN_CUVINTE_PT_PROPORTIE):
+        return [], None
+    potriviri = list(LINIE_LISTA.finditer(text))
+    if len(potriviri) < _comun.PRAG_AGLOMERARE:
+        return [], None
+    proportie = len(potriviri) / len(linii_continut)
+    if proportie < PROPORTIE_LISTA_ABUZATA:
+        return [], None
+
+    rezultate = []
+    for m in potriviri:
+        start = max(0, m.start() - _comun.CONTEXT_CHARS)
+        end = min(len(text), m.end() + _comun.CONTEXT_CHARS)
+        fragment = " ".join(text[start:end].split())
+        linie = text.count("\n", 0, m.start()) + 1
+        rezultate.append({
+            "categorie": "simboluri_excesive",
+            "severitate": "minor",
+            "prag": "proportie",
+            "tipar": "liste_abuzate",
+            "sugestie": "transformă o parte din liste înapoi în proză",
+            "offset": m.start(),
+            "sfarsit": m.end(),
+            "linie": linie,
+            "fragment": fragment,
+        })
+    depasire = ("simboluri_excesive", "liste_abuzate", len(rezultate),
+                f"proportie={proportie:.0%}")
+    return rezultate, depasire
+
+
+DETECTOARE_EXTRA = [detecteaza_liste_abuzate]
 
 
 SCOR_MAXIM = 6
@@ -226,7 +297,8 @@ NOTA_SCOR = ("nota: semnalele despre surse inventate si densitatea de "
 def main():
     return _comun.ruleaza_cli(
         __doc__, sys.argv[1:], CATEGORII, CATEGORII_ORIGINAL,
-        calculeaza_scor, SCOR_MAXIM, eticheta="AI", nota_scor=NOTA_SCOR)
+        calculeaza_scor, SCOR_MAXIM, eticheta="AI", nota_scor=NOTA_SCOR,
+        detectoare_extra=DETECTOARE_EXTRA)
 
 
 if __name__ == "__main__":
