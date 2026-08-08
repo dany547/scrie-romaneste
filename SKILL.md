@@ -33,6 +33,9 @@ Alege modul din cerință. Dacă nu e clar, e **rescriere**.
   <fișier>`** — raportul dă direct citatele, severitatea și sugestiile de
   corecție; încarcă din `references/` doar ce-ți trebuie pentru judecata
   calitativă (ritm, naturalitate) sau pentru categoriile semnalate.
+  Raportul automat **nu acoperă acordul gramatical** (gen/număr/caz), topica și
+  alegerea lexicală — recitește textul, în special titlul și excerptul, pentru
+  acord, separat de script.
 - **editare** — modificări minime și țintite în fișier. Păstrează intacte
   pasajele care sunt deja bune. Nu rescrie ce nu e stricat.
 
@@ -141,7 +144,10 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    calcuri, pleonasme, paronime, ritm și SEO dintr-o singură trecere, cu
    sugestia de corecție inline (`|→ …`) unde există una canonică. Aplică
    sugestiile cu judecată — potrivirea e mecanică, corecția cere acord și
-   topică. Pentru problemele semnalate fără sugestie, sau ca să înțelegi o
+   topică. Dacă textul are titlu sau excerpt separat de corp (TITLE_RO/EXCERPT_RO,
+   frontmatter), verifică-le ca text separat, lângă corp — nu le scoate din
+   inputul verificat. Pentru problemele semnalate fără sugestie, sau ca să
+   înțelegi o
    categorie, deschide referința relevantă (`anti-tipare-ai.md`,
    `tipare-ro.md`, `modelisme.md`).
 6. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
@@ -154,7 +160,10 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    confirmă:
    - niciun fapt, citat, preț sau date de business inventate;
    - niciun artefact de chat, markup rezidual sau placeholder publicabil;
-   - erorile certe (calc, sedilă, acord, artefact) sunt corectate;
+   - erorile certe (calc, sedilă, acord, artefact) sunt corectate — inclusiv în
+     titlu și excerpt, unde acordul se recitește manual: neutre la plural
+     (virusuri funcționale, nu virusuri funcționali), numeral+substantiv
+     (primii/primele, doi/două), genul adjectivelor;
    - semnalele stilistice (ritm, concluzie, paralelism, listă) au fost
      recitite în context și păstrate sau tăiate deliberat;
    - textul respectă contractul de la pasul 2 — gen, registru, cititor,

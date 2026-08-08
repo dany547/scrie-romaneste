@@ -105,6 +105,54 @@ pe tot textul.
 
 ---
 
+## acord_plural_neutru
+
+Substantivele neutre iau la plural forme de gen feminin: adjectivele și
+ordinalele se acordă ca la femininul plural, nu ca la masculinul plural.
+Capcana cea mai frecventă în vocabularul tehnic:
+
+| Greșit | Corect | Regula |
+|---|---|---|
+| virusuri funcționali | virusuri **funcționale** | pluralul neutru cere feminin plural |
+| modele performanți | modele **performante** | idem |
+| niveluri înalți | niveluri **înalte** | idem |
+| dispozitive inteligenti | dispozitive **inteligente** | idem |
+| servicii rapizi | servicii **rapide** | idem |
+
+Pluralul substantivului însuși, la neologisme:
+
+| Singular | Plural |
+|---|---|
+| virus | virusuri |
+| model | modele |
+| nivel | niveluri (nu „nivele") |
+| dispozitiv | dispozitive |
+| serviciu | servicii |
+
+La împrumuturile recente, cratima la plural (device-uri, update-uri) e o
+politică de consecvență, nu o eroare — vezi `articol_imprumuturi`.
+
+**Numeral + substantiv:** „doi" e masculin; „două" e feminin și neutru.
+
+| Greșit | Corect |
+|---|---|
+| doi aplicații | **două** aplicații |
+| două editori | **doi** editori |
+| doi modele | **două** modele |
+
+**Ordinale:** „primii/ultimii" masculine; „primele/ultimele" feminine și neutre.
+
+| Greșit | Corect |
+|---|---|
+| primii versiuni | **primele** versiuni |
+| primele utilizatori | **primii** utilizatori |
+| ultimii actualizări | **ultimele** actualizări |
+
+Acordurile astea pică des în titluri și excerpte — text scurt, care nu trece
+prin recitirea corpului. Verifică-le explicit acolo.
+
+---
+
 ## morfologie_flexiune
 
 Formele rare și neologismele se construiesc prin analogie greșită.

@@ -51,6 +51,10 @@ pleonasme, diacritice cu virgulă (`ș`/`ț`) nu cu sedilă.
 informative — scriptul vede două cuvinte în aceeași frază, nu sensul; verifică-le tu și
 ignoră semnalul dacă ambele sunt folosite corect.
 
+**Titlu și excerpt** se recitesc separat pentru acord: neutre la plural (virusuri
+funcționale, nu virusuri funcționali), numeral+substantiv (primii/primele, doi/două),
+genul adjectivelor — `tipare-ro.md` § `acord_plural_neutru`.
+
 ## Texte scurte
 
 Sub 100 de cuvinte — titluri, sloganuri, mesaje — aplică doar ce se aplică. Statistica de
