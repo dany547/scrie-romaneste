@@ -1,45 +1,57 @@
-# Scoring checklist — limbă (naturalitate, ritm, gramatică)
+# Checklist de limbă — naturalitate, ritm, gramatică
 
-Rubrică de auto-evaluare pentru un text în limba română, partea de limbă (3 din cele
-5 criterii ale rubricii complete — vezi `references/seo/scoring-checklist.md` pentru
-criteriile 4-5, SEO/GEO și densitatea informației).
+Listă de citit înainte de livrare, partea de limbă. Pentru densitatea informației și
+partea online vezi `references/seo/scoring-checklist.md`.
 
-## Criterii (0-2 puncte fiecare, max 6 pentru această jumătate)
+Nu e o rubrică de punctaj. Un text nu devine bun fiindcă adună puncte, iar
+`scripts/verifica.py` numără penalizări deterministe (`scor_automat=X/13`), nu
+calitate. Întrebarea la fiecare punct e „e corectat sau e o alegere pe care o susțin?",
+nu „câte puncte îmi dau?".
 
-1. **Naturalitate (lipsa clișeelor AI)** — 0-2 pct
-   Verifică față de `anti-tipare-ai.md`: tranziții mecanice, introduceri formulaice,
-   umpluturi meta-text, adjective corporatiste, cuantificări vagi, hedging, abuz de
-   simboluri (emoji, liste cu „-", liniuță ca paranteză, bold/italic — §I).
-   *Intrare mecanică:* `scripts/check-tipare.py`, categoria `simboluri_excesive`
-   inclusă. Orice rezultat `critic` rămas înseamnă maximum 1 punct. Două sau mai
-   multe înseamnă 0.
+## 1. Naturalitate — clișee și formatare
 
-2. **Ritm și burstiness** — 0-2 pct
-   Alternanță de fraze scurte/lungi; paragrafe de lungime variabilă; fără structură de
-   eseu școlar repetitivă.
-   *Intrare mecanică:* `scripts/check-ritm.py`. Dacă raportează `ritm_uniform` sau
-   `fraze_egale`, nu-ți da 2/2 — indiferent cât de bine sună la citit. Dacă
-   raportează `capcana_concluziei`, taie secțiunea înainte de a reevalua.
+Verifică față de `anti-tipare-ai.md`: tranziții mecanice, introduceri formulaice,
+umpluturi meta-text, adjective corporatiste, cuantificări vagi, hedging, abuz de
+simboluri (emoji, liste cu „-", liniuță ca paranteză, bold/italic — §I).
 
-3. **Corectitudine gramaticală și lexicală (fără romgleză)** — 0-2 pct
-   Verifică față de `gramatica-stil.md` (normă) și `tipare-ro.md` (tipare de eșec
-   ale modelelor): acord la distanță, regim prepozițional, flexiune, calcuri din
-   engleză, pleonasme, diacritice cu virgulă nu cu sedilă.
+*Intrare mecanică:* `scripts/check-tipare.py`, categoria `simboluri_excesive` inclusă.
 
-## Prag minim: 8/10 (pe rubrica completă, limbă + SEO)
+**Blocant:** orice rezultat `critic` rămas necorectat — artefact de chat, placeholder,
+introducere formulaică, calc din engleză. Astea sunt erori, nu alegeri.
+**De recitit:** semnalele `important` și `minor`, plus categoriile care se raportează
+fără scor (`copula_evitata`, `referinta_vaga`). Se taie dacă nu adaugă nimic; se
+păstrează dacă genul le cere.
 
-Dacă scorul auto-evaluat pe partea de limbă e sub 6/6 (sau contribuie la un total sub 8/10
-cu partea SEO), NU livra textul. Intră în buclă de refactoring:
+Pentru cu ce înlocuiești, nu doar ce tai: `exemple-voce.md`.
 
-1. Identifică exact ce a picat: rulează mental (sau cu `scripts/check-tipare.py`) o căutare
-   a frazelor problematice — găsește toate aparițiile de „De asemenea", „În concluzie" etc.
-2. Rescrie acele secțiuni aplicând regulile din `anti-tipare-ai.md` și `gramatica-stil.md`.
-3. Reverifică ritmul (alternanța lungimii frazelor) — dacă tot corectat sună uniform,
-   variază structura sintactică, nu doar vocabularul.
-4. Repetă evaluarea. Livrează doar după ce treci pragul.
+## 2. Ritm
 
-## Notă despre subiectivitate
+Alternanță de fraze scurte și lungi; paragrafe de lungime variabilă; fără structura de
+eseu școlar repetată la fiecare paragraf.
 
-Scorul e un instrument de disciplină, nu o știință exactă. Pentru texte scurte (sub 100
-cuvinte — titluri, sloganuri, mesaje) aplică doar criteriile relevante; nu forța o evaluare
-pe 6 puncte pentru un text de o propoziție.
+*Intrare mecanică:* `scripts/check-ritm.py`. **Semnalele lui nu sunt blocante.** Pragurile
+vin din corpusuri englezești și dau fals pozitiv pe registru formal, tehnic și juridic —
+vezi nota din capul scriptului. `ritm_uniform` sau `fraze_egale` înseamnă „recitește cu
+voce tare", nu „textul e greșit". Dacă la citit sună bine în registrul ales, păstrează-l
+și treci mai departe.
+
+`capcana_concluziei` merită tăiată în articol, postare sau pagină; într-un raport, o
+lucrare academică sau o notă juridică, concluzia e cerută de gen.
+
+Nu forța lungimi diferite ca să miști o metrică. Ritmul se schimbă rescriind ideea, nu
+tăind fraze la nimereală.
+
+## 3. Corectitudine gramaticală și lexicală
+
+Verifică față de `gramatica-stil.md` (normă) și `tipare-ro.md` (tipare de eșec ale
+modelelor): acord la distanță, regim prepozițional, flexiune, calcuri din engleză,
+pleonasme, diacritice cu virgulă (`ș`/`ț`) nu cu sedilă.
+
+**Blocant:** tot ce e eroare de normă. Paronimele semnalate de `check-modelisme.py` sunt
+informative — scriptul vede două cuvinte în aceeași frază, nu sensul; verifică-le tu și
+ignoră semnalul dacă ambele sunt folosite corect.
+
+## Texte scurte
+
+Sub 100 de cuvinte — titluri, sloganuri, mesaje — aplică doar ce se aplică. Statistica de
+ritm nici nu rulează sub 5 fraze.

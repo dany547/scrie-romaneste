@@ -49,6 +49,18 @@ Un singur „de asemenea" într-un articol de 2000 de cuvinte nu strică nimic. 
 | Cu toate acestea | „dar", „totuși" | la_aglomerare |
 | Pe scurt | taie | la_aglomerare |
 | Nu doar…, ci și… | reformulează direct | la_aglomerare |
+| Nu e vorba doar de…, ci de… | spune direct despre ce e vorba | la_aglomerare |
+| Nu în ultimul rând | taie — enumerarea se vede | la_aglomerare |
+| Atunci când vine vorba de | „la", „în privința", „când" | la_aglomerare |
+
+**Fără simetrie de acoperire**: fraza care se adresează tuturor ca să nu excludă
+niciun cititor — „Fie că ești începător sau profesionist…", „indiferent de
+buget…", „pentru oricine". O propoziție adevărată pentru toată lumea nu
+informează pe nimeni; numește cititorul concret. Atenție, conjuncția corelativă
+obișnuită („Fie că plouă, fie că nu, plecăm") nu are nicio legătură cu tiparul —
+semnalul cere adresarea la persoana a II-a. Prag: familie (3+ apariții).
+Detaliat, cu celelalte reflexe de gen, în `../seo/core.md`, „Registrul «articol
+SEO»".
 
 ## B. Introduceri, umpluturi și meta-text
 
@@ -155,7 +167,7 @@ proiectul", nu „Proiectul a fost realizat de către echipă"). Detaliu tehnic 
 ## H. Ton și stil
 
 - **Fără explicații excesive**: nu explica redundant concepte simple. Cititorul
-  înțelege aluziile. Vezi și regula celor 10% din `scris-eficient.md` §9.
+  înțelege aluziile. Vezi și regula celor 10% din `scris-eficient.md` §6.
 - **Fără neutralitate sterilă**: dacă textul permite, injectează opinii, nuanțe,
   un ton conversațional. Evită tonul diplomatic lipsit de personalitate.
 - **Fără echilibru forțat**: nu compensa fiecare afirmație cu o rezervă. Detalii
