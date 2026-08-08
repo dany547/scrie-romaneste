@@ -230,6 +230,17 @@ python3 -m unittest discover tests
 
 ## Version
 
+- **v0.5.3** — Three fixtures for the genres the checkers can damage: a legal
+  regulation, an academic abstract with a required Conclusions section, and a
+  short literary piece with deliberate repetition and dashed dialogue. Each one
+  deliberately contains the constructions we detect — "constituie" three times,
+  three pronominal references, intentional parallelism — because a fixture that
+  avoids them proves nothing. The invariant they pin down: the content checkers
+  (`check-tipare`, `check-modelisme`) stay silent on all three; the family
+  categories may report `minor` without costing a point; only the rhythm
+  heuristic fires, on the academic text, for a Conclusions section its genre
+  requires. Also records why `check-seo.py` sits outside the severity/score
+  model, and when that should change. Tests 61 → 65.
 - **v0.5.2** — Fixed a silent matching bug: any multi-word pattern that fell
   across a line break was missed entirely. `_comun.py` now treats a literal space
   in a pattern as "space, or a single line break that does not start a new

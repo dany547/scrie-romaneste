@@ -14,6 +14,22 @@ Verifică:
     - diacritice în URL-uri/slug-uri (trebuie transliterate ASCII)
     - sedilă (ş/ţ) în loc de virgulă (ș/ț)
 
+DE CE NU ARE SEVERITATE ȘI NU INTRĂ ÎN SCOR
+
+Spre deosebire de celelalte scripturi, ăsta returnează tupluri simple
+(categorie, detaliu, context), fără severitate, și nu contribuie la
+`scor_automat`. E o inconsecvență de arhitectură, asumată: ce găsește aici sunt
+fapte structurale verificabile — „două H1", „salt H1->H3", „diacritice în slug"
+— nu alegeri de stil care cer o judecată de severitate. Se corectează, nu se
+cântăresc.
+
+Alinierea la modelul comun (severitate + praguri + contribuție la scor) ar
+atinge `verifica.py`, `ca_json` și testele, pentru un câștig de consecvență fără
+efect asupra deciziilor. Merită făcută în momentul în care apare aici prima
+verificare care cere judecată — de exemplu o detecție de diacritice lipsă, care
+e problemă de limbă, nu verdict SEO, și care oricum n-ar avea ce căuta într-un
+script dezactivat de `--fara-seo`.
+
 Usage:
     check-seo.py <fisier_sau_->
     check-seo.py --help

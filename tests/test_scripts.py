@@ -411,6 +411,55 @@ class TestDriftGuard(unittest.TestCase):
                 cod, 1, f"expresie interzisa neprinsă: {text!r}\n{iesire}")
 
 
+class TestGenuriLegitime(unittest.TestCase):
+    """Text formal si literar corect nu trebuie stricat de detectoare.
+
+    Fixture-urile contin deliberat constructiile pe care le detectam — „constituie"
+    de trei ori in cel juridic, „acest aspect"/„aceasta abordare"/„acest lucru" in
+    cel academic, repetitie intentionata si dialog in cel literar. Un fixture care
+    le evita n-ar demonstra nimic.
+
+    Invariantul: detectoarele de continut (tipare, modelisme) tac. Familiile pot
+    raporta `minor` — asta e rolul lor, semnal de recitire fara consecinta. Ritmul
+    poate raporta: pragurile lui vin din corpusuri englezesti si dau fals pozitiv
+    pe registru formal, motiv pentru care nu blocheaza livrarea (vezi
+    `references/limba/scoring-checklist.md` §2).
+    """
+
+    GENURI = ("legit-juridic.md", "legit-academic.md", "legit-literar.md")
+
+    def test_detectoarele_de_continut_tac(self):
+        for fixture in self.GENURI:
+            cod, iesire = ruleaza("verifica.py", str(FIXTURES / fixture), "--fara-seo")
+            linie = next(l for l in iesire.splitlines() if l.startswith("scor_automat"))
+            self.assertIn("tipare=0/6", linie, f"{fixture}: {iesire}")
+            self.assertIn("modelisme=0/4", linie, f"{fixture}: {iesire}")
+
+    def test_nicio_eroare_critica(self):
+        for fixture in self.GENURI:
+            cod, iesire = ruleaza("verifica.py", str(FIXTURES / fixture), "--fara-seo")
+            critice = [l for l in iesire.splitlines() if l.startswith("critic|")]
+            self.assertEqual(critice, [], f"{fixture}: text legitim semnalat ca eroare")
+
+    def test_familiile_raporteaza_fara_sa_penalizeze(self):
+        """Juridicul foloseste «constituie» de trei ori, academicul are trei
+        referinte pronominale. Ambele se raporteaza, niciuna nu costa un punct."""
+        for fixture, categorie in (("legit-juridic.md", "copula_evitata"),
+                                   ("legit-academic.md", "referinta_vaga")):
+            cod, iesire = ruleaza("verifica.py", str(FIXTURES / fixture), "--fara-seo")
+            self.assertIn(f"minor|{categorie}", iesire, f"{fixture}: {iesire}")
+            linie = next(l for l in iesire.splitlines() if l.startswith("scor_automat"))
+            self.assertIn("tipare=0/6", linie,
+                          f"{fixture}: familia a ajuns in scor")
+
+    def test_proza_literara_ramane_intacta(self):
+        """Repetitie intentionata, paralelism si dialog cu linie de pauza —
+        niciunul nu e tipar de model."""
+        cod, iesire = ruleaza("verifica.py", str(FIXTURES / "legit-literar.md"),
+                              "--fara-seo")
+        self.assertEqual(cod, 0, f"proza literara semnalata:\n{iesire}")
+
+
 class TestTrimiteriDocumentatie(unittest.TestCase):
     """Trimiterile din SKILL.md si references/ trebuie sa duca undeva.
 
