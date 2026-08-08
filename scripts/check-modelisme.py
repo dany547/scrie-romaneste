@@ -4,6 +4,10 @@
 Potrivirea ignoră diacriticele, deci prinde și textul scris fără ele sau cu
 sedilă (ş/ţ) în loc de virgulă (ș/ț).
 
+Paronimele se raportează informativ (`minor`, fără contribuție la scor):
+detecția e coapariția a două cuvinte în aceeași frază, nu confuzia dintre ele.
+Un text care le folosește corect pe amândouă se potrivește la fel de bine.
+
 Fiecare tipar are o severitate (critic/important/minor) și un prag:
     mereu          — semnalat la orice apariție
     la_aglomerare  — semnalat la 3+ în același paragraf sau peste densitate
@@ -28,15 +32,25 @@ import sys
 
 import _comun
 
-# Fereastra de potrivire: 80 de caractere, suficient pentru o propoziție.
-CTX = r".{0,80}?"
+# Fereastra de potrivire pentru pleonasme: 25 de caractere. La 80 (valoarea
+# inițială) tiparul sărea peste granița de propoziție și raporta drept pleonasm
+# construcții corecte — „Hemoragia a fost oprită, dar pacientul pierduse mult
+# sânge". Pleonasmul etimologic real stă în aceeași sintagmă, nu la două clauze
+# distanță.
+CTX = r".{0,25}?"
+
+# Paronimele au nevoie de fereastra largă: semnalul e coapariția în aceeași
+# frază. De aceea sunt și informative, nu erori — vezi nota de la `paronimie`.
+CTX_FRAZA = r".{0,80}?"
 
 # Tiparele rulează pe textul pliat (fără diacritice) — nu scrie diacritice în
 # regex-uri; testul de igienă din tests/ pică dacă apar.
 CATEGORII = {
     "pleonasm_etimologic": ("important", [
         (r"\bhemoragi(e|a)\b" + CTX + r"\bde sange\b", "mereu", "hemoragie"),
-        (r"\bortografi(a|e)\b" + CTX + r"\bcorecta\b", "mereu", "ortografie"),
+        # „ortografia corectă a cuvântului X" e uz curent, mai ales didactic —
+        # doar sintagma nudă, fără complement, e pleonasmul propriu-zis.
+        (r"\bortografi(a|e)\b\s+corecta\b(?!\s+(a|al|ai|ale)\b)", "mereu", "ortografie"),
         (r"\baltitudinea?\b" + CTX + r"\b(inalta|mare)\b", "mereu", "altitudine"),
         (r"\banivers(a|eaza|area)\b" + CTX + r"\b(anii?|un numar|ani)\b", "mereu",
          "împlinirea a N ani / aniversarea"),
@@ -134,48 +148,52 @@ CATEGORII = {
         (r"\btank-?shirt\b", "la_densitate", "maiou"),
         (r"\bsuper-?trendy\b", "la_densitate", "la modă"),
     ]),
-    "paronimie": ("important", [
-        (r"\babilitate\b" + CTX + r"\bagilitate\b", "mereu",
-         "abilitate=pricepere, agilitate=sprinteneală — verifică sensul"),
-        (r"\bagilitate\b" + CTX + r"\babilitate\b", "mereu",
-         "abilitate=pricepere, agilitate=sprinteneală — verifică sensul"),
-        (r"\bantigel\b" + CTX + r"\bantigen\b", "mereu",
+    # INFORMATIV, nu eroare. Scriptul vede două cuvinte în aceeași frază, nu
+    # sensul lor: un text care le folosește corect pe amândouă — sau unul care
+    # explică diferența dintre ele — se potrivește la fel de bine. Severitate
+    # `minor`, fără contribuție la scor, ca să nu forțeze corecții inutile.
+    "paronimie": ("minor", [
+        (r"\babilitate\b" + CTX_FRAZA + r"\bagilitate\b", "mereu",
+         "abilitate=pricepere, agilitate=sprinteneală — informativ, verifică sensul"),
+        (r"\bagilitate\b" + CTX_FRAZA + r"\babilitate\b", "mereu",
+         "abilitate=pricepere, agilitate=sprinteneală — informativ, verifică sensul"),
+        (r"\bantigel\b" + CTX_FRAZA + r"\bantigen\b", "mereu",
          "antigel=lichid auto, antigen=substanță imunologică"),
-        (r"\bantigen\b" + CTX + r"\bantigel\b", "mereu",
+        (r"\bantigen\b" + CTX_FRAZA + r"\bantigel\b", "mereu",
          "antigel=lichid auto, antigen=substanță imunologică"),
-        (r"\bantinomie\b" + CTX + r"\bantonimie\b", "mereu",
+        (r"\bantinomie\b" + CTX_FRAZA + r"\bantonimie\b", "mereu",
          "antinomie=contradicție logică, antonimie=sens opus"),
-        (r"\bantonimie\b" + CTX + r"\bantinomie\b", "mereu",
+        (r"\bantonimie\b" + CTX_FRAZA + r"\bantinomie\b", "mereu",
          "antinomie=contradicție logică, antonimie=sens opus"),
-        (r"\batlas\b" + CTX + r"\batlaz\b", "mereu", "atlas=hărți, atlaz=țesătură"),
-        (r"\batlaz\b" + CTX + r"\batlas\b", "mereu", "atlas=hărți, atlaz=țesătură"),
-        (r"\belipsa\b" + CTX + r"\beclipsa\b", "mereu",
+        (r"\batlas\b" + CTX_FRAZA + r"\batlaz\b", "mereu", "atlas=hărți, atlaz=țesătură"),
+        (r"\batlaz\b" + CTX_FRAZA + r"\batlas\b", "mereu", "atlas=hărți, atlaz=țesătură"),
+        (r"\belipsa\b" + CTX_FRAZA + r"\beclipsa\b", "mereu",
          "elipsă=omisiune/curbă, eclipsă=fenomen astronomic"),
-        (r"\beclipsa\b" + CTX + r"\belipsa\b", "mereu",
+        (r"\beclipsa\b" + CTX_FRAZA + r"\belipsa\b", "mereu",
          "elipsă=omisiune/curbă, eclipsă=fenomen astronomic"),
-        (r"\beminent\b" + CTX + r"\biminent\b", "mereu",
+        (r"\beminent\b" + CTX_FRAZA + r"\biminent\b", "mereu",
          "eminent=remarcabil, iminent=pe cale să se întâmple"),
-        (r"\biminent\b" + CTX + r"\beminent\b", "mereu",
+        (r"\biminent\b" + CTX_FRAZA + r"\beminent\b", "mereu",
          "eminent=remarcabil, iminent=pe cale să se întâmple"),
-        (r"\bcompliment\b" + CTX + r"\bcomplement\b", "mereu",
+        (r"\bcompliment\b" + CTX_FRAZA + r"\bcomplement\b", "mereu",
          "compliment=laudă, complement=parte de propoziție/adaos"),
-        (r"\bcomplement\b" + CTX + r"\bcompliment\b", "mereu",
+        (r"\bcomplement\b" + CTX_FRAZA + r"\bcompliment\b", "mereu",
          "compliment=laudă, complement=parte de propoziție/adaos"),
-        (r"\bconjunctura\b" + CTX + r"\bconjectura\b", "mereu",
+        (r"\bconjunctura\b" + CTX_FRAZA + r"\bconjectura\b", "mereu",
          "conjunctură=împrejurare, conjectură=presupunere"),
-        (r"\bconjectura\b" + CTX + r"\bconjunctura\b", "mereu",
+        (r"\bconjectura\b" + CTX_FRAZA + r"\bconjunctura\b", "mereu",
          "conjunctură=împrejurare, conjectură=presupunere"),
-        (r"\bmortal\b" + CTX + r"\bmortar\b", "mereu",
+        (r"\bmortal\b" + CTX_FRAZA + r"\bmortar\b", "mereu",
          "mortal=aducător de moarte, mortar=material de construcție"),
-        (r"\bmortar\b" + CTX + r"\bmortal\b", "mereu",
+        (r"\bmortar\b" + CTX_FRAZA + r"\bmortal\b", "mereu",
          "mortal=aducător de moarte, mortar=material de construcție"),
-        (r"\bpadela\b" + CTX + r"\bpedala\b", "mereu", "padelă=vâslă, pedală=la picior"),
-        (r"\bpedala\b" + CTX + r"\bpadela\b", "mereu", "padelă=vâslă, pedală=la picior"),
-        (r"\bcauzal\b" + CTX + r"\bcazual\b", "mereu", "cauzal=de cauză, cazual=întâmplător"),
-        (r"\bcazual\b" + CTX + r"\bcauzal\b", "mereu", "cauzal=de cauză, cazual=întâmplător"),
-        (r"\bflagrant\b" + CTX + r"\bfragrant\b", "mereu",
+        (r"\bpadela\b" + CTX_FRAZA + r"\bpedala\b", "mereu", "padelă=vâslă, pedală=la picior"),
+        (r"\bpedala\b" + CTX_FRAZA + r"\bpadela\b", "mereu", "padelă=vâslă, pedală=la picior"),
+        (r"\bcauzal\b" + CTX_FRAZA + r"\bcazual\b", "mereu", "cauzal=de cauză, cazual=întâmplător"),
+        (r"\bcazual\b" + CTX_FRAZA + r"\bcauzal\b", "mereu", "cauzal=de cauză, cazual=întâmplător"),
+        (r"\bflagrant\b" + CTX_FRAZA + r"\bfragrant\b", "mereu",
          "flagrant=evident/în fapt, fragrant=parfumat"),
-        (r"\bfragrant\b" + CTX + r"\bflagrant\b", "mereu",
+        (r"\bfragrant\b" + CTX_FRAZA + r"\bflagrant\b", "mereu",
          "flagrant=evident/în fapt, fragrant=parfumat"),
     ]),
 }
@@ -195,8 +213,9 @@ def calculeaza_scor(raportate, depasiri):
         n_anglicisme = sum(1 for r in raportate if r["categorie"] == "anglicism")
         if n_anglicisme >= 2:
             semnale.append(("anglicisme_frecvente", 1))
-    if "paronimie" in categorii:
-        semnale.append(("confuzie_paronimica", 1))
+    # `paronimie` nu intră în scor: detecția e coapariție lexicală, nu sens.
+    # „Un savant eminent a anunțat un pericol iminent" folosește ambele cuvinte
+    # corect și tot s-ar potrivi. Se raportează ca `minor`, spre verificare.
     if depasiri:
         semnale.append(("praguri_depasite", 1))
     return semnale, sum(p for _, p in semnale)

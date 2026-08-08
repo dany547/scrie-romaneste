@@ -6,10 +6,10 @@ scorul combinat calculat automat. Scripturile individuale rămân utile pentru
 verificări punctuale.
 
 Raportul păstrează formatul pipe al scripturilor individuale, grupat pe
-secțiuni. Scorul automat acoperă doar semnalele deterministe (max 13 puncte:
-tipare 6 + ritm 3 + modelisme 4); naturalitatea, densitatea de informație și
-sursele rămân la judecata modelului, după rubricile din
-references/*/scoring-checklist.md.
+secțiuni. Scorul automat numără penalizări deterministe, nu calitate (max 13
+puncte: tipare 6 + ritm 3 + modelisme 4); naturalitatea, densitatea de
+informație și sursele rămân la judecata modelului, după listele din
+references/*/scoring-checklist.md. Un scor mic nu garantează un text bun.
 
 Usage:
     verifica.py <fisier_sau_->
@@ -139,7 +139,7 @@ def tipareste(rez):
     print("---")
     print(linie_scor(rez))
     print("de evaluat manual: naturalitate, densitate informatie, fapte/surse "
-          "— rubricile din references/*/scoring-checklist.md (prag total 8/10)")
+          "— listele din references/*/scoring-checklist.md")
 
 
 def main():
@@ -170,8 +170,10 @@ def main():
     elif "--scor" in argv:
         print(linie_scor(rez))
     elif not are_semnale(rez):
-        print(f"curat: 0 semnale pe toate verificarile ({rez['cuvinte']} cuvinte)")
+        print(f"0 semnale automate ({rez['cuvinte']} cuvinte) — nu inseamna text "
+              "bun, doar ca n-a calcat pe nicio mina automata")
         print(linie_scor(rez))
+        print("de evaluat manual: naturalitate, densitate informatie, fapte/surse")
     else:
         tipareste(rez)
 

@@ -11,10 +11,17 @@ proporție de linii, nu pe regex) liste cu „-" în locul prozei. Toate au prag
 de abuz, nu interdicție absolută — o listă de funcționalități sau un singur
 bold nu sunt semnal.
 
+Categoriile `copula_evitata` („reprezintă", „constituie"), `referinta_vaga`
+(„acest lucru", „această soluție") și `simetrie_de_acoperire` („fie că ești
+începător sau expert…") se numără pe familie, nu pe tipar: niciun membru nu e
+greșit singur, dar repetiția lor mută textul în registru nominal, respectiv în
+adresarea către toată lumea. Se raportează ca `minor` și nu intră în scor.
+
 Fiecare tipar are o severitate (critic/important/minor) și un prag:
     mereu          — semnalat la orice apariție
     la_aglomerare  — semnalat la 3+ în același paragraf sau peste densitate
     la_densitate   — semnalat doar peste densitate
+    familie        — 3+ apariții ale familiei, plus aglomerare sau densitate
 
 Unde există o corecție canonică, raportul o dă direct după fragment:
     critic|romgleza|L12|...face sens...|→ are sens
@@ -33,6 +40,8 @@ Exit codes:
 """
 import re
 import sys
+import unicodedata
+from collections import defaultdict
 
 import _comun
 
@@ -65,6 +74,12 @@ CATEGORII = {
         (r"\bin primul rand\b.{0,600}?\bin al doilea rand\b", "mereu",
          "enumerarea mecanică — leagă ideile natural sau folosește o listă"),
         (r"\bnu doar\b.{0,120}?\bci si\b", "la_aglomerare"),
+        (r"\bnu (e|este) vorba doar de\b", "la_aglomerare",
+         "spune direct despre ce e vorba"),
+        (r"\bnu in ultimul rand\b", "la_aglomerare",
+         "elimină — enumerarea se vede fără conector"),
+        (r"\batunci cand vine vorba de\b", "la_aglomerare",
+         "la / în privința / când"),
     ]),
     "introduceri": ("critic", [
         (r"\bin lumea (de astazi|digitala|moderna|contemporana)\b", "mereu",
@@ -197,7 +212,8 @@ CATEGORII_ORIGINAL = {
     "tipografie_anglicizata": ("minor", [
         (r'"[^"\n]{3,}"', "la_aglomerare", "ghilimele românești: „…”"),
         (r"\b\d+\.\d+\s*(%|la suta|lei|euro)", "mereu", "virgulă zecimală: 3,5"),
-        (r"\s—\s.{0,80}\s—\s", "la_aglomerare", "reformulează fără incidentă între linii de pauză"),
+        (r"\s—\s" + _comun.IN_ACELASI_PARAGRAF + r"{0,80}\s—\s", "la_aglomerare",
+         "reformulează fără incidentă între linii de pauză"),
     ]),
     "simboluri_excesive": ("minor", [
         # emoji decorative — presărate în proză sau ca marcatori de listă
@@ -263,14 +279,104 @@ def detecteaza_liste_abuzate(text):
     return rezultate, depasire
 
 
-DETECTOARE_EXTRA = [detecteaza_liste_abuzate]
+# Semnale de familie: tipare unde niciun membru nu e greșit singur, dar
+# repetiția familiei întregi schimbă registrul textului. Motorul generic din
+# `_comun.scaneaza` numără pe tipar, nu pe categorie, așa că „reprezintă" de
+# două ori plus „constituie" o dată nu ar declanșa nimic — deși exact asta e
+# amprenta registrului nominal. Detectoarele de mai jos numără familia.
+#
+# Niciuna dintre familii nu intră în `calculeaza_scor`: „constituie infracțiune"
+# e formulă juridică fixă, iar referința pronominală e mecanismul normal de
+# coeziune în română. Sunt semnale de recitire, nu erori.
+FAMILII = {
+    "copula_evitata": (
+        [r"\breprezinta\b", r"\bconstituie\b", r"\bse numara printre\b"],
+        "«este», sau verbul care spune ce face",
+    ),
+    "referinta_vaga": (
+        [r"\bacest lucru\b", r"\bacest aspect\b", r"\baceasta (abordare|solutie)\b"],
+        "substantivul concret la care trimite",
+    ),
+    # Fraza care se adresează tuturor ca să nu excludă niciun cititor — amprenta
+    # articolului de agenție și a textului de model. O propoziție adevărată
+    # pentru toată lumea nu informează pe nimeni.
+    #
+    # Tiparul NU e conjuncția „fie că… fie că", care e corelativă normală
+    # („Fie că plouă, fie că nu, plecăm"). Semnalul cere structura completă:
+    # deschidere de frază + adresare la persoana a II-a. Fără persoana a II-a nu
+    # e formulă de acoperire, e o disjuncție obișnuită.
+    "simetrie_de_acoperire": (
+        [r"(?:^|[.!?]\s+)(fie ca|indiferent daca|nu conteaza daca)\b"
+         r"[^.!?]{0,160}?\b(esti|sunteti|vrei|doriti|cauti|ai nevoie|aveti nevoie)\b",
+         r"\bindiferent de (nivelul?|experienta|bugetul?|varsta)\b",
+         r"\bde la incepatori (si )?pana la\b",
+         r"\bpentru oricine\b"],
+        "spune cui i se adresează concret, nu «tuturor»",
+    ),
+}
+
+MIN_APARITII_FAMILIE = 3
+
+
+def _detector_familie(categorie):
+    tipare, sugestie = FAMILII[categorie]
+    combinat = re.compile(
+        "|".join(_comun.spatii_flexibile(t) for t in tipare),
+        re.IGNORECASE | re.MULTILINE | re.DOTALL)
+
+    def detecteaza(text):
+        """Detector extra pentru `_comun.scaneaza` — vezi contractul acolo."""
+        pliat = _comun.pliaza(unicodedata.normalize("NFC", text))
+        potriviri = list(combinat.finditer(pliat))
+        if len(potriviri) < MIN_APARITII_FAMILIE:
+            return [], None
+
+        cuvinte = max(_comun.numara_cuvinte(text), 1)
+        densitate = len(potriviri) * 1000.0 / cuvinte
+        limite = _comun.indici_paragrafe(text)
+        pe_paragraf = defaultdict(int)
+        for m in potriviri:
+            pe_paragraf[_comun.paragraf_pentru(m.start(), limite)] += 1
+        aglomerat = any(n >= _comun.PRAG_AGLOMERARE for n in pe_paragraf.values())
+        if not (aglomerat or densitate >= _comun.PRAG_DENSITATE_IMPLICIT):
+            return [], None
+
+        rezultate = []
+        for m in potriviri:
+            start = max(0, m.start() - _comun.CONTEXT_CHARS)
+            end = min(len(text), m.end() + _comun.CONTEXT_CHARS)
+            rezultate.append({
+                "categorie": categorie,
+                "severitate": "minor",
+                "prag": "familie",
+                "tipar": categorie,
+                "sugestie": sugestie,
+                "offset": m.start(),
+                "sfarsit": m.end(),
+                "linie": text.count("\n", 0, m.start()) + 1,
+                "fragment": " ".join(text[start:end].split()),
+            })
+        motiv = "aglomerare" if aglomerat else f"densitate={densitate:.1f}"
+        return rezultate, (categorie, categorie, len(rezultate), motiv)
+
+    return detecteaza
+
+
+DETECTOARE_EXTRA = [detecteaza_liste_abuzate] + [
+    _detector_familie(c) for c in FAMILII]
 
 
 SCOR_MAXIM = 6
 
 
 def calculeaza_scor(raportate, depasiri):
-    """Semnale deterministe, 0-6 puncte. Restul rubricii ține de judecata umană."""
+    """Semnale deterministe, 0-6 puncte. Restul rubricii ține de judecata umană.
+
+    `copula_evitata` și `referinta_vaga` se raportează, dar nu intră aici: sunt
+    semnale de recitire, nu erori, iar un text formal sau juridic le poate
+    conține legitim. Adăugarea lor la `lexic` ar umfla scorul exact pe genurile
+    unde sunt corecte.
+    """
     raportate = [r for r in raportate if r["severitate"] != "sub_prag"]
     categorii = {r["categorie"] for r in raportate}
     semnale = []

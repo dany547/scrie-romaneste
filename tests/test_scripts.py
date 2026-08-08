@@ -103,6 +103,124 @@ class TestTipare(unittest.TestCase):
         self.assertEqual(cod, 1)
 
 
+class TestTextWrapped(unittest.TestCase):
+    """Regresie: tiparele de mai multe cuvinte se rupeau la capat de rand.
+
+    Textul real e wrapped. Inainte de fix, „in era digitala" era prins, iar
+    „in era\\ndigitala" trecea complet — acelasi text, semnale diferite in
+    functie de unde a cazut intamplator taietura de rand.
+    """
+
+    def test_acelasi_text_da_acelasi_rezultat_wrapped(self):
+        pe_o_linie = ("Traim in era digitala. Este important de mentionat ca "
+                      "oferim o gama larga de solutii. Asta face sens pentru noi.")
+        wrapped = ("Traim in era\ndigitala. Este important de\nmentionat ca "
+                   "oferim o gama\nlarga de solutii. Asta face\nsens pentru noi.")
+        _, iesire_linie = ruleaza_stdin("check-tipare.py", pe_o_linie)
+        _, iesire_wrap = ruleaza_stdin("check-tipare.py", wrapped)
+        categorii = lambda s: sorted(l.split("|")[1] for l in s.splitlines()
+                                     if "|L" in l)
+        self.assertEqual(categorii(iesire_linie), categorii(iesire_wrap),
+                         f"wrapping-ul schimba rezultatul:\n{iesire_wrap}")
+        self.assertIn("introduceri", categorii(iesire_wrap))
+
+    def test_nu_trece_peste_granita_de_paragraf(self):
+        """O sintagma nu se intinde peste un rand gol — ar fi doua paragrafe."""
+        cod, iesire = ruleaza_stdin("check-tipare.py",
+                                    "Traim in era\n\ndigitala si e bine asa.")
+        self.assertEqual(cod, 0, f"potrivire peste granita de paragraf:\n{iesire}")
+
+    def test_liniuta_paranteza_nu_inghite_un_heading(self):
+        """Fereastra dintre doua linii de pauza se opreste la capat de paragraf,
+        altfel prinde ultimul cuvant al unui paragraf si primul din urmatorul."""
+        text = ("Prima idee se incheie aici — cu o precizare scurta.\n\n"
+                "## Alt subiect\n\n"
+                "Al doilea paragraf incepe — si continua normal mai departe.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("tipografie_anglicizata", iesire,
+                         f"potrivire peste granita de paragraf:\n{iesire}")
+
+    def test_pleonasmul_wrapped_e_prins(self):
+        cod, iesire = ruleaza_stdin("check-modelisme.py",
+                                    "A avut o hemoragie\nde sange severa.")
+        self.assertEqual(cod, 1, f"pleonasm ratat peste capat de rand:\n{iesire}")
+
+    def test_lista_cu_liniuta_la_inceput_de_rand_nu_e_confundata(self):
+        """Spatiile din interiorul claselor raman neatinse: `[ \\t]-[ \\t]` nu
+        trebuie sa prinda marcatorii de lista de la inceput de rand."""
+        text = ("Produsul are trei calitati clare care conteaza la munte.\n"
+                "- greutate mica\n- rezistenta la apa\n- pret bun\n"
+                "Restul sunt detalii de catalog fara importanta reala.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("simboluri_excesive", iesire,
+                         f"marcatori de lista confundati cu liniuta-paranteza:\n{iesire}")
+
+
+class TestRegistruNominal(unittest.TestCase):
+    """Categoriile numarate pe familie: `copula_evitata`, `referinta_vaga`."""
+
+    def test_registrul_nominal_e_semnalat(self):
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "pereche-inainte.md"))
+        self.assertIn("copula_evitata", iesire,
+                      f"registrul nominal a trecut nedetectat:\n{iesire}")
+        self.assertEqual(cod, 1)
+
+    def test_doua_aparitii_nu_sunt_un_tipar(self):
+        """Doua verbe nominale intr-un text lung raman uz normal."""
+        text = ("Centrala reprezinta o solutie buna pentru case mici. "
+                "Pompa de caldura constituie alternativa scumpa. "
+                + "Am montat-o intr-o zi si merge bine de atunci. " * 40)
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("copula_evitata", iesire,
+                         f"uz normal semnalat ca tipar:\n{iesire}")
+
+    def test_formula_juridica_izolata_nu_e_semnalata(self):
+        text = ("Fapta constituie infractiune si se pedepseste cu inchisoare. "
+                + "Instanta a stabilit termenul de judecata pentru luna viitoare. " * 30)
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("copula_evitata", iesire,
+                         f"formula juridica fixa semnalata:\n{iesire}")
+
+    def test_referinta_vaga_repetata_e_semnalata(self):
+        text = ("Acest lucru schimba totul pentru echipa noastra. "
+                "Acest aspect ne-a costat trei luni de munca. "
+                "Aceasta solutie a fost aleasa dupa multe discutii. "
+                "Acest lucru ramane valabil si acum, dupa doi ani.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("referinta_vaga", iesire)
+
+    def test_familiile_nu_intra_in_scor(self):
+        """Sunt semnale de recitire, nu erori — nu umfla scorul automat."""
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "check-tipare.py", (FIXTURES / "pereche-inainte.md").read_text(), "--scor")
+        self.assertNotIn("copula_evitata", iesire)
+        self.assertNotIn("referinta_vaga", iesire)
+
+    def test_simetria_de_acoperire_e_semnalata(self):
+        text = ("Fie ca esti incepator sau ai deja experienta, ghidul te ajuta. "
+                "Indiferent de bugetul disponibil, exista o varianta buna. "
+                "Solutia e potrivita pentru oricine, la orice scara.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("simetrie_de_acoperire", iesire)
+
+    def test_fie_ca_corelativ_nu_e_semnalat(self):
+        """«Fie ca… fie ca» e conjunctie corelativa normala. Fara adresare la
+        persoana a II-a nu e formula de acoperire."""
+        text = ("Fie ca ploua, fie ca ninge, drumul ramane deschis. "
+                "Fie ca vine iarna devreme, fie ca intarzie, pregatim utilajele. "
+                "Fie ca ne convine, fie ca nu, termenul e in martie.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("simetrie_de_acoperire", iesire,
+                         f"conjunctie corelativa normala semnalata:\n{iesire}")
+
+    def test_textele_curate_raman_curate(self):
+        for fixture in ("bun-articol.md", "pereche-dupa.md"):
+            cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / fixture))
+            for categorie in ("copula_evitata", "referinta_vaga",
+                              "simetrie_de_acoperire"):
+                self.assertNotIn(categorie, iesire, f"{fixture}:\n{iesire}")
+
+
 class TestRitm(unittest.TestCase):
 
     def test_text_uniform_e_semnalat(self):
@@ -115,14 +233,17 @@ class TestRitm(unittest.TestCase):
         cod, iesire = ruleaza("check-ritm.py", str(FIXTURES / "bun-articol.md"))
         self.assertEqual(cod, 0, f"proza umana semnalata gresit:\n{iesire}")
 
-    def test_rescrierea_creste_variatia(self):
-        """Perechea inainte/dupa demonstreaza ce trebuie sa se intample."""
+    def test_rescrierea_iese_din_zona_uniforma(self):
+        """Perechea inainte/dupa: rescrierea trebuie sa scoata textul din zona
+        semnalata, nu sa atinga un multiplu de CV. Un prag de tip «CV-ul se
+        dubleaza» ar premia taierea frazelor la intamplare — exact ce nu vrem."""
         def cv(fisier):
             _, iesire = ruleaza("check-ritm.py", str(FIXTURES / fisier))
             linie = next(l for l in iesire.splitlines() if l.startswith("metrici|fraze"))
             return float(linie.split("cv=")[1].split("|")[0])
-        self.assertGreater(cv("pereche-dupa.md"), cv("pereche-inainte.md") * 2,
-                           "rescrierea nu a variat suficient ritmul")
+        self.assertLess(cv("pereche-inainte.md"), 0.16, "fixture-ul inainte nu mai e uniform")
+        self.assertGreater(cv("pereche-dupa.md"), 0.22,
+                           "rescrierea a ramas in zona nedecisa")
 
     def test_capcana_concluziei(self):
         cod, iesire = ruleaza("check-ritm.py", str(FIXTURES / "pereche-inainte.md"))
@@ -147,12 +268,40 @@ class TestModelisme(unittest.TestCase):
         cod, iesire = ruleaza("check-modelisme.py", str(FIXTURES / "bun-articol.md"))
         self.assertEqual(cod, 0, f"text curat semnalat gresit:\n{iesire}")
 
-    def test_paronimia_da_explicatia_sensurilor(self):
+    def test_paronimia_e_informativa_nu_eroare(self):
+        """Ambele cuvinte sunt folosite corect aici. Scriptul vede coaparitia,
+        nu sensul, deci raporteaza `minor` si nu blocheaza livrarea (exit 0)."""
         cod, iesire = ruleaza_stdin("check-modelisme.py",
                                     "Un savant eminent a anuntat un pericol iminent.")
-        self.assertEqual(cod, 1)
-        self.assertIn("paronimie", iesire)
+        self.assertEqual(cod, 0, f"paronimia corecta a blocat livrarea:\n{iesire}")
+        self.assertIn("minor|paronimie", iesire)
         self.assertIn("eminent=remarcabil", iesire)
+
+    def test_paronimia_nu_intra_in_scor(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "check-modelisme.py",
+            "Un savant eminent a anuntat un pericol iminent.", "--scor")
+        self.assertIn("scor_automat=0/4", iesire)
+
+    def test_pleonasmul_nu_sare_granita_de_propozitie(self):
+        """Regresie: fereastra de 80 de caractere prindea doua clauze diferite."""
+        cod, iesire = ruleaza_stdin(
+            "check-modelisme.py",
+            "Hemoragia a fost oprita in zece minute, dar pacientul pierduse "
+            "deja o cantitate mare de sange.")
+        self.assertEqual(cod, 0, f"constructie corecta semnalata:\n{iesire}")
+
+    def test_ortografia_corecta_a_unui_cuvant_nu_e_pleonasm(self):
+        cod, iesire = ruleaza_stdin(
+            "check-modelisme.py",
+            "Elevii invata ortografia corecta a cuvintelor cu diftong.")
+        self.assertEqual(cod, 0, f"uz didactic normal semnalat:\n{iesire}")
+
+    def test_ortografie_corecta_nud_ramane_pleonasm(self):
+        cod, iesire = ruleaza_stdin("check-modelisme.py",
+                                    "Textul are o ortografie corecta.")
+        self.assertEqual(cod, 1)
+        self.assertIn("pleonasm_etimologic", iesire)
 
     def test_fara_diacritice_e_prins(self):
         cod, iesire = ruleaza_stdin("check-modelisme.py",
@@ -180,7 +329,9 @@ class TestVerifica(unittest.TestCase):
     def test_text_curat_da_exit_0(self):
         cod, iesire = ruleaza("verifica.py", str(FIXTURES / "bun-articol.md"))
         self.assertEqual(cod, 0, f"text curat semnalat:\n{iesire}")
-        self.assertIn("curat", iesire)
+        self.assertIn("0 semnale automate", iesire)
+        self.assertIn("de evaluat manual", iesire,
+                      "raportul curat nu trebuie sa incurajeze livrarea imediata")
 
     def test_json_e_valid_si_are_sugestii(self):
         import json
@@ -258,6 +409,83 @@ class TestDriftGuard(unittest.TestCase):
             cod, iesire = ruleaza_stdin("check-tipare.py", text)
             self.assertEqual(
                 cod, 1, f"expresie interzisa neprinsă: {text!r}\n{iesire}")
+
+
+class TestTrimiteriDocumentatie(unittest.TestCase):
+    """Trimiterile din SKILL.md si references/ trebuie sa duca undeva.
+
+    Un agent care urmeaza o trimitere moarta fie se blocheaza, fie inventeaza
+    continutul fisierului lipsa. Clasa asta de bug a aparut de doua ori: dupa
+    spargerea lui `seo-geo.md` in references/seo/, si dupa renumerotarea
+    sectiunilor SEO (trimiteri ramase la §8, §11).
+    """
+
+    # Fisiere ale proiectului utilizatorului sau exemple de nume, nu fisiere
+    # ale skill-ului: nu au cum sa existe aici.
+    EXTERNE = {"CLAUDE.md", "AGENTS.md", "README.md",
+               "BRIEF.md", "CONTEXT.md", "brand.md"}
+
+    def _surse(self):
+        cai = [RADACINA / "SKILL.md"]
+        cai.extend(sorted((RADACINA / "references").rglob("*.md")))
+        return cai
+
+    def _rezolva(self, sursa, referinta):
+        """Intai relativ la fisierul sursa, apoi la radacina, apoi dupa nume.
+
+        Cautarea dupa nume e deliberata: skill-ul foloseste peste tot nume nude
+        („incarca `core.md`"), iar un agent le rezolva la fel — cauta fisierul
+        cu numele ala in skill.
+        """
+        for candidat in ((sursa.parent / referinta).resolve(),
+                         (RADACINA / referinta).resolve()):
+            if candidat.exists():
+                return candidat
+        nume = Path(referinta).name
+        return next((f for f in RADACINA.rglob(nume) if ".git" not in f.parts), None)
+
+    def test_fisierele_referite_exista(self):
+        import re
+        tipar = re.compile(r"`([\w./-]+\.md)`")
+        lipsa = []
+        for sursa in self._surse():
+            for referinta in tipar.findall(sursa.read_text(encoding="utf-8")):
+                if Path(referinta).name in self.EXTERNE:
+                    continue
+                if self._rezolva(sursa, referinta) is None:
+                    lipsa.append(f"{sursa.relative_to(RADACINA)} -> {referinta}")
+        self.assertEqual(lipsa, [], "trimiteri catre fisiere inexistente:\n" +
+                         "\n".join(lipsa))
+
+    def test_sectiunile_referite_exista(self):
+        """`fisier.md` §N trebuie sa aiba un heading care incepe cu N."""
+        import re
+        tipar = re.compile(r"`([\w./-]+\.md)`\s*(?:,\s*)?§([\w.]+)")
+        headinguri = re.compile(r"^#{1,6}\s+(\S+)", re.MULTILINE)
+        lipsa = []
+        for sursa in self._surse():
+            text = sursa.read_text(encoding="utf-8")
+            for referinta, sectiune in tipar.findall(text):
+                if Path(referinta).name in self.EXTERNE:
+                    continue
+                tinta = self._rezolva(sursa, referinta)
+                if tinta is None:
+                    continue  # raportat de testul de mai sus
+                etichete = {e.rstrip(".") for e in
+                            headinguri.findall(tinta.read_text(encoding="utf-8"))}
+                # „§1.1-1.5" trimite la un interval — verifica primul capat.
+                capat = sectiune.split("-")[0].rstrip(".")
+                if capat not in etichete:
+                    lipsa.append(f"{sursa.relative_to(RADACINA)} -> {referinta} §{sectiune}")
+        self.assertEqual(lipsa, [], "trimiteri catre sectiuni inexistente:\n" +
+                         "\n".join(lipsa))
+
+    def test_fisierele_din_references_sunt_toate_rutate(self):
+        """Un fisier pe care SKILL.md nu-l pomeneste nu va fi incarcat niciodata."""
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        orfane = [f.name for f in (RADACINA / "references").rglob("*.md")
+                  if f.name not in skill]
+        self.assertEqual(orfane, [], f"fisiere nereferite in SKILL.md: {orfane}")
 
 
 class TestSeo(unittest.TestCase):

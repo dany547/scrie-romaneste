@@ -58,6 +58,50 @@ def numara_cuvinte(text):
     return len(re.findall(r"\b[\wăâîșțĂÂÎȘȚ]+\b", text))
 
 
+# Spații/taburi, sau exact o întrerupere de linie care nu începe un paragraf nou.
+SPATIU_FLEXIBIL = r"(?:[ \t]+|[ \t]*\n(?!\s*\n)[ \t]*)"
+
+# Fereastră între doi termeni, oprită la granița de paragraf. Folosită doar unde
+# măsurătoarea a arătat că e nevoie: din 1189 de potriviri pe proza românească
+# din repo, 7 traversau un rând gol, toate din tiparul liniuței-paranteză, care
+# altfel înghite heading-ul dintre două paragrafe. Restul ferestrelor (CTX din
+# check-modelisme, „pe de o parte…pe de altă parte") n-au produs niciuna.
+IN_ACELASI_PARAGRAF = r"(?:(?!\n\s*\n).)"
+
+
+def spatii_flexibile(tipar):
+    """Spațiul literal dintr-un tipar se potrivește și peste o întrerupere de linie.
+
+    Textul real e wrapped — la 80 de coloane în Markdown, la lățimea ferestrei
+    în orice altceva. Fără asta, „în era\\ndigitală" trece nedetectat, deși „în
+    era digitală" e prins: același text, semnale diferite după unde a căzut
+    întâmplător tăierea de rând.
+
+    Spațiile din interiorul claselor de caractere rămân neatinse: `[ \\t]` din
+    tiparul liniuței e scris deliberat fără `\\n`, ca să nu prindă marcatorii de
+    listă de la început de rând.
+
+    Se acceptă cel mult o întrerupere de linie, și numai dacă nu urmează un rând
+    gol: o sintagmă nu trece peste granița de paragraf.
+    """
+    rezultat = []
+    in_clasa = False
+    i = 0
+    while i < len(tipar):
+        c = tipar[i]
+        if c == "\\":
+            rezultat.append(tipar[i:i + 2])
+            i += 2
+            continue
+        if c == "[":
+            in_clasa = True
+        elif c == "]":
+            in_clasa = False
+        rezultat.append(SPATIU_FLEXIBIL if (c == " " and not in_clasa) else c)
+        i += 1
+    return "".join(rezultat)
+
+
 def _desfa(intrare):
     """(regex, prag) sau (regex, prag, sugestie) -> (regex, prag, sugestie|None)."""
     if len(intrare) == 3:
@@ -96,7 +140,11 @@ def scaneaza(text, categorii, categorii_original=None,
                 tipar, prag, sugestie = _desfa(intrare)
                 if prag == "niciodata":
                     continue
-                for m in re.finditer(tipar, tinta, re.IGNORECASE | re.MULTILINE):
+                # DOTALL: ferestrele de tip `.{0,80}` dintre doi termeni (CTX
+                # din check-modelisme, „pe de o parte…pe de altă parte") trebuie
+                # să treacă și ele peste newline, din același motiv.
+                for m in re.finditer(spatii_flexibile(tipar), tinta,
+                                     re.IGNORECASE | re.MULTILINE | re.DOTALL):
                     start = max(0, m.start() - CONTEXT_CHARS)
                     end = min(len(text), m.end() + CONTEXT_CHARS)
                     fragment = " ".join(text[start:end].split())
