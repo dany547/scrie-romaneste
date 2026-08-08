@@ -14,6 +14,7 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 - **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
 - **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, syntactic calques, false friends, borrowed-word articulation, diacritic restoration
 - **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
+- **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
 - **Writing techniques** — rhythm, conciseness, structure, audience calibration
 - **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search
 - **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker
@@ -168,11 +169,13 @@ scrie-romaneste/
 ├── references/
 │   ├── limba/
 │   │   ├── anti-tipare-ai.md       # AI clichés with replacements + thresholds
+│   │   ├── exemple-voce.md         # Annotated before/after rewrites, by register
+│   │   ├── flux-exemplu.md         # One complete run: request → contract → draft → report → delivery
 │   │   ├── tipare-ro.md            # Romanian-specific failure modes
 │   │   ├── gramatica-stil.md       # Agreement, punctuation, spelling, pleonasms
 │   │   ├── scris-eficient.md       # Process techniques: draft/edit, rhythm, concision
 │   │   ├── modelisme.md            # Etymological pleonasms, anglicisms, paronyms
-│   │   └── scoring-checklist.md    # 1-10 rubric, language criteria (1-3)
+│   │   └── scoring-checklist.md    # Pre-delivery language checklist
 │   └── seo/                        # Split by topic so agents load only what a task needs
 │       ├── core.md                 # Technical, on-page, content, Romanian-specific
 │       ├── grounding.md            # Business data that must never be invented
@@ -182,7 +185,7 @@ scrie-romaneste/
 │       ├── blog-keyword.md         # Blog content + keyword research
 │       ├── local.md                # NAP, Google Business Profile
 │       ├── avansat.md              # Link building, advanced technical, audits
-│       └── scoring-checklist.md    # 1-10 rubric, SEO criteria (4-5)
+│       └── scoring-checklist.md    # Pre-delivery SEO/information-density checklist
 ├── scripts/
 │   ├── verifica.py                 # Orchestrator: all checks, one call, combined score
 │   ├── check-tipare.py             # AI clichés, calques, generation artefacts
@@ -227,6 +230,57 @@ python3 -m unittest discover tests
 
 ## Version
 
+- **v0.5.2** — Fixed a silent matching bug: any multi-word pattern that fell
+  across a line break was missed entirely. `_comun.py` now treats a literal space
+  in a pattern as "space, or a single line break that does not start a new
+  paragraph", leaving spaces inside character classes untouched (the dash pattern
+  deliberately excludes `\n` so it never matches list markers). Measured on
+  wrapped Romanian prose: at 80 columns the old engine missed ~1 in 6 detections,
+  at 40 columns half of them — the same text scored differently depending on
+  where the line wrap happened to land. Added a documentation-reference guard
+  test: every `file.md` and `§N` mentioned in `SKILL.md` or `references/` must
+  resolve, and every reference file must be routed from `SKILL.md`. That test
+  covers the class of bug fixed by hand in 0.5.0 and 0.5.1. New
+  `references/limba/flux-exemplu.md`: one complete run from request to delivery,
+  with the scripts' real output and the decision taken on each signal, including
+  the four problems the scripts do not catch. `SKILL.md` gained a rule for
+  requests that ask for audit and rewrite at once, a `--json` recommendation for
+  programmatic use, and a note for shells without heredoc. Tests 53 → 60.
+- **v0.5.1** — SEO templates and agent ergonomics. The planned `sablon_seo`
+  category was dropped: three of its phrases ("atunci când vine vorba de", "nu în
+  ultimul rând", "nu e vorba doar de") belong in the existing `structura` table,
+  one ("în funcție de nevoile") carries almost no signal, and a bare `fie că… fie
+  că` is an ordinary correlative conjunction. What replaces it is the actual
+  pattern: `simetrie_de_acoperire`, the sentence that addresses everyone so it
+  ranks for every query ("Fie că ești începător sau profesionist…"). It requires
+  sentence-initial position *plus* second-person address, counts per family, and
+  stays out of the score. New `core.md` section on the Romanian agency-content
+  register — mandatory opening definition, decorative FAQ, politeness sign-off,
+  keyword forced into every H2, padding to a word count — none of which Google
+  penalises and all of which readers recognise. SEO section numbering fixed
+  (`core.md` jumped 3 → 13, leftovers from the `seo-geo.md` split). `SKILL.md`
+  gained an operational section for weaker agents: where the scripts actually
+  live, how to pipe text in via stdin, that exit 1 is a normal result rather than
+  a failure, how to read the pipe-delimited report by severity, and what to do
+  when `python3` is missing. Tests 51 → 53.
+- **v0.5.0** — Naturalness over checklist compliance. New `CONTRACT` step in the
+  workflow: genre, reader, channel, register and address form are fixed before
+  the draft, not inferred after it. The global **8/10 score gate is gone** — it
+  mixed a manual rubric with `verifica.py`'s deterministic penalty count and was
+  unreachable for any text that skips SEO; both scoring checklists are now
+  pre-delivery reading lists with explicit blockers. New
+  `references/limba/exemple-voce.md` with annotated before/after rewrites, in
+  neutral and colloquial variants, so one register does not become the universal
+  model. `scris-eficient.md` cut from 237 to ~110 lines: the blogger-habit
+  material (timed sprints, coffee, post-its, writing with the screen covered) is
+  gone, and its contradictions with the anti-pattern rules — automatic summary
+  endings, unconditional praise for lists and bold — are resolved. New
+  `copula_evitata` and `referinta_vaga` detectors count *per family* rather than
+  per pattern, which is what catches nominal register ("reprezintă" twice plus
+  "constituie" once); neither feeds the score. Paronyms are now informative
+  (`minor`, unscored): the detector sees co-occurrence, not meaning, and flagged
+  sentences that use both words correctly. Pleonasm matching window narrowed
+  80 → 25 chars so it stops crossing clause boundaries. Tests 39 → 51.
 - **v0.4.0** — Agent-efficiency release. New `verifica.py` orchestrator runs all
   checks in one call with a combined deterministic score (`X/13`), `--json`
   output and `--fara-seo`. Reports now include the canonical fix inline
