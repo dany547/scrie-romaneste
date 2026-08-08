@@ -1,6 +1,6 @@
 # SEO avansat — link building, tehnic avansat, audit, competitiv
 
-## 7. Link building și autoritate (off-page SEO)
+## Link building și autoritate (off-page SEO)
 
 - **Backlinks de calitate** de la site-uri relevante și cu autoritate sunt cel mai important
   semnal off-page. Un link de la un site de specialitate valorează mai mult decât 100 de
@@ -16,7 +16,7 @@
 - Guest posting-ul pe bloguri relevante din industrie este o tactică legitimă, dar doar
   dacă aduce valoare reală cititorilor, nu doar un link.
 
-## 8. SEO tehnic avansat
+## SEO tehnic avansat
 
 - **robots.txt**: controlează ce crawl Googlebot; nu bloca resurse CSS/JS critice — Google
   trebuie să vadă pagina ca un utilizator obișnuit. Blochează doar paginile cu adevărat
@@ -49,7 +49,7 @@
   redirect automat către homepage (pierde contextul pentru crawler și utilizator).
 
 
-## 12. Audit SEO și monitorizare
+## Audit SEO și monitorizare
 
 - **Google Search Console**: instrument esențial gratuit — verifică indexarea, erorile
   de crawl, performanța în căutări (cuvinte-cheie, clicuri, impresii), Core Web Vitals,
@@ -86,7 +86,7 @@
    (conținut, imagini, funcționalități).
 
 
-## 14. SEO competitiv
+## SEO competitiv
 
 - Analizează **primele 5-10 rezultate** pentru cuvântul-cheie țintă: ce tip de conținut
   au (articol, ghid, listă, video), cât de lung este, ce structură au, ce date structurate

@@ -21,7 +21,7 @@
   - `FAQPage` — retras pe **7 mai 2026**. Raportarea în Search Console se oprește
     în iunie 2026, suportul API în august 2026. Markup-ul poate rămâne pe pagină
     fără probleme, iar rankingul nu e afectat — e o schimbare de afișare, nu de
-    algoritm. Conținutul de tip întrebare-răspuns rămâne valoros pentru GEO (§11),
+    algoritm. Conținutul de tip întrebare-răspuns rămâne valoros pentru GEO (`geo.md`),
     doar că nu-ți mai extinde listarea în SERP.
   - `HowTo` — deprecat pe desktop din septembrie 2023.
   - Retrase în iunie 2025: `Book Actions`, `Course Info`, `ClaimReview`,

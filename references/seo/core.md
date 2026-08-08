@@ -2,7 +2,7 @@
 
 Aplică regulile **fără a compromite naturalitatea textului** — vezi `references/limba/anti-tipare-ai.md`. Un text optimizat SEO care sună robotizat și-a ratat scopul.
 
-## 1. SEO tehnic și on-page (bazele)
+## SEO tehnic și on-page (bazele)
 
 - **Titlu de pagină (`<title>`)**: unic pentru fiecare pagină, descrie exact conținutul,
   scurt dar informativ (motoarele de căutare taie titlurile prea lungi). Evită titluri
@@ -22,7 +22,7 @@ Aplică regulile **fără a compromite naturalitatea textului** — vezi `refere
 - **Sitemap**: un fișier XML Sitemap pentru motoarele de căutare + eventual o pagină HTML
   de site map pentru utilizatori, dacă site-ul are multe pagini.
 
-## 2. Conținut (partea unde textul propriu-zis contează)
+## Conținut (partea unde textul propriu-zis contează)
 
 - **Conținut util și original** contează mai mult decât orice truc tehnic — utilizatorii
   recunosc conținutul de calitate și îl distribuie organic.
@@ -46,7 +46,7 @@ Aplică regulile **fără a compromite naturalitatea textului** — vezi `refere
   variază vocabularul — cu cât folosești mai multe cuvinte relevante, cu atât ai mai multe
   șanse să apări în rezultate, dar nu umple textul artificial.
 
-## 3. Ce evită un text SEO natural (interzis)
+## Ce evită un text SEO natural (interzis)
 
 - Keyword stuffing — repetarea nefirească a cuvântului-cheie doar pentru motor, nu pentru
   cititor (ex. „cumpără X, cel mai bun X, X ieftin, X calitate" înșirat fără sens).
@@ -60,10 +60,49 @@ Aplică regulile **fără a compromite naturalitatea textului** — vezi `refere
 - Reclame excesive care distrag atenția de la conținutul principal și îngreunează lectura.
 
 
-## 13. Specific pentru limba română
+## Specific pentru limba română
 
 Regulile de mai sus sunt valabile în orice limbă. Cele de aici apar doar când
 scrii pentru un public românesc.
+
+### Registrul „articol SEO" — reflexele de breaslă
+
+Regulile de mai sus spun ce cere motorul de căutare. Secțiunea asta e despre
+altceva: tiparele pe care le produce automat oricine a scris conținut pe bandă
+în română — agenții de conținut, bloguri corporate, și modelele antrenate pe
+ele. Google nu le penalizează. Cititorul le recunoaște instant și pleacă.
+
+Când primești „scrie un articol SEO în română", astea sunt reflexele de suprimat:
+
+- **Definiția obligatorie la început.** „Ce este X? X este un proces prin
+  care…", pusă în deschidere pentru cineva care căutase de fapt un preț sau o
+  comparație. Dă definiția doar dacă cititorul chiar are nevoie de ea, și pune-o
+  unde se lovește de termen.
+- **Simetria de acoperire.** „Fie că ești începător sau profesionist…",
+  „indiferent de buget…", „pentru oricine". Fraza se adresează tuturor ca să
+  prindă toate interogările, deci nu spune nimic despre nimeni. Numește
+  cititorul concret — și dacă textul chiar e pentru două categorii diferite,
+  scrie două pasaje diferite, nu unul care le acoperă pe amândouă.
+  Detectat automat: `check-tipare.py`, `simetrie_de_acoperire`.
+- **FAQ-ul lipit la final** fiindcă „așa se face", cu întrebări pe care nu le
+  pune nimeni („Este X important?"). După retragerea rich-result-ului `FAQPage`
+  (`schema.md`) nu mai aduce nici măcar afișare. Păstrează întrebările reale —
+  cele din Search Console, din „Oamenii mai întreabă și", din emailurile
+  clientului — și integrează-le în text dacă se poate.
+- **Încheierea de politețe.** „Sperăm că acest articol ți-a fost util",
+  „Nu ezita să ne contactezi pentru mai multe informații". Ultima frază e cea
+  mai citită după titlu; nu o irosi pe o formulă.
+- **Cuvântul-cheie forțat în fiecare subtitlu**, cu topica ruptă („Centrala
+  termica pret — ce trebuie sa stii"). Subtitlul se scrie cum ar tasta omul
+  întrebarea, nu cum arată în Keyword Planner. Un H2 natural se potrivește
+  oricum interogării.
+- **Umplerea până la „numărul de cuvinte".** Nu există prag de lungime pentru
+  ranking. Textul întins ca să atingă 1500 de cuvinte se vede în paragrafele de
+  context care nu spun nimic — și taie exact densitatea de informație care aduce
+  citarea în răspunsurile generative (`geo.md`).
+
+Testul rapid: dacă un paragraf ar putea sta neschimbat într-un articol despre
+alt produs din altă industrie, taie-l.
 
 ### Diacriticele — cea mai frecventă confuzie
 
