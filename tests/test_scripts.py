@@ -357,6 +357,106 @@ class TestVerifica(unittest.TestCase):
         self.assertEqual(cod, 0)
 
 
+class TestHumanVoice(unittest.TestCase):
+
+    def test_cazurile_rele_sunt_semnalate(self):
+        cod, iesire = ruleaza("check-human-voice.py",
+                              str(FIXTURES / "human-voice-rau.md"))
+        self.assertEqual(cod, 1)
+        for categorie in ("filler", "promotional", "metafora_copywriter",
+                          "punchline"):
+            self.assertIn(categorie, iesire)
+        self.assertIn("AI_PATTERN_SCORE=11/30", iesire)
+        self.assertIn("STATUS=REWRITE", iesire)
+
+    def test_textul_curat_trece(self):
+        cod, iesire = ruleaza("check-human-voice.py",
+                              str(FIXTURES / "human-voice-curat.md"))
+        self.assertEqual(cod, 0, iesire)
+        self.assertIn("AI_PATTERN_SCORE=0/30", iesire)
+        self.assertIn("STATUS=PASS", iesire)
+
+    def test_metafora_literara_legitima_nu_e_prinsa(self):
+        cod, iesire = ruleaza("check-human-voice.py",
+                              str(FIXTURES / "human-voice-metafora-legitima.md"))
+        self.assertEqual(cod, 0, iesire)
+        self.assertNotIn("metafora_copywriter", iesire)
+
+    def test_autobiografia_cu_reper_nu_e_prinsa(self):
+        cod, iesire = ruleaza("check-human-voice.py",
+                              str(FIXTURES / "human-voice-autobiografie.md"))
+        self.assertEqual(cod, 0, iesire)
+        self.assertNotIn("autobiografie_nesustinuta", iesire)
+        cod, iesire = ruleaza_stdin("check-human-voice.py",
+                                    "Din experiența mea, munca se învață greu.")
+        self.assertEqual(cod, 1)
+        self.assertIn("autobiografie_nesustinuta", iesire)
+
+    def test_contaminarea_si_placeholderul_sunt_blocere(self):
+        cod, iesire = ruleaza("check-human-voice.py",
+                              str(FIXTURES / "human-voice-contaminare.md"))
+        self.assertEqual(cod, 1)
+        self.assertIn("contaminare", iesire)
+        self.assertIn("placeholder", iesire)
+        self.assertIn("STATUS=REWRITE", iesire)
+        self.assertIn("CONTAMINATION_FOUND=YES", iesire)
+        self.assertIn("HUMAN_VOICE_BLOCKERS=contaminare,placeholder", iesire)
+
+    def test_verifica_pastreaza_scorul_si_adauga_human_voice_json(self):
+        import json
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py", "assistant: [DE COMPLETAT: nume]", "--human-voice", "--json")
+        date = json.loads(iesire)
+        self.assertEqual(cod, 1)
+        self.assertEqual(date["scor_maxim"], 13)
+        self.assertEqual(date["human_voice"]["ai_pattern_maxim"], 30)
+        self.assertEqual(date["human_voice"]["STATUS"], "REWRITE")
+        self.assertEqual(date["human_voice"]["CONTAMINATION_FOUND"], "YES")
+        self.assertEqual(date["human_voice"]["blockers"],
+                         ["contaminare", "placeholder"])
+
+    def test_variantele_din_feedback_sunt_acoperite(self):
+        cazuri = {
+            "Hai să începem.": ("A", "filler"),
+            "Să lămurim un lucru.": ("A", "filler"),
+            "Merită menționat faptul că plouă.": ("A", "filler"),
+            "Ține minte regula.": ("A", "filler"),
+            "În esență, e simplu.": ("F", "concluzie_redundanta"),
+            "Răspunsul se vede singur.": ("F", "concluzie_redundanta"),
+            "Regretele devin scumpe.": ("B", "punchline"),
+            "Answear și Fashiondays au rămas în draft.": ("J", "contaminare"),
+            '{"prompt": "rescrie"}': ("J", "contaminare"),
+            "[PLACEHOLDER]": ("J", "placeholder"),
+            "ACESTA ESTE UN TITLU CAPS.": ("J", "caps"),
+        }
+        for text, (categorie, subcategorie) in cazuri.items():
+            cod, iesire = ruleaza_stdin("check-human-voice.py", text)
+            self.assertEqual(cod, 1, text)
+            self.assertIn(f"|{categorie}|{subcategorie}|", iesire, text)
+
+    def test_pragurile_de_status_si_blocker_override(self):
+        # A (2) + B (3) = 5: PASS.
+        _, iesire = ruleaza_stdin("check-human-voice.py",
+                                  "Hai să. Asta e tot ce contează.")
+        self.assertIn("AI_PATTERN_SCORE=5/30", iesire)
+        self.assertIn("STATUS=PASS", iesire)
+        # A (2) + C (3) + F (3) = 8: EDITED.
+        _, iesire = ruleaza_stdin(
+            "check-human-voice.py",
+            "Hai să. Busola ta arată drumul. Pe scurt, alegi simplu.")
+        self.assertIn("AI_PATTERN_SCORE=8/30", iesire)
+        self.assertIn("STATUS=EDITED", iesire)
+        # J=3 ar intra numeric la PASS, dar contaminarea forțează REWRITE.
+        _, iesire = ruleaza_stdin("check-human-voice.py", "assistant: salut")
+        self.assertIn("AI_PATTERN_SCORE=3/30", iesire)
+        self.assertIn("STATUS=REWRITE", iesire)
+        # CAPS rămâne un semnal J, fără greutate suplimentară.
+        _, iesire = ruleaza_stdin("check-human-voice.py", "ACESTA ESTE UN TITLU CAPS.")
+        self.assertIn("|J|caps|", iesire)
+        self.assertIn("AI_PATTERN_SCORE=0/30", iesire)
+        self.assertIn("STATUS=PASS", iesire)
+
+
 class TestIgienaTiparelor(unittest.TestCase):
     """Tiparele din CATEGORII ruleaza pe text pliat — diacriticele din regex
     sunt ramuri moarte care nu se potrivesc niciodata."""
@@ -603,7 +703,7 @@ class TestSeo(unittest.TestCase):
 class TestContractCLI(unittest.TestCase):
 
     TOATE = ("check-tipare.py", "check-ritm.py", "check-seo.py",
-             "check-modelisme.py", "verifica.py")
+             "check-modelisme.py", "check-human-voice.py", "verifica.py")
 
     def test_help_pe_toate(self):
         for script in self.TOATE:

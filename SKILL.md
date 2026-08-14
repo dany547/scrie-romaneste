@@ -38,6 +38,12 @@ Alege modul din cerință. Dacă nu e clar, e **rescriere**.
   acord, separat de script.
 - **editare** — modificări minime și țintite în fișier. Păstrează intacte
   pasajele care sunt deja bune. Nu rescrie ce nu e stricat.
+- **human-voice** — audit separat pentru reflexe mecanice de voce. Rulează
+  `scripts/verifica.py <fișier> --human-voice`; raportează citatele, scorul
+  `AI_PATTERN_SCORE/30`, `STATUS` (`PASS`/`EDITED`/`REWRITE`) și blocerele.
+  **Nu rescrie** în acest mod.
+  Regulile, excepțiile și schema sunt în
+  `references/limba/human-voice-validator.md`.
 
 Când cererea cere două lucruri deodată („verifică textul și fă-l mai bun",
 „zi-mi ce e prost și repară"), **fă rescrierea și pune raportul după text**, în
@@ -149,7 +155,10 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    inputul verificat. Pentru problemele semnalate fără sugestie, sau ca să
    înțelegi o
    categorie, deschide referința relevantă (`anti-tipare-ai.md`,
-   `tipare-ro.md`, `modelisme.md`).
+   `tipare-ro.md`, `modelisme.md`). După acest audit, rulează separat
+   `scripts/verifica.py <fișier> --human-voice`. Nu amesteca auditul de voce cu
+   editarea: citește fiecare semnal în context, blochează doar garbage-ul,
+   contaminarea și placeholder-ele, iar pentru restul editează minim.
 6. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
    își introduce propriile tipare: tranziții reciclate, sinonime rotite peste
    aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
@@ -168,6 +177,8 @@ scripturilor și cu deciziile luate pe fiecare semnal.
      recitite în context și păstrate sau tăiate deliberat;
    - textul respectă contractul de la pasul 2 — gen, registru, cititor,
      lungime;
+   - auditul separat `--human-voice` nu are blocere; semnalele editoriale au
+     fost păstrate sau tăiate deliberat, nu rescrise mecanic;
    - fiecare paragraf justifică spațiul prin informație, exemplu, cauză,
      consecință, decizie sau efect stilistic intenționat.
 
@@ -175,7 +186,10 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    `references/seo/scoring-checklist.md` rămân utile ca listă de citit, nu ca
    prag numeric.
 8. **LIVRARE** — conform modului ales la pasul 1. Semnalează separat, la final,
-   orice `[DE COMPLETAT: …]` rămas în text.
+   orice `[DE COMPLETAT: …]` rămas în text. Când fluxul e agentic, păstrează
+   ordinea: audit de limbă → audit human-voice → editare minimă → reverificare
+   a ambelor → reviewer independent. Reviewerul validează contextul și
+   excepțiile, nu rescrie pasaje curate.
 
 ## Structura references/
 
@@ -184,6 +198,7 @@ references/
 ├── limba/
 │   ├── anti-tipare-ai.md      # clișee, vocabular, praguri — obligatoriu la scriere
 │   ├── exemple-voce.md        # transformări înainte/după, pe registre — modele pozitive
+│   ├── human-voice-validator.md # audit separat: A–J, scor, blocere, procedură
 │   ├── flux-exemplu.md        # un traseu complet: cerere → contract → draft → raport → livrare
 │   ├── tipare-ro.md           # acord, prepoziții, flexiune, calc sintactic
 │   ├── gramatica-stil.md      # punctuație, ortografie, pleonasm — normă
@@ -287,13 +302,20 @@ care conține o bară.
 - **`verifica.py` — punctul de intrare recomandat.** Rulează toate verificările
   dintr-un singur apel și calculează scorul combinat
   (`scor_automat=X/13`). Flags: `--fara-seo` (text literar), `--scor` (doar
-  scorurile), `--json` (output structurat), `--prag N`. Celelalte scripturi sunt
+  scorurile), `--json` (output structurat), `--prag N`, `--human-voice`
+  (audit separat, cu `AI_PATTERN_SCORE/30`, `STATUS` și blocere). Combinația
+  `--human-voice --json` adaugă obiectul `human_voice` fără să modifice scorul
+  existent /13. Celelalte scripturi sunt
   utile doar pentru verificări punctuale — implicit rulezi `verifica.py`.
 - `check-tipare.py` — clișee, calcuri, artefacte de generare. Potrivirea ignoră
   diacriticele, deci merge și pe text scris fără ele sau cu sedilă. Raportează
   severitate și praguri de densitate. Categoriile `copula_evitata`,
   `referinta_vaga` și `simetrie_de_acoperire` se numără pe familie, nu pe
   expresie, și nu intră în scor — sunt semnale de recitire.
+- `check-human-voice.py` — semnale mecanice prudente pentru filler conversațional,
+  punchline, slogan/promo, metafore de copywriter, autobiografie fără context,
+  CAPS și contaminare. Citește `human-voice-validator.md`; nu îl folosi pentru
+  a decide automat că un text este AI sau pentru a rescrie voce legitimă.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
 - `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),

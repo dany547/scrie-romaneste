@@ -17,6 +17,7 @@ Usage:
     verifica.py <fisier> --scor        # doar scorurile, fără potriviri
     verifica.py <fisier> --json        # output structurat pentru procesare
     verifica.py <fisier> --prag 5      # densitate apariții/1000 cuvinte
+    verifica.py <fisier> --human-voice # audit separat al vocii umane
     verifica.py --help
 
 Exit codes:
@@ -33,11 +34,12 @@ tipare = _comun.incarca_script("check-tipare")
 modelisme = _comun.incarca_script("check-modelisme")
 ritm = _comun.incarca_script("check-ritm")
 seo = _comun.incarca_script("check-seo")
+human_voice = _comun.incarca_script("check-human-voice")
 
 SCOR_MAXIM = tipare.SCOR_MAXIM + 3 + modelisme.SCOR_MAXIM  # 6 + 3 + 4 = 13
 
 
-def analizeaza_tot(text, prag, cu_seo=True):
+def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False):
     """Returnează un dict cu rezultatele tuturor verificărilor."""
     rap_t, dep_t, cuvinte = _comun.scaneaza(
         text, tipare.CATEGORII, tipare.CATEGORII_ORIGINAL, prag,
@@ -62,6 +64,7 @@ def analizeaza_tot(text, prag, cu_seo=True):
         "ritm": {"metrici": a, "semnale": semnale_r, "scor": scor_r, "max": 3,
                  "text_prea_scurt": a["fraze"] < 5},
         "seo": {"probleme": probleme_seo, "verificat": cu_seo},
+        "human_voice": human_voice.analizeaza(text) if cu_human_voice else None,
         "scor_automat": scor_t + scor_m + scor_r,
         "scor_maxim": SCOR_MAXIM,
     }
@@ -70,7 +73,8 @@ def analizeaza_tot(text, prag, cu_seo=True):
 def are_semnale(rez):
     return bool(rez["tipare"]["potriviri"] or rez["tipare"]["depasiri"]
                 or rez["modelisme"]["potriviri"] or rez["modelisme"]["depasiri"]
-                or rez["ritm"]["semnale"] or rez["seo"]["probleme"])
+                or rez["ritm"]["semnale"] or rez["seo"]["probleme"]
+                or (rez["human_voice"] and rez["human_voice"]["potriviri"]))
 
 
 def ca_json(rez):
@@ -99,6 +103,8 @@ def ca_json(rez):
                              for n, i, d in rez["ritm"]["semnale"]]},
         "seo": [{"categorie": c, "detaliu": d, "context": ctx}
                 for c, d, ctx in rez["seo"]["probleme"]],
+        "human_voice": (human_voice.ca_json(rez["human_voice"])
+                        if rez["human_voice"] else None),
         "de_evaluat_manual": ["naturalitate si ritm perceput", "densitate informatie",
                               "fapte si surse (nimic inventat)", "relevanta pentru public"],
     }
@@ -136,6 +142,10 @@ def tipareste(rez):
         for categorie, detaliu, context in rez["seo"]["probleme"]:
             print(f"{categorie}|{detaliu}|{context}")
 
+    if rez["human_voice"]:
+        print("== human voice")
+        human_voice.tipareste(rez["human_voice"])
+
     print("---")
     print(linie_scor(rez))
     print("de evaluat manual: naturalitate, densitate informatie, fapte/surse "
@@ -163,12 +173,15 @@ def main():
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 
-    rez = analizeaza_tot(text, prag, cu_seo="--fara-seo" not in argv)
+    rez = analizeaza_tot(text, prag, cu_seo="--fara-seo" not in argv,
+                         cu_human_voice="--human-voice" in argv)
 
     if "--json" in argv:
         print(json.dumps(ca_json(rez), ensure_ascii=False, indent=1))
     elif "--scor" in argv:
         print(linie_scor(rez))
+        if rez["human_voice"]:
+            human_voice.tipareste(rez["human_voice"], detalii=False)
     elif not are_semnale(rez):
         print(f"0 semnale automate ({rez['cuvinte']} cuvinte) — nu inseamna text "
               "bun, doar ca n-a calcat pe nicio mina automata")
