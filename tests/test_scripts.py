@@ -333,6 +333,25 @@ class TestVerifica(unittest.TestCase):
         self.assertIn("de evaluat manual", iesire,
                       "raportul curat nu trebuie sa incurajeze livrarea imediata")
 
+    def test_ordinea_flag_uri_si_fisier_nu_conteaza(self):
+        cod, iesire = ruleaza("verifica.py", "--fara-seo", "--human-voice",
+                              str(FIXTURES / "bun-articol.md"))
+        self.assertEqual(cod, 0,
+                         f"flag-urile inaintea fisierului au stricat input-ul:\n{iesire}")
+        self.assertIn("AI_PATTERN_SCORE=", iesire)
+
+    def test_prag_inaintea_fisierului_nu_confunda_valoarea_cu_inputul(self):
+        cod, iesire = ruleaza("verifica.py", "--prag", "5",
+                              str(FIXTURES / "bun-articol.md"))
+        self.assertEqual(cod, 0, f"--prag inaintea fisierului a stricat input-ul:\n{iesire}")
+
+    def test_lipsa_fisierului_e_eroare_de_input(self):
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "verifica.py"), "--fara-seo"],
+            capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("eroare", r.stderr)
+
     def test_json_e_valid_si_are_sugestii(self):
         import json
         cod, iesire = ruleaza_stdin_cu_flags("verifica.py", "Asta face sens.", "--json")
@@ -722,6 +741,40 @@ def ruleaza_stdin(script, text):
         [sys.executable, str(SCRIPTS / script), "-"],
         input=text, capture_output=True, text=True)
     return r.returncode, r.stdout
+
+
+class TestMatriceFixtureuri(unittest.TestCase):
+    """Orice script pe orice fixture are voie să dea doar exit 0 sau 1.
+
+    Exit 2 înseamnă eroare de input — adică scriptul nu suportă un fișier
+    valid din propriul corpus de test. Asta e defect, indiferent de verdict.
+    """
+
+    SCRIPTURI = ["check-tipare.py", "check-ritm.py", "check-modelisme.py",
+                 "check-seo.py", "check-human-voice.py"]
+
+    def test_orice_script_ruleaza_pe_orice_fixture(self):
+        erori = []
+        for fisier in sorted(FIXTURES.glob("*.md")):
+            for script in self.SCRIPTURI:
+                cod, iesire = ruleaza(script, str(fisier))
+                if cod >= 2:
+                    erori.append(f"{script} pe {fisier.name}: exit {cod}\n{iesire}")
+            cod, iesire = ruleaza("verifica.py", "--fara-seo", "--human-voice",
+                                  str(fisier))
+            if cod >= 2:
+                erori.append(f"verifica.py --fara-seo --human-voice "
+                             f"pe {fisier.name}: exit {cod}\n{iesire}")
+        self.assertEqual(erori, [],
+                         "scripturile au dat eroare de input pe fixture-uri valide:\n"
+                         + "\n".join(erori))
+
+    def test_fixtureurile_rau_au_nevoie_de_macar_un_semnal(self):
+        """Un fixture numit rau_* trebuie prins de cel puțin un detector."""
+        for fisier in sorted(FIXTURES.glob("rau-*.md")):
+            cod, _ = ruleaza("verifica.py", str(fisier))
+            self.assertEqual(cod, 1,
+                             f"{fisier.name} ar trebui semnalat de macar o verificare")
 
 
 def ruleaza_stdin_cu_flags(script, text, *flags):

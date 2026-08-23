@@ -10,7 +10,7 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 
 ### Key features
 
-- **Three modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits)
+- **Four modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits), `human-voice` (separate audit for mechanical voice reflexes, with a 30-point score and hard blockers)
 - **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
 - **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, syntactic calques, false friends, borrowed-word articulation, diacritic restoration
 - **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
@@ -170,6 +170,7 @@ scrie-romaneste/
 │   ├── limba/
 │   │   ├── anti-tipare-ai.md       # AI clichés with replacements + thresholds
 │   │   ├── exemple-voce.md         # Annotated before/after rewrites, by register
+│   │   ├── human-voice-validator.md # Separate voice audit: A–J categories, score, blockers
 │   │   ├── flux-exemplu.md         # One complete run: request → contract → draft → report → delivery
 │   │   ├── tipare-ro.md            # Romanian-specific failure modes
 │   │   ├── gramatica-stil.md       # Agreement, punctuation, spelling, pleonasms
@@ -189,6 +190,7 @@ scrie-romaneste/
 ├── scripts/
 │   ├── verifica.py                 # Orchestrator: all checks, one call, combined score
 │   ├── check-tipare.py             # AI clichés, calques, generation artefacts
+│   ├── check-human-voice.py        # Conversational filler, punchlines, promo voice, contamination
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
 │   ├── check-modelisme.py          # Etymological pleonasms, anglicisms, paronyms
 │   ├── check-seo.py                # Headings and keyword stuffing
@@ -203,8 +205,10 @@ python3 scripts/verifica.py <file>          # all checks in one pass + combined 
 python3 scripts/verifica.py <file> --json   # structured output for programmatic use
 python3 scripts/verifica.py <file> --scor   # scores only
 python3 scripts/verifica.py <file> --fara-seo  # skip SEO checks (literary text)
+python3 scripts/verifica.py <file> --human-voice  # separate voice audit: AI_PATTERN_SCORE/30, STATUS, blockers
 
 python3 scripts/check-tipare.py <file>      # AI clichés and calques only
+python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure only
@@ -229,6 +233,24 @@ python3 -m unittest discover tests
 ```
 
 ## Version
+
+- **v0.5.3** — Human voice validator. New separate audit (`verifica.py <file>
+  --human-voice`, or `check-human-voice.py` standalone) for mechanical voice
+  reflexes the language checks don't see: conversational filler, punchlines,
+  copywriter metaphors, unsupported autobiography, promotional promises, CAPS,
+  and chat/prompt contamination as hard blockers. Reports
+  `AI_PATTERN_SCORE/30` and a `PASS`/`EDITED`/`REWRITE` status; signals are
+  editorial decisions, not automatic corrections — literary metaphor, colloquial
+  tone and brand slogans are legitimate choices. Rules and procedure in
+  `references/limba/human-voice-validator.md`. Five fixtures and full test
+  coverage; SKILL.md gained a dedicated mode plus a delivery-gate item. On a
+  fully clean result the orchestrator now still prints the voice summary, so an
+  agent running the audit has something to report. Flag order in `verifica.py`
+  no longer matters (`verifica.py --fara-seo file.md` used to fail); missing
+  file is a proper exit-2 error. CI now runs every script against every fixture
+  (exit ≥ 2 fails), asserts clean fixtures stay clean and bad fixtures are
+  caught, plus a stdin smoke test — mirrored by two new test classes in the
+  suite.
 
 - **v0.5.0** — Naturalness over checklist compliance.
 

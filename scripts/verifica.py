@@ -14,6 +14,7 @@ references/*/scoring-checklist.md. Un scor mic nu garantează un text bun.
 Usage:
     verifica.py <fisier_sau_->
     verifica.py <fisier> --fara-seo    # text literar / fără destinație online
+    verifica.py [optiuni] <fisier_sau_->   # ordinea optiuni/fișier nu contează
     verifica.py <fisier> --scor        # doar scorurile, fără potriviri
     verifica.py <fisier> --json        # output structurat pentru procesare
     verifica.py <fisier> --prag 5      # densitate apariții/1000 cuvinte
@@ -158,7 +159,18 @@ def main():
         print(__doc__)
         return 0
 
-    sursa = argv[0]
+    # Fișierul e primul argument pozițional; „-” e stdin chiar dacă începe cu „-”.
+    # Ordinea optiuni/fișier nu contează, dar valoarea lui --prag nu e fișier.
+    sursa = None
+    for i, arg in enumerate(argv):
+        if arg == "--prag" or (i > 0 and argv[i - 1] == "--prag"):
+            continue
+        if arg == "-" or not arg.startswith("-"):
+            sursa = arg
+            break
+    if sursa is None:
+        print("eroare: lipsește fișierul de verificat", file=sys.stderr)
+        return 2
     prag = _comun.PRAG_DENSITATE_IMPLICIT
     if "--prag" in argv:
         try:
@@ -186,7 +198,11 @@ def main():
         print(f"0 semnale automate ({rez['cuvinte']} cuvinte) — nu inseamna text "
               "bun, doar ca n-a calcat pe nicio mina automata")
         print(linie_scor(rez))
-        print("de evaluat manual: naturalitate, densitate informatie, fapte/surse")
+        if rez["human_voice"]:
+            print("== human voice")
+            human_voice.tipareste(rez["human_voice"], detalii=False)
+        else:
+            print("de evaluat manual: naturalitate, densitate informatie, fapte/surse")
     else:
         tipareste(rez)
 

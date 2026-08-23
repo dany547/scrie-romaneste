@@ -24,8 +24,42 @@ jobs:
       - name: Rulează testele
         run: python -m unittest discover -s tests -v
 
-      - name: Verifică scripturile pe propriile fixtures
+      - name: Toate scripturile rulează pe toate fixture-urile (fără eroare de input)
         run: |
-          python scripts/check-tipare.py tests/fixtures/bun-articol.md
-          python scripts/check-ritm.py tests/fixtures/bun-articol.md
-          python scripts/check-seo.py tests/fixtures/bun-articol.md
+          status=0
+          for f in tests/fixtures/*.md; do
+            for s in verifica check-tipare check-ritm check-modelisme check-seo check-human-voice; do
+              python3 scripts/$s.py "$f" >/dev/null 2>&1
+              code=$?
+              # 0 = curat, 1 = semnale găsite (rezultat valid); >=2 = eroare reală
+              if [ "$code" -ge 2 ]; then
+                echo "EROARE ($code): $s.py pe $f"
+                status=1
+              fi
+            done
+          done
+          exit $status
+
+      - name: Fixture-ile curate rămân curate
+        run: |
+          python3 scripts/verifica.py tests/fixtures/bun-articol.md
+          python3 scripts/verifica.py tests/fixtures/human-voice-curat.md --fara-seo --human-voice
+          python3 scripts/verifica.py tests/fixtures/human-voice-autobiografie.md --fara-seo --human-voice
+          python3 scripts/verifica.py tests/fixtures/human-voice-metafora-legitima.md --fara-seo --human-voice
+          python3 scripts/verifica.py tests/fixtures/legit-literar.md --fara-seo --human-voice
+          python3 scripts/check-tipare.py tests/fixtures/bun-articol.md
+          python3 scripts/check-ritm.py tests/fixtures/bun-articol.md
+          python3 scripts/check-seo.py tests/fixtures/bun-articol.md
+
+      - name: Fixture-ile rele sunt prinse
+        run: |
+          python3 scripts/verifica.py tests/fixtures/rau-cu-diacritice.md
+          python3 scripts/verifica.py tests/fixtures/rau-fara-diacritice.md
+          python3 scripts/verifica.py tests/fixtures/rau-sedila.md
+          python3 scripts/verifica.py tests/fixtures/human-voice-rau.md --human-voice
+          python3 scripts/verifica.py tests/fixtures/human-voice-contaminare.md --human-voice
+
+      - name: Text pe stdin (cazul obișnuit al agentului)
+        run: |
+          echo "Text scurt de probă, cu diacritice corecte." | \
+            python3 scripts/verifica.py --fara-seo --human-voice -
