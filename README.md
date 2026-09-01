@@ -17,6 +17,7 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 - **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
 - **Writing techniques** — rhythm, conciseness, structure, audience calibration
 - **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search
+- **Title craft and article flow** — titles with a concrete promise and a precision element, not labels or tabloid clickbait; openings that skip the warmup; section rhythm that isn't a five-H2 template
 - **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker
 
 ## Installation
@@ -180,6 +181,8 @@ scrie-romaneste/
 │   └── seo/                        # Split by topic so agents load only what a task needs
 │       ├── core.md                 # Technical, on-page, content, Romanian-specific
 │       ├── grounding.md            # Business data that must never be invented
+│       ├── titluri.md              # Titles, H1, subheads, meta — not labels
+│       ├── flux-articol.md         # Opening, section rhythm, ending, original perspective
 │       ├── geo.md                  # Generative Engine Optimization (AI search)
 │       ├── schema.md               # JSON-LD / structured data
 │       ├── ecommerce.md            # Product and category pages
@@ -211,7 +214,7 @@ python3 scripts/check-tipare.py <file>      # AI clichés and calques only
 python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
-python3 scripts/check-seo.py <file>         # SEO structure only
+python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
 ```
 
 Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.
@@ -233,6 +236,17 @@ python3 -m unittest discover tests
 ```
 
 ## Version
+
+- **v0.6.0** — Title craft and organic article flow. New `titluri.md` (anatomy of
+  a title that earns the click: subject, promise, precision, angle — not a label
+  and not tabloid clickbait) and `flux-articol.md` (opening without warmup,
+  uneven section rhythm, original perspective asked at CONTEXT, ending that is
+  not a summary). Both load globally for online content, not only on the blog
+  row. `check-seo.py` now reports severity like the other checkers (still no
+  contribution to `scor_automat` /13) and flags title register: clickbait,
+  agency template ("Ghidul suprem", "Tot ce trebuie să știi"), label titles,
+  overlong titles, flat H2s. New fixture `rau-titlu.md`; SKILL.md gained two
+  critical-rule bullets, a delivery-gate item, and routing for the new files.
 
 - **v0.5.3** — Human voice validator. New separate audit (`verifica.py <file>
   --human-voice`, or `check-human-voice.py` standalone) for mechanical voice

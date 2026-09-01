@@ -102,8 +102,8 @@ def ca_json(rez):
                              if k != "min_max"},
                  "semnale": [{"nume": n, "incredere": i, "detaliu": d}
                              for n, i, d in rez["ritm"]["semnale"]]},
-        "seo": [{"categorie": c, "detaliu": d, "context": ctx}
-                for c, d, ctx in rez["seo"]["probleme"]],
+        "seo": [{"severitate": s, "categorie": c, "detaliu": d, "context": ctx}
+                for s, c, d, ctx in rez["seo"]["probleme"]],
         "human_voice": (human_voice.ca_json(rez["human_voice"])
                         if rez["human_voice"] else None),
         "de_evaluat_manual": ["naturalitate si ritm perceput", "densitate informatie",
@@ -140,8 +140,8 @@ def tipareste(rez):
 
     if rez["seo"]["probleme"]:
         print("== seo")
-        for categorie, detaliu, context in rez["seo"]["probleme"]:
-            print(f"{categorie}|{detaliu}|{context}")
+        for severitate, categorie, detaliu, context in rez["seo"]["probleme"]:
+            print(f"{severitate}|{categorie}|{detaliu}|{context}")
 
     if rez["human_voice"]:
         print("== human voice")

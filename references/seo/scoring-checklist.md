@@ -43,6 +43,18 @@ SEO. Pentru text pur literar sări peste tot fișierul.
    datele reale lipsesc, textul rămâne mai sărac și se marchează
    `[DE COMPLETAT: …]` — vezi `grounding.md`.
 
+## 3. Titlu, subtitluri, deschidere și final
+
+   Titlul are o promisiune concretă și corpul o plătește. Nu e etichetă („Centrale
+   termice pe gaz") și nu e clickbait de tabloid. Subtitlurile citite în șir spun
+   povestea articolului, nu cuprinsul unui manual. Deschiderea nu e încălzire —
+   promisiunea titlului se atinge în primele propoziții. Finalul nu e rezumat și
+   nu e formulă de politețe. Există cel puțin o propoziție care nu putea fi
+   scrisă de altcineva.
+
+   Detalii: `titluri.md`, `flux-articol.md`. Intrare mecanică, grosieră:
+   `scripts/check-seo.py` (clickbait, șablon, etichetă, subtitluri plate).
+
 ## Blocante
 
 Date de business inventate — nume, adrese, prețuri, autori, statistici proprii — opresc

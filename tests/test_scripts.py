@@ -369,6 +369,23 @@ class TestVerifica(unittest.TestCase):
         cod_fara, iesire_fara = ruleaza_stdin_cu_flags("verifica.py", text, "--fara-seo")
         self.assertNotIn("heading|", iesire_fara)
 
+    def test_fara_seo_sare_si_verificarile_de_titlu(self):
+        text = "# Ghidul suprem pentru centrale termice\n\nUn paragraf."
+        _, iesire_cu = ruleaza_stdin("verifica.py", text)
+        self.assertIn("titlu_sablon", iesire_cu)
+        _, iesire_fara = ruleaza_stdin_cu_flags("verifica.py", text, "--fara-seo")
+        self.assertNotIn("titlu_sablon", iesire_fara)
+
+    def test_json_seo_are_severitate(self):
+        import json
+        text = "# Unu\n\ntext\n\n# Doi\n\ntext"
+        cod, iesire = ruleaza_stdin_cu_flags("verifica.py", text, "--json")
+        date = json.loads(iesire)
+        self.assertEqual(cod, 1)
+        self.assertTrue(date["seo"])
+        self.assertIn("severitate", date["seo"][0])
+        self.assertEqual(date["seo"][0]["severitate"], "important")
+
     def test_scor_compact(self):
         cod, iesire = ruleaza_stdin_cu_flags(
             "verifica.py", "Un text scurt si cuminte despre nimic.", "--scor")
@@ -510,7 +527,11 @@ class TestIgienaTiparelor(unittest.TestCase):
 
 class TestDriftGuard(unittest.TestCase):
     """Expresiile interzise promise in SKILL.md trebuie sa fie prinse de
-    check-tipare.py — altfel documentatia si scriptul au divergat."""
+    detectorul potrivit — altfel documentatia si scriptul au divergat.
+
+    Corpul trece prin check-tipare.py. Titlurile-șablon („ghidul suprem",
+    „tot ce trebuie să știi") sunt prinse de check-seo.py, și doar în titlu.
+    """
 
     EXPRESII = [
         "În concluzie, asta e tot.",
@@ -523,11 +544,25 @@ class TestDriftGuard(unittest.TestCase):
         "Mai mult decât atât, e ieftin.",
     ]
 
+    # Titlurile-șablon promise la Interzis sunt prinse de titlu_sablon,
+    # doar dacă apar în titlu — nu în corp.
+    EXPRESII_TITLU = [
+        "# Ghidul suprem pentru centrale termice\n\nUn paragraf despre montaj.",
+        "# Tot ce trebuie să știi despre pompe de căldură\n\nUn paragraf despre montaj.",
+    ]
+
     def test_expresiile_din_skill_sunt_acoperite(self):
         for text in self.EXPRESII:
             cod, iesire = ruleaza_stdin("check-tipare.py", text)
             self.assertEqual(
                 cod, 1, f"expresie interzisa neprinsă: {text!r}\n{iesire}")
+
+    def test_titlurile_sablon_din_skill_sunt_acoperite(self):
+        for text in self.EXPRESII_TITLU:
+            cod, iesire = ruleaza_stdin("check-seo.py", text)
+            self.assertEqual(
+                cod, 1, f"titlu-șablon neprins: {text!r}\n{iesire}")
+            self.assertIn("titlu_sablon", iesire, text)
 
 
 class TestGenuriLegitime(unittest.TestCase):
@@ -717,6 +752,96 @@ class TestSeo(unittest.TestCase):
         text = "<h1>Unu</h1><p>text</p><h3>Trei</h3><p>text</p>"
         cod, iesire = ruleaza_stdin("check-seo.py", text)
         self.assertIn("salt H1->H3", iesire)
+
+    def test_titlu_clickbait(self):
+        text = "# Nu-ți vine să crezi ce a urmat la montaj\n\nUn paragraf.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_clickbait", iesire)
+
+    def test_titlu_clickbait_semne_de_exclamare(self):
+        text = "# Centrală termică la bloc, acum!!\n\nUn paragraf.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_clickbait", iesire)
+
+    def test_titlu_clickbait_cuvant_caps(self):
+        text = "# ATENȚIE la montajul centralei pe gaz\n\nUn paragraf.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_clickbait", iesire)
+
+    def test_titlu_bun_nu_e_clickbait(self):
+        text = ("# Cum alegi o centrală termică pentru un apartament de 60 mp"
+                "\n\nUn paragraf despre montaj.\n")
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertNotIn("titlu_clickbait", iesire, iesire)
+        self.assertNotIn("titlu_sablon", iesire, iesire)
+        self.assertNotIn("titlu_eticheta", iesire, iesire)
+        self.assertNotIn("titlu_lung", iesire, iesire)
+
+    def test_titlu_sablon(self):
+        text = "# Ghidul suprem pentru centrale termice pe gaz\n\nUn paragraf.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_sablon", iesire)
+
+    def test_titlu_sablon_top(self):
+        text = "# Top 10 cele mai bune centrale termice\n\nUn paragraf.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_sablon", iesire)
+
+    def test_sablon_in_corp_nu_e_semnalat(self):
+        """Șablonul e problemă de titlu, nu de corp."""
+        text = ("# Cum alegi o centrală termică pentru un apartament de 60 mp"
+                "\n\nNu e ghidul suprem și nici tot ce trebuie să știi.\n")
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertNotIn("titlu_sablon", iesire, iesire)
+
+    def test_titlu_lung(self):
+        lung = "Cum alegi o centrală termică în 2026 pentru un apartament mic de 60 mp"
+        self.assertGreater(len(lung), 65)
+        text = f"# {lung}\n\nUn paragraf.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_lung", iesire)
+
+    def test_titlu_eticheta(self):
+        text = "# Centrale termice\n\nUn paragraf despre montaj.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_eticheta", iesire)
+
+    def test_subtitluri_plate(self):
+        text = ("# Cum alegi o centrală termică pentru un apartament de 60 mp\n\n"
+                "Intro.\n\n## Beneficii\n\ntext\n\n## Caracteristici\n\n"
+                "text\n\n## Preț\n\ntext\n")
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("subtitluri_plate", iesire)
+
+    def test_subtitluri_normale_nu_sunt_semnalate(self):
+        text = ("# Cum alegi o centrală termică pentru un apartament de 60 mp\n\n"
+                "Intro.\n\n## Ce costă o centrală de 24 kW la bloc\n\ntext\n\n"
+                "## Dacă stai la casă, racordul decide\n\ntext\n\n"
+                "## Ce se strică în anul trei de funcționare\n\ntext\n")
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertNotIn("subtitluri_plate", iesire, iesire)
+
+    def test_fara_titlu_sare_verificarile_de_titlu(self):
+        text = "Un paragraf fără heading și fără frontmatter.\n"
+        cod, iesire = ruleaza_stdin("check-seo.py", text)
+        self.assertNotIn("titlu_", iesire, iesire)
+
+    def test_fixture_rau_titlu(self):
+        cod, iesire = ruleaza("check-seo.py", str(FIXTURES / "rau-titlu.md"))
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_clickbait", iesire)
+        self.assertIn("titlu_sablon", iesire)
+        self.assertIn("subtitluri_plate", iesire)
+        self.assertIn("important|", iesire)
+        self.assertIn("minor|", iesire)
 
 
 class TestContractCLI(unittest.TestCase):

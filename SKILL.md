@@ -91,6 +91,9 @@ praguri):
 - Abuz de simboluri: emoji decorative, liste cu „-" în locul prozei, liniuța ca
   paranteză improvizată, bold/italic dese — toate cu prag de abuz, nu interzicere
   absolută (`references/limba/anti-tipare-ai.md` §I).
+- Clickbait de tabloid și titlul-șablon de agenție: „nu-ți vine să crezi",
+  „Ghidul suprem pentru X", „Tot ce trebuie să știi despre X"
+  (`references/seo/titluri.md`).
 
 **Obligatoriu**:
 - Diateza activă în locul pasivului birocratic (`references/limba/gramatica-stil.md` §4).
@@ -100,6 +103,10 @@ praguri):
   datelor de business — nume, adrese, telefoane, prețuri, autori: dacă nu le ai
   confirmate, cere-le sau lasă `[DE COMPLETAT: …]`.
 - Diacritice cu virgulă (`ș`, `ț`), nu cu sedilă (`ş`, `ţ`).
+- Titlul are o promisiune concretă și un element de precizie, nu e etichetă
+  (`references/seo/titluri.md`).
+- Deschiderea intră direct în subiect: fără încălzire, iar promisiunea titlului
+  e onorată în primele propoziții (`references/seo/flux-articol.md`).
 
 **Regulile de mai sus sunt suficiente ca să scrii un text bun.** Fișierele din
 `references/` adaugă praguri, excepții și cazuri de graniță — le deschizi când
@@ -122,8 +129,9 @@ scripturilor și cu deciziile luate pe fiecare semnal.
      detectează, nu previne) și, dacă textul trebuie să sune viu, nu doar
      curat, `references/limba/exemple-voce.md` (transformări înainte/după).
      Dacă textul are destinație online/comercială, alege din `references/seo/`
-     după tabelul de rutare de mai jos; dacă e text pur literar, sari peste
-     partea SEO și protejează repetiția intenționată, ritmul și dialogul.
+     după tabelul de rutare de mai jos; `titluri.md` se încarcă odată cu
+     `core.md`. Dacă e text pur literar, sari peste partea SEO și protejează
+     repetiția intenționată, ritmul și dialogul.
 2. **CONTRACT** — înainte de a scrie, stabilește intern (nu în livrare):
    scopul textului și ce vrei să facă cititorul; cine e cititorul concret și
    cât știe deja; canalul și genul (email, pagină de produs, articol,
@@ -179,6 +187,9 @@ scripturilor și cu deciziile luate pe fiecare semnal.
      lungime;
    - auditul separat `--human-voice` nu are blocere; semnalele editoriale au
      fost păstrate sau tăiate deliberat, nu rescrise mecanic;
+   - dacă textul e de citit cap-coadă online: titlul promite ceva concret și
+     corpul îl plătește; deschiderea nu e încălzire; subtitlurile citite în
+     șir spun povestea articolului;
    - fiecare paragraf justifică spațiul prin informație, exemplu, cauză,
      consecință, decizie sau efect stilistic intenționat.
 
@@ -208,6 +219,8 @@ references/
 └── seo/
     ├── core.md                # tehnic, on-page, conținut, specific română
     ├── grounding.md           # date care nu se inventă + salvarea lor
+    ├── titluri.md             # titlu, H1, subtitluri, meta — nu etichete
+    ├── flux-articol.md        # deschidere, ritm, final, perspectiva proprie
     ├── geo.md                 # optimizare pentru AI search
     ├── schema.md              # JSON-LD / structured data
     ├── ecommerce.md           # pagini de produs și categorie
@@ -218,12 +231,13 @@ references/
 ```
 
 Rutare SEO — încarcă doar ce cere task-ul (plus `grounding.md` la orice conținut
-comercial):
+comercial, `titluri.md` la orice conținut cu titlu vizibil și `flux-articol.md`
+la orice text de citit cap-coadă):
 
 | Task | Fișiere |
 |---|---|
-| articol de blog | `core.md`, `blog-keyword.md`, `geo.md` |
-| pagină de produs/categorie | `core.md`, `ecommerce.md` |
+| articol de blog | `core.md`, `blog-keyword.md`, `geo.md`, `titluri.md`, `flux-articol.md` |
+| pagină de produs/categorie | `core.md`, `ecommerce.md`, `titluri.md`, `flux-articol.md` |
 | afacere locală / pagină de contact | `core.md`, `local.md` |
 | schema / date structurate | `schema.md` |
 | audit SEO complet, link building | `core.md`, `avansat.md` |
@@ -292,6 +306,9 @@ prag_depasit|copula_evitata|3 aparitii|densitate
 `scor_automat=X/13` numără penalizări deterministe, nu calitate. 0/13 nu
 înseamnă text bun, înseamnă doar că n-a călcat pe nicio mină automată.
 
+Secțiunea `seo` din raport are și ea severitate (`critic`/`important`/`minor`),
+ca ghid de citire. Nu intră în `scor_automat` — `/13` rămâne neschimbat.
+
 Dacă iei decizii pe baza raportului în loc să-l citești (filtrezi pe severitate,
 numeri categorii, iterezi până la un prag), folosește `--json`. E același
 conținut, structurat — parsarea liniilor cu `|` se strică la primul fragment
@@ -322,7 +339,10 @@ care conține o bară.
   anglicisme, paronime. Paronimele sunt informative: scriptul vede coapariția a
   două cuvinte în aceeași frază, nu confuzia dintre ele.
 - `check-seo.py` — heading-uri (H1 unic, fără sărituri), keyword stuffing,
-  secțiuni prea lungi între heading-uri, diacritice în URL-uri, sedilă.
+  secțiuni prea lungi între heading-uri, diacritice în URL-uri, sedilă,
+  plus registrul titlului (clickbait, șablon, etichetă, lungime, subtitluri
+  plate). Raportează severitate ca restul scripturilor, dar nu contribuie
+  la `scor_automat`.
 
 Sunt instrumente de sprijin, nu verdicte. `check-ritm.py` mai ales: pragurile lui
 vin din corpusuri englezești și dau fals pozitiv pe registru formal. Nu înlocuiesc

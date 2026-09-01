@@ -56,6 +56,7 @@ jobs:
           python3 scripts/verifica.py tests/fixtures/rau-cu-diacritice.md
           python3 scripts/verifica.py tests/fixtures/rau-fara-diacritice.md
           python3 scripts/verifica.py tests/fixtures/rau-sedila.md
+          python3 scripts/verifica.py tests/fixtures/rau-titlu.md
           python3 scripts/verifica.py tests/fixtures/human-voice-rau.md --human-voice
           python3 scripts/verifica.py tests/fixtures/human-voice-contaminare.md --human-voice
 
