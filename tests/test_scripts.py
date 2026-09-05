@@ -137,7 +137,7 @@ class TestTextWrapped(unittest.TestCase):
                 "## Alt subiect\n\n"
                 "Al doilea paragraf incepe — si continua normal mai departe.")
         cod, iesire = ruleaza_stdin("check-tipare.py", text)
-        self.assertNotIn("tipografie_anglicizata", iesire,
+        self.assertNotIn("punctuatie_carja", iesire,
                          f"potrivire peste granita de paragraf:\n{iesire}")
 
     def test_pleonasmul_wrapped_e_prins(self):
@@ -154,6 +154,83 @@ class TestTextWrapped(unittest.TestCase):
         cod, iesire = ruleaza_stdin("check-tipare.py", text)
         self.assertNotIn("simboluri_excesive", iesire,
                          f"marcatori de lista confundati cu liniuta-paranteza:\n{iesire}")
+        self.assertNotIn("punctuatie_carja", iesire,
+                         f"marcatori de lista confundati cu liniuta-conector:\n{iesire}")
+
+
+class TestPunctuatieCarja(unittest.TestCase):
+    """Liniuta ca singur conector de fraza — tic de model, nu semn de punctuatie.
+
+    Detectorul cere litera inainte de spatiu, deci dialogul, marcatorul de lista
+    si intervalul numeric sunt excluse prin constructie, nu prin lista de
+    exceptii. Pragul e propriu tiparului (4.0/1000), pentru ca liniutele cu
+    spatii sunt mult mai rare decat cuvintele.
+    """
+
+    def test_liniuta_conector_repetata_e_semnalata(self):
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "rau-liniuta.md"))
+        self.assertEqual(cod, 1, f"ticul liniutei nu a fost prins:\n{iesire}")
+        self.assertIn("punctuatie_carja", iesire)
+        self.assertIn("prag_depasit|punctuatie_carja", iesire)
+
+    def test_toate_cele_trei_liniute_sunt_prinse(self):
+        """Em-dash, en-dash si cratima cu spatii sunt acelasi tic. En-dash-ul
+        lipsea complet din detectoare inainte de v0.7.0."""
+        for liniuta in ("—", "–", "-"):
+            text = (f"Solutia noastra e buna {liniuta} foarte buna, de fapt.\n"
+                    f"Clientii vin des {liniuta} pentru ca au incredere.\n"
+                    f"Rezultatele se vad rapid {liniuta} in prima luna deja.")
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertIn("punctuatie_carja", iesire,
+                          f"liniuta {liniuta!r} ratata:\n{iesire}")
+
+    def test_dialogul_literar_nu_e_semnalat(self):
+        """Blocant: `—` la inceput de replica e obligatoriu in proza romaneasca."""
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "legit-literar.md"))
+        self.assertNotIn("punctuatie_carja", iesire,
+                         f"dialog literar confundat cu tic de model:\n{iesire}")
+
+    def test_replicile_dese_nu_declanseaza_pragul(self):
+        text = ("Au tacut amandoi o vreme, pana a pornit trenul.\n\n"
+                "— Iar intarzie, a zis femeia.\n\n"
+                "— Iar, a zis barbatul.\n\n"
+                "— Ca intotdeauna, a zis copilul de langa ei.\n\n"
+                "— Asa e in fiecare dimineata, a zis femeia din nou.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("punctuatie_carja", iesire,
+                         f"replici de dialog numarate ca tipar:\n{iesire}")
+
+    def test_intervalul_numeric_nu_e_semnalat(self):
+        text = ("Preturile pornesc de la 4.000 - 7.000 lei pentru montaj.\n"
+                "Termenul de livrare e 10 - 12 zile lucratoare in toata tara.\n"
+                "Garantia tine 24 - 36 de luni, in functie de model si de firma.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("punctuatie_carja", iesire,
+                         f"interval numeric confundat cu liniuta-conector:\n{iesire}")
+
+    def test_liniuta_la_capat_de_rand_e_prinsa(self):
+        """Textul real e wrapped — semnalul nu are voie sa depinda de unde a
+        cazut taierea de rand (vezi TestTextWrapped)."""
+        text = ("Solutia noastra e buna —\nfoarte buna, de fapt, spun clientii.\n"
+                "Rezultatele se vad rapid —\nin prima luna deja se simte.\n"
+                "Echipa lucreaza bine —\nfara sedinte lungi si fara rapoarte.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("punctuatie_carja", iesire,
+                      f"liniuta rupta la capat de rand ratata:\n{iesire}")
+
+    def test_doua_liniute_intr_un_text_bun_raman_tacute(self):
+        """Calibrare: `pereche-dupa.md` e rescrierea-model a repo-ului si
+        foloseste doua linii de pauza la 293 de cuvinte. Daca pragul o
+        semnaleaza, pragul e gresit, nu textul."""
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "pereche-dupa.md"))
+        self.assertNotIn("punctuatie_carja", iesire,
+                         f"rescrierea-model semnalata pentru doua linii de pauza:\n{iesire}")
+
+    def test_nu_intra_in_scorul_automat(self):
+        """Semnal de recitire, nu penalizare — `/13` ramane neschimbat."""
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "rau-liniuta.md"),
+                              "--scor")
+        self.assertIn("scor_automat=0/6", iesire, iesire)
 
 
 class TestRegistruNominal(unittest.TestCase):

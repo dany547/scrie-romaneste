@@ -190,6 +190,15 @@ mare.
 - **Liniuța ca paranteză improvizată**: „text - precizare - continuare" sau „text —
   precizare — continuare" repetat ca tic sintactic în loc de virgulă, paranteză sau frază
   nouă. Prag: `la_aglomerare`.
+- **Liniuța-cârjă, singură**: o singură liniuță pe frază, dar în aproape fiecare frază —
+  ticul cel mai des al textului de model. „Puterea se calculează după suprafață — nu după
+  cât de mare e casa." Nu contează care liniuță: `—` (em-dash), `–` (en-dash) și `-` cu
+  spații în jur sunt același gest, o pauză grafică pusă în locul unei virgule, al unui
+  punct sau al subordonării. Corecția: virgulă, punct sau frază nouă; linia de pauză o
+  singură dată pe paragraf, când chiar întrerupe fraza. Categoria `punctuatie_carja`,
+  prag propriu 4/1000 de cuvinte. **Nu sunt semnal**: linia de dialog („— Iar întârzie, a
+  zis femeia"), marcatorul de listă, intervalul numeric („10 - 12 zile") și cuvântul
+  compus („prim-ministru").
 - **Bold/italic excesiv**: `**text**` / `*text*` pentru accentuare deasă — tipic markdown
   de chat, nepotrivit pentru text publicat. Prag: `la_densitate`.
 

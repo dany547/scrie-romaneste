@@ -237,6 +237,21 @@ python3 -m unittest discover tests
 
 ## Version
 
+- **v0.7.0** — Dash-as-crutch detector. New category `punctuatie_carja` in
+  `check-tipare.py` for the single most common model tic: `—`, `–` or `-` used as
+  the only sentence connector, clause after clause, instead of a comma or a full
+  stop. All three characters count together — the en-dash `–` was previously
+  absent from every pattern — and the old pair-only detector moved into the same
+  category, so the same span is never reported twice. Dialogue lines, list
+  markers (indented ones too), numeric ranges and hyphenated compounds are
+  excluded by construction, not by an exception list; a line-wrapped dash is
+  still caught. The pattern carries its own density threshold (4/1000 words),
+  calibrated so `pereche-dupa.md` — the repo's own model rewrite, two dashes in
+  293 words — stays silent; `_comun.scaneaza` now accepts a numeric threshold per
+  pattern alongside the string ones. The signal is `minor` and stays out of
+  `scor_automat` /13. New fixture `rau-liniuta.md`, eight new tests (dialogue and
+  the model rewrite are blocking cases).
+
 - **v0.6.0** — Title craft and organic article flow. New `titluri.md` (anatomy of
   a title that earns the click: subject, promise, precision, angle — not a label
   and not tabloid clickbait) and `flux-articol.md` (opening without warmup,

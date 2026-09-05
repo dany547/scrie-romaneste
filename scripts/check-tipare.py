@@ -17,11 +17,17 @@ Categoriile `copula_evitata` („reprezintă", „constituie"), `referinta_vaga`
 greșit singur, dar repetiția lor mută textul în registru nominal, respectiv în
 adresarea către toată lumea. Se raportează ca `minor` și nu intră în scor.
 
+Categoria `punctuatie_carja` acoperă liniuța (`—`, `–`, `-`) folosită ca singur
+conector de frază, în locul virgulei sau al punctului. Are prag propriu, mai
+strict decât cel global, și exclude prin construcție dialogul, marcatorul de
+listă și intervalul numeric.
+
 Fiecare tipar are o severitate (critic/important/minor) și un prag:
     mereu          — semnalat la orice apariție
     la_aglomerare  — semnalat la 3+ în același paragraf sau peste densitate
     la_densitate   — semnalat doar peste densitate
     familie        — 3+ apariții ale familiei, plus aglomerare sau densitate
+    <număr>        — densitate proprie tiparului, în apariții/1000 cuvinte
 
 Unde există o corecție canonică, raportul o dă direct după fragment:
     critic|romgleza|L12|...face sens...|→ are sens
@@ -212,6 +218,29 @@ CATEGORII_ORIGINAL = {
     "tipografie_anglicizata": ("minor", [
         (r'"[^"\n]{3,}"', "la_aglomerare", "ghilimele românești: „…”"),
         (r"\b\d+\.\d+\s*(%|la suta|lei|euro)", "mereu", "virgulă zecimală: 3,5"),
+    ]),
+    # Liniuța ca singur conector de frază — ticul cel mai des al textului de
+    # model: o pauză grafică în locul unei virgule, al unui punct sau al
+    # subordonării. Categorie proprie, nu `tipografie_anglicizata`: dedupleaza()
+    # filtrează pe categorie, iar tiparul-pereche de mai jos descrie același
+    # fenomen, deci trebuie să stea alături ca să nu se raporteze de două ori.
+    #
+    # Ce NU e semnal, prin construcție:
+    #   - linia de dialog („— Iar întârzie, a zis femeia") — cere literă înainte
+    #     de spațiu, iar replica începe rândul; vezi tests/fixtures/legit-literar.md;
+    #   - marcatorul de listă, chiar indentat („  - element") — aceeași regulă;
+    #   - intervalul numeric („10 - 12") — cifra dinainte e exclusă din clasă;
+    #   - cuvântul compus („prim-ministru", „show-uri") — nu are spații în jur.
+    # Liniuța poate cădea la capăt de rând („text —\ncontinuare"): textul real e
+    # wrapped, iar semnalul nu are voie să depindă de unde a căzut tăierea.
+    #
+    # Prag propriu, 4.0/1000: liniuțele cu spații sunt mult mai rare decât
+    # cuvintele, deci pragul global de 5.0 le-ar lăsa să treacă. Calibrat ca
+    # tests/fixtures/pereche-dupa.md (rescrierea-model, 2 liniuțe la 293 de
+    # cuvinte) să rămână tăcut — regula „1-2 apariții nu sunt tipar" îl acoperă.
+    "punctuatie_carja": ("minor", [
+        (r"[^\W\d_][ \t\xa0][—–-](?=[ \t\xa0]|\n(?!\s*\n))", 4.0,
+         "virgulă, punct sau frază nouă; linia de pauză o singură dată pe paragraf"),
         (r"\s—\s" + _comun.IN_ACELASI_PARAGRAF + r"{0,80}\s—\s", "la_aglomerare",
          "reformulează fără incidentă între linii de pauză"),
     ]),

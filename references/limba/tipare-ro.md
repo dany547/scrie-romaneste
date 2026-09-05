@@ -263,9 +263,34 @@ clară bate eleganța confuză.
 - Fără majuscule la fiecare cuvânt din titlu — asta e regulă englezească. În
   română, majusculă doar la primul cuvânt și la nume proprii.
 - Linia de pauză nu se pune la fiecare inflexiune. Două perechi în același
-  paragraf înseamnă că frazele trebuie sparte.
+  paragraf înseamnă că frazele trebuie sparte. Pentru liniuța singulară repetată
+  din frază în frază, vezi `punctuatie_carja` mai jos.
 - Virgula nu se pune automat după fiecare conector, și niciodată între subiect și
   predicat, oricât de lung ar fi subiectul.
+
+---
+
+## punctuatie_carja
+
+Liniuța pusă ca singur conector de frază — o pauză grafică în locul unei virgule,
+al unui punct sau al subordonării. Un model o folosește pentru că arată a ritm
+fără să ceară o decizie de sintaxă; efectul, după zece fraze, e o proză care
+gâfâie.
+
+- **Același gest, trei caractere.** `—` (em-dash), `–` (en-dash) și `-` cu spații
+  în jur se numără împreună. En-dash-ul e cel mai des la textul importat din
+  engleză și trece neobservat la corectură.
+- **Corecția** e aproape mereu o virgulă sau un punct: „Puterea se calculează după
+  suprafață — nu după cât de mare e casa" → „Puterea se calculează după suprafață,
+  nu după cât de mare e casa." Linia de pauză rămâne legitimă o dată pe paragraf,
+  când chiar rupe fraza.
+- **Ce nu e tipar**, niciodată: linia de dialog la început de replică („— Iar
+  întârzie, a zis femeia") — obligatorie în proza românească; marcatorul de listă;
+  intervalul numeric scris cu spații („10 - 12 zile"); cuvântul compus
+  („prim-ministru", „show-uri").
+- **Prag:** propriu categoriei, 4 apariții la 1000 de cuvinte, plus regula
+  generală „1-2 apariții nu sunt niciodată tipar". Semnalul e `minor` și nu intră
+  în `scor_automat` — e o invitație la recitire, nu o eroare.
 
 ---
 

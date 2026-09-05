@@ -6,6 +6,11 @@ la_densitate), deduplicare și formatarea raportului pipe-delimited.
 
 Tiparele sunt tupluri (regex, prag) sau (regex, prag, sugestie). Sugestia,
 când există, apare în raport după fragment: `...|→ sugestia`.
+
+Pragul e de obicei un șir („mereu", „la_aglomerare", „la_densitate"), caz în
+care densitatea se compară cu pragul global al rulării. Un prag numeric
+(ex. `4.0`) înseamnă densitate proprie tiparului, pentru semnalele care nu se
+măsoară pe aceeași scară ca restul — vezi `punctuatie_carja` din check-tipare.
 """
 import importlib.util
 import re
@@ -175,6 +180,9 @@ def scaneaza(text, categorii, categorii_original=None,
             raportate.extend(aparitii)
             continue
 
+        # Un prag numeric e densitatea proprie a tiparului; altfel se aplică
+        # pragul global al rulării (`--prag`).
+        prag_efectiv = prag if isinstance(prag, (int, float)) else prag_densitate
         densitate = len(aparitii) * 1000.0 / cuvinte
         pe_paragraf = defaultdict(int)
         for a in aparitii:
@@ -186,7 +194,7 @@ def scaneaza(text, categorii, categorii_original=None,
         # orice densitate la prima potrivire.
         destule = len(aparitii) >= PRAG_AGLOMERARE
 
-        if destule and (densitate >= prag_densitate or aglomerat):
+        if destule and (densitate >= prag_efectiv or aglomerat):
             raportate.extend(aparitii)
             motiv = "aglomerare" if aglomerat else f"densitate={densitate:.1f}"
             depasiri.append((aparitii[0]["categorie"], aparitii[0]["tipar"],
