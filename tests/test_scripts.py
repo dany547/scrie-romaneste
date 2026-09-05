@@ -173,10 +173,10 @@ class TestPunctuatieCarja(unittest.TestCase):
         self.assertIn("punctuatie_carja", iesire)
         self.assertIn("prag_depasit|punctuatie_carja", iesire)
 
-    def test_toate_cele_trei_liniute_sunt_prinse(self):
-        """Em-dash, en-dash si cratima cu spatii sunt acelasi tic. En-dash-ul
-        lipsea complet din detectoare inainte de v0.7.0."""
-        for liniuta in ("—", "–", "-"):
+    def test_em_dash_si_cratima_sunt_prinse_pe_frecventa(self):
+        """Amandoua au intrebuintari legitime, deci se judeca pe prag. En-dash-ul
+        e scos separat, prin regula absoluta — vezi TestLiniutaEngleza."""
+        for liniuta in ("—", "-"):
             text = (f"Solutia noastra e buna {liniuta} foarte buna, de fapt.\n"
                     f"Clientii vin des {liniuta} pentru ca au incredere.\n"
                     f"Rezultatele se vad rapid {liniuta} in prima luna deja.")
@@ -231,6 +231,90 @@ class TestPunctuatieCarja(unittest.TestCase):
         cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "rau-liniuta.md"),
                               "--scor")
         self.assertIn("scor_automat=0/6", iesire, iesire)
+
+
+class TestLiniutaEngleza(unittest.TestCase):
+    """En-dash-ul „–" nu are rol in norma romaneasca: compusele si intervalele
+    cer cratima, incizele cer linie de pauza. Singura regula absoluta din zona
+    de punctuatie — restul liniutelor se judeca pe frecventa."""
+
+    def test_o_singura_aparitie_e_semnalata(self):
+        cod, iesire = ruleaza_stdin("check-tipare.py", "Solutia e buna – foarte buna.")
+        self.assertEqual(cod, 1, f"en-dash ratat:\n{iesire}")
+        self.assertIn("liniuta_engleza", iesire)
+
+    def test_intervalul_cu_en_dash_e_semnalat(self):
+        """Tocmai intervalul e calea pe care intra: conventie engleza, nu RO."""
+        cod, iesire = ruleaza_stdin("check-tipare.py",
+                                    "Programul tine 10–12 zile lucratoare.")
+        self.assertIn("liniuta_engleza", iesire, iesire)
+
+    def test_em_dash_si_cratima_nu_sunt_prinse_de_regula_absoluta(self):
+        """Doar en-dash-ul e interzis mereu; celelalte au prag."""
+        cod, iesire = ruleaza_stdin("check-tipare.py",
+                                    "Solutia e buna — foarte buna, spun clientii.")
+        self.assertNotIn("liniuta_engleza", iesire, iesire)
+
+    def test_nu_intra_in_scorul_automat(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "check-tipare.py", "Solutia e buna – foarte buna.", "--scor")
+        self.assertIn("scor_automat=0/6", iesire, iesire)
+
+
+class TestSimboluriOrnamentale(unittest.TestCase):
+    """Bullet-ul Unicode si simbolurile de referinta („§", „¶", „†") sunt
+    artefacte de fereastra de chat, nu punctuatie romaneasca."""
+
+    def test_bullet_unicode_e_semnalat(self):
+        text = ("Produsul are trei calitati clare care conteaza la munte.\n"
+                "• greutate mica\n• rezistenta la apa\n• pret bun\n"
+                "Restul sunt detalii de catalog fara importanta reala.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("simboluri_excesive", iesire, iesire)
+        self.assertIn("marcator Markdown", iesire, iesire)
+
+    def test_lista_markdown_normala_nu_e_semnalata(self):
+        text = ("Produsul are trei calitati clare care conteaza la munte.\n"
+                "- greutate mica\n- rezistenta la apa\n- pret bun\n"
+                "Restul sunt detalii de catalog fara importanta reala.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("marcator Markdown", iesire, iesire)
+
+    def test_simbolurile_de_referinta_dese_sunt_semnalate(self):
+        text = ("Vezi § 5 si § 7 din regulament, plus § 12 pentru detalii.\n"
+                "Nota † explica termenul, iar ¶ 3 il reia mai jos in text.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("simboluri_excesive", iesire, iesire)
+
+    def test_o_citare_izolata_nu_e_semnalata(self):
+        """Doua trimiteri sunt citare, nu ornament — regula «1-2 nu sunt tipar»."""
+        text = ("Norma germana e stricta: § 5 BGB cere forma scrisa, iar § 126\n"
+                "detaliaza semnatura. In dreptul romanesc, echivalentul e\n"
+                "articolul 1179 din Codul civil, care cere aceleasi conditii.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("simboluri_excesive", iesire, iesire)
+
+    def test_semnele_matematice_nu_sunt_semnalate(self):
+        """«×», «°» si «±» sunt notatie normala, nu ornament."""
+        text = ("Camera are 3 × 4 metri, adica 12 metri patrati utili.\n"
+                "Temperatura urca la 21 °C, cu o abatere de ± 2 grade.\n"
+                "Suprafata totala e de 3 × 4 metri in fiecare dintre camere.")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("simboluri_excesive", iesire, iesire)
+
+    def test_proza_in_bulleturi_unicode_intra_in_proportie(self):
+        """Detectorul de proportie numara si marcatorii Unicode — altfel un text
+        integral bullet-uit cu «•» trecea pe langa el."""
+        linii = [f"• ideea numarul {i} lamurita in cateva cuvinte simple"
+                 for i in range(12)]
+        cod, iesire = ruleaza_stdin("check-tipare.py", "\n".join(linii))
+        self.assertIn("proportie", iesire, iesire)
+
+    def test_genurile_legitime_raman_curate(self):
+        for fixture in ("legit-juridic.md", "legit-academic.md", "legit-literar.md"):
+            cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / fixture))
+            self.assertNotIn("liniuta_engleza", iesire, f"{fixture}: {iesire}")
+            self.assertNotIn("simboluri_excesive", iesire, f"{fixture}: {iesire}")
 
 
 class TestRegistruNominal(unittest.TestCase):

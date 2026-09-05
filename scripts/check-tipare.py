@@ -17,10 +17,11 @@ Categoriile `copula_evitata` („reprezintă", „constituie"), `referinta_vaga`
 greșit singur, dar repetiția lor mută textul în registru nominal, respectiv în
 adresarea către toată lumea. Se raportează ca `minor` și nu intră în scor.
 
-Categoria `punctuatie_carja` acoperă liniuța (`—`, `–`, `-`) folosită ca singur
+Categoria `punctuatie_carja` acoperă liniuța (`—`, `-`) folosită ca singur
 conector de frază, în locul virgulei sau al punctului. Are prag propriu, mai
 strict decât cel global, și exclude prin construcție dialogul, marcatorul de
-listă și intervalul numeric.
+listă și intervalul numeric. En-dash-ul `–` are categoria lui,
+`liniuta_engleza`, cu regulă absolută: în română nu are nicio întrebuințare.
 
 Fiecare tipar are o severitate (critic/important/minor) și un prag:
     mereu          — semnalat la orice apariție
@@ -238,8 +239,19 @@ CATEGORII_ORIGINAL = {
     # cuvintele, deci pragul global de 5.0 le-ar lăsa să treacă. Calibrat ca
     # tests/fixtures/pereche-dupa.md (rescrierea-model, 2 liniuțe la 293 de
     # cuvinte) să rămână tăcut — regula „1-2 apariții nu sunt tipar" îl acoperă.
+    # En-dash-ul nu are niciun rol în norma românească: compusele și intervalele
+    # cer cratimă („prim-ministru", „10-12 zile"), incizele cer linie de pauză
+    # („—"). Ajunge în text pe două căi, amândouă străine: convenția tipografică
+    # engleză pentru intervale și autocorectura editorului. De aceea `mereu`, nu
+    # densitate — spre deosebire de `—` și `-`, care au întrebuințări legitime și
+    # se judecă pe frecvență. Nu intră în `scor_automat`, ca toate categoriile
+    # din tabelul acesta, dar `important` oprește poarta de livrare.
+    "liniuta_engleza": ("important", [
+        (r"–", "mereu",
+         "cratimă în compuse și intervale, linie de pauză „—” în incize"),
+    ]),
     "punctuatie_carja": ("minor", [
-        (r"[^\W\d_][ \t\xa0][—–-](?=[ \t\xa0]|\n(?!\s*\n))", 4.0,
+        (r"[^\W\d_][ \t\xa0][—-](?=[ \t\xa0]|\n(?!\s*\n))", 4.0,
          "virgulă, punct sau frază nouă; linia de pauză o singură dată pe paragraf"),
         (r"\s—\s" + _comun.IN_ACELASI_PARAGRAF + r"{0,80}\s—\s", "la_aglomerare",
          "reformulează fără incidentă între linii de pauză"),
@@ -248,6 +260,18 @@ CATEGORII_ORIGINAL = {
         # emoji decorative — presărate în proză sau ca marcatori de listă
         (r"[\U0001F300-\U0001FAFF☀-➿←-⇿⬀-⯿️]", "la_densitate",
          "taie emoji decorativ, sau păstrează unul singur dacă tonul e colocvial"),
+        # Bullet Unicode ca marcator de listă. Markdown cere „-"; „•" ajunge în
+        # text pentru că modelul scrie ca într-o fereastră de chat, iar la
+        # publicare rămâne un caracter care nu se randează ca listă nicăieri.
+        (r"^[ \t]*[•▪◆‣·][ \t]+\S", "la_aglomerare",
+         "marcator Markdown: „- ” la început de rând"),
+        # Simboluri ornamentale de referință, presărate în proză românească.
+        # `§` e legitim în drept comparat și în citarea legislației germane, dar
+        # norma românească e „art. 5 alin. (2)". De aceea densitate, nu
+        # interdicție: 1-2 trimiteri sunt citare, o mână de simboluri e ornament.
+        # `×`, `°`, `±` lipsesc deliberat — sunt semne matematice normale.
+        (r"[§¶†‡№™‰]", "la_densitate",
+         "scrie în cuvinte: „secțiunea”, „articolul”, „nota”, „la mie”"),
         # liniuța „-" ca paranteză improvizată în frază (nu cuvânt compus).
         # [ \t], nu \s — \s prinde și newline-ul dinaintea unui marcator de
         # listă („text.\n- alt item"), care nu e deloc același tipar.
@@ -267,7 +291,7 @@ CATEGORII_ORIGINAL = {
 # sunt calibrate ca un articol scurt cu o singură listă de 3 puncte (frecvent
 # și legitim în conținut SEO) să nu treacă de prag — vezi tests/test_scripts.py
 # TestTipare.test_lista_scurta_normala_nu_e_semnalata.
-LINIE_LISTA = re.compile(r"^[ \t]*-[ \t]+\S.*$", re.MULTILINE)
+LINIE_LISTA = re.compile(r"^[ \t]*[-•▪◆‣·][ \t]+\S.*$", re.MULTILINE)
 PROPORTIE_LISTA_ABUZATA = 0.65
 MIN_LINII_PT_PROPORTIE = 10
 MIN_CUVINTE_PT_PROPORTIE = 60

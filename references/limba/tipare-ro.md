@@ -277,9 +277,9 @@ al unui punct sau al subordonării. Un model o folosește pentru că arată a ri
 fără să ceară o decizie de sintaxă; efectul, după zece fraze, e o proză care
 gâfâie.
 
-- **Același gest, trei caractere.** `—` (em-dash), `–` (en-dash) și `-` cu spații
-  în jur se numără împreună. En-dash-ul e cel mai des la textul importat din
-  engleză și trece neobservat la corectură.
+- **Același gest, două caractere.** `—` (linia de pauză) și `-` cu spații în jur
+  se numără împreună, fiindcă amândouă au și întrebuințări legitime. En-dash-ul
+  `–` nu: el se scoate întotdeauna, vezi `liniuta_engleza` mai jos.
 - **Corecția** e aproape mereu o virgulă sau un punct: „Puterea se calculează după
   suprafață — nu după cât de mare e casa" → „Puterea se calculează după suprafață,
   nu după cât de mare e casa." Linia de pauză rămâne legitimă o dată pe paragraf,
@@ -291,6 +291,23 @@ gâfâie.
 - **Prag:** propriu categoriei, 4 apariții la 1000 de cuvinte, plus regula
   generală „1-2 apariții nu sunt niciodată tipar". Semnalul e `minor` și nu intră
   în `scor_automat` — e o invitație la recitire, nu o eroare.
+
+---
+
+## liniuta_engleza
+
+`–` (en-dash, U+2013) nu are nicio întrebuințare în norma românească. Singura
+regulă absolută din zona de punctuație: se scoate la orice apariție.
+
+- **Ce se pune în loc:** cratimă în compuse și în intervale — „10-12 zile",
+  „1990-2000", „prim-ministru"; linie de pauză `—` în incize și în dialog.
+- **De unde vine:** convenția tipografică engleză, care rezervă en-dash-ul pentru
+  intervale, și autocorectura editorului, care înlocuiește cratima cu en-dash
+  între cifre. Ambele sunt reflexe de altă limbă, nu decizii de scriitor.
+- **De ce nu are prag**, spre deosebire de `—` și `-`: acelea sunt semne
+  românești folosite prea des, deci se judecă pe frecvență. En-dash-ul e semn
+  străin, deci una singură e deja una în plus. Severitate `important`, în afara
+  `scor_automat`.
 
 ---
 

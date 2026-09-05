@@ -237,6 +237,19 @@ python3 -m unittest discover tests
 
 ## Version
 
+- **v0.7.1** — En-dash banned outright; chat symbols. `–` (U+2013) moves out of
+  the frequency-based `punctuatie_carja` into its own category `liniuta_engleza`,
+  flagged at every single occurrence: Romanian has no use for it — compounds and
+  ranges take a hyphen ("10-12 zile"), asides take the em-dash. It is the one
+  absolute rule in the punctuation area, `important` severity, still outside
+  `scor_automat` /13. `—` and `-` keep their density threshold, since both have
+  legitimate uses. Also new in `simboluri_excesive`: the Unicode bullet as a list
+  marker (`• ▪ ◆ ‣ ·` — Markdown wants `-`), counted by the `liste_abuzate`
+  proportion detector too, and ornamental reference symbols (`§ ¶ † ‡ № ™ ‰`) on
+  a density threshold, so an isolated legal citation stays silent. Math notation
+  (`×`, `°`, `±`) is deliberately excluded. Eleven new tests; legal, academic and
+  literary fixtures are blocking cases.
+
 - **v0.7.0** — Dash-as-crutch detector. New category `punctuatie_carja` in
   `check-tipare.py` for the single most common model tic: `—`, `–` or `-` used as
   the only sentence connector, clause after clause, instead of a comma or a full

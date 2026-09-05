@@ -91,9 +91,13 @@ praguri):
 - Abuz de simboluri: emoji decorative, liste cu „-" în locul prozei, liniuța ca
   paranteză improvizată, bold/italic dese — toate cu prag de abuz, nu interzicere
   absolută (`references/limba/anti-tipare-ai.md` §I).
-- Liniuța-cârjă: `—`, `–` sau `-` ca singur conector, frază după frază, în locul
+- Liniuța-cârjă: `—` sau `-` ca singur conector, frază după frază, în locul
   virgulei sau al punctului. Dialogul și intervalele numerice rămân neatinse
   (`references/limba/tipare-ro.md` `punctuatie_carja`).
+- En-dash `–`: niciodată, în niciun context. Cratimă în compuse și intervale
+  („10-12 zile"), linie de pauză `—` în incize (`liniuta_engleza`).
+- Bullet Unicode „•" în loc de „-", și `§ ¶ † ‡` presărate ca ornament: artefacte
+  de fereastră de chat, nu punctuație românească.
 - Clickbait de tabloid și titlul-șablon de agenție: „nu-ți vine să crezi",
   „Ghidul suprem pentru X", „Tot ce trebuie să știi despre X"
   (`references/seo/titluri.md`).

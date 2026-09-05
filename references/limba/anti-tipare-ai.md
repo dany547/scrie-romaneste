@@ -192,13 +192,25 @@ mare.
   nouă. Prag: `la_aglomerare`.
 - **Liniuța-cârjă, singură**: o singură liniuță pe frază, dar în aproape fiecare frază —
   ticul cel mai des al textului de model. „Puterea se calculează după suprafață — nu după
-  cât de mare e casa." Nu contează care liniuță: `—` (em-dash), `–` (en-dash) și `-` cu
-  spații în jur sunt același gest, o pauză grafică pusă în locul unei virgule, al unui
-  punct sau al subordonării. Corecția: virgulă, punct sau frază nouă; linia de pauză o
-  singură dată pe paragraf, când chiar întrerupe fraza. Categoria `punctuatie_carja`,
-  prag propriu 4/1000 de cuvinte. **Nu sunt semnal**: linia de dialog („— Iar întârzie, a
-  zis femeia"), marcatorul de listă, intervalul numeric („10 - 12 zile") și cuvântul
-  compus („prim-ministru").
+  cât de mare e casa." Și `—` (linia de pauză), și `-` cu spații în jur fac același gest:
+  o pauză grafică pusă în locul unei virgule, al unui punct sau al subordonării. Corecția:
+  virgulă, punct sau frază nouă; linia de pauză o singură dată pe paragraf, când chiar
+  întrerupe fraza. Categoria `punctuatie_carja`, prag propriu 4/1000 de cuvinte. **Nu sunt
+  semnal**: linia de dialog („— Iar întârzie, a zis femeia"), marcatorul de listă,
+  intervalul numeric („10 - 12 zile") și cuvântul compus („prim-ministru").
+- **En-dash-ul `–`**: singura regulă absolută din toată zona de punctuație. În română n-are
+  nicio întrebuințare — compusele și intervalele cer cratimă („10-12 zile"), incizele cer
+  linie de pauză („—"). Intră în text pe două căi, amândouă străine: convenția tipografică
+  engleză pentru intervale și autocorectura editorului. Se scoate de fiecare dată, la orice
+  apariție. Categoria `liniuta_engleza`, severitate `important`.
+- **Bullet Unicode ca marcator de listă**: „• punctul întâi" în loc de „- punctul întâi".
+  Markdown cere cratima; „•" ajunge acolo pentru că textul a fost scris ca într-o fereastră
+  de chat și, la publicare, rămâne un caracter care nu se randează ca listă nicăieri. La fel
+  `▪ ◆ ‣ ·`. Prag: `la_aglomerare`.
+- **Simboluri de referință în proză**: `§ ¶ † ‡ № ™ ‰` presărate ca ornament. `§` e legitim
+  în drept comparat și în citarea legislației germane, dar norma românească e „art. 5
+  alin. (2)", nu „§5"; una-două trimiteri sunt citare, o mână de simboluri e decor. Prag:
+  `la_densitate`. **Nu sunt semnal**: `×`, `°`, `±` — notație matematică normală.
 - **Bold/italic excesiv**: `**text**` / `*text*` pentru accentuare deasă — tipic markdown
   de chat, nepotrivit pentru text publicat. Prag: `la_densitate`.
 
