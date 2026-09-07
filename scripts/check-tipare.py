@@ -131,6 +131,9 @@ CATEGORII = {
         (r"\bun impact (semnificativ|major|considerabil) asupra\b", "la_aglomerare",
          "spune efectul concret, cu cifre dacă le ai"),
         (r"\bse recomanda adoptarea\b", "mereu", "diateza activă: cine, ce să facă"),
+        (r"\bin cadrul\b", "la_densitate", "în — sau spune relația concret"),
+        (r"\bla nivelul\b", "la_densitate", "la / în — sau spune relația concret"),
+        (r"\bfaptul ca\b", "la_densitate", "«că», direct — sau reformulează"),
     ]),
     "cuantificari_vagi": ("important", [
         (r"\bo serie de\b", "la_aglomerare", "cifra exactă sau enumeră"),
@@ -156,6 +159,9 @@ CATEGORII = {
         (r"\binsight-?uri\b", "mereu", "concluzii / observații"),
         (adj("actionabil"), "mereu", "concret / aplicabil"),
         (r"\ba performa\b", "mereu", "a funcționa / a da rezultate"),
+        # calc consacrat de normă ca „de evitat”: „filmul este despre…”
+        (r"\b(e|este|era|sunt|sunteti|fiind|vor fi) despre\b", "mereu",
+         "vorbește despre / are ca subiect / tratează tema"),
     ]),
     "calc_sintactic": ("critic", [
         (r"\ba adresa (o |aceasta |aceste |problema|probleme)", "mereu",
@@ -176,6 +182,32 @@ CATEGORII = {
         (r"\bprogres inainte\b|\bavanseaza inainte\b", "mereu", "progres / avansează"),
         (r"\bmijloace mass-?media\b", "mereu", "mass-media"),
         (r"\baniversarea a \d+ ani\b", "mereu", "împlinirea a N ani / aniversarea"),
+    ]),
+    # Forme contrazise explicit de norma academică — nu ezitări de uz, ci
+    # erori cu formă corectă unică. Detalii și explicații:
+    # references/limba/gramatica-stil.md §3.9.
+    "forme_nonnormative": ("important", [
+        (r"\bvroia(m|i|ti|u)?\b", "mereu", "voiam, voiai, voia…"),
+        (r"\bprecede\b|\bsuccede\b", "mereu", "precedă / succedă; a preceda / a succeda"),
+        (r"\b(ar|a) (place|displace)\b", "mereu", "plăcea / displăcea"),
+        (r"\bse merita\b", "mereu", "merită"),
+        (r"\bde dinainte\b", "mereu", "dinainte / dinaintea"),
+        (r"\bnici (un|o)\b", "mereu", "niciun / nicio (într-un cuvânt)"),
+    ]),
+    # Acordul adjectivului pronominal cu substantivul-număr (feminin):
+    # „aceste milioane”, „câteva sute” — nu „*acești milioane”.
+    "acord_numerale": ("important", [
+        (r"\b(acesti|aceia|cativa|multi)\s+(milioane|miliarde|zeci|sute|mii)\b",
+         "mereu", "acord cu substantivul-număr: aceste milioane, câteva sute"),
+    ]),
+    # Numeralele ≥ 20 cer «de» înaintea substantivului: „treizeci de ani”.
+    # Numerele scrise în cifre au detector propriu mai jos (cu anii exclus);
+    # cele scrise în cuvinte se prind aici, pe sintaxă.
+    "numeral_fara_de": ("important", [
+        (r"\b[a-z]+zeci\s+(?!de\b|si\b)[a-z]+\b", "mereu",
+         "adaugă «de»: treizeci de ani"),
+        (r"\b(sute|mii)\s+(?!de\b|si\b)[a-z]+\b", "mereu",
+         "adaugă «de»: sute de oameni"),
     ]),
     "repetitie_mascata": ("minor", [
         (r"\bclar si usor de inteles\b", "mereu", "clar"),
@@ -370,6 +402,47 @@ FAMILII = {
 
 MIN_APARITII_FAMILIE = 3
 
+# Numerale scrise în cifre, urmate direct de substantiv. Analiza valorii
+# (ani exclus, lunile și conectorii exceptați) nu se reduce la un regex, de
+# aceea e detector, nu tipar. Regula normei: numeralele ≥ 20 cer «de» înaintea
+# substantivului; sub 20, substantivul urmează direct.
+NUMERAL_CIFRE = re.compile(r"\b(\d{1,3}(?:[. ]\d{3})+|\d{2,4})\s+([a-z]+)\b")
+LUNI = {"ianuarie", "februarie", "martie", "aprilie", "mai", "iunie", "iulie",
+        "august", "septembrie", "octombrie", "noiembrie", "decembrie"}
+EXCEPTII_NUMERAL = {"de", "sau", "ori", "si", "respectiv", "mai", "pana",
+                    "la", "in", "cu", "pe", "din", "dintre", "prin", "spre",
+                    "catre", "iar", "ca", "ce", "nu", "a"}
+
+
+def detecteaza_numerale_fara_de(text):
+    """Detector extra pentru `_comun.scaneaza` — vezi contractul acolo."""
+    pliat = _comun.pliaza(unicodedata.normalize("NFC", text))
+    gasituri = []
+    for m in NUMERAL_CIFRE.finditer(pliat):
+        valoare = int(m.group(1).replace(".", "").replace(" ", ""))
+        if valoare < 20 or 1900 <= valoare <= 2100:
+            continue  # sub prag sau an de calendar („în 1990 românii…”)
+        cuvant = m.group(2)
+        if cuvant in EXCEPTII_NUMERAL or cuvant in LUNI:
+            continue
+        # Inițială mare în original = nume propriu / siglă („20 București”): tăcere.
+        if text[m.start(2)].isupper():
+            continue
+        start = max(0, m.start() - _comun.CONTEXT_CHARS)
+        end = min(len(text), m.end() + _comun.CONTEXT_CHARS)
+        gasituri.append({
+            "categorie": "numeral_fara_de",
+            "severitate": "important",
+            "prag": "mereu",
+            "tipar": "numerale_fara_de",
+            "sugestie": "adaugă «de»: 1.500 de cazuri, treizeci de ani",
+            "offset": m.start(),
+            "sfarsit": m.end(),
+            "linie": text.count("\n", 0, m.start()) + 1,
+            "fragment": " ".join(text[start:end].split()),
+        })
+    return gasituri, None
+
 
 def _detector_familie(categorie):
     tipare, sugestie = FAMILII[categorie]
@@ -415,7 +488,7 @@ def _detector_familie(categorie):
     return detecteaza
 
 
-DETECTOARE_EXTRA = [detecteaza_liste_abuzate] + [
+DETECTOARE_EXTRA = [detecteaza_liste_abuzate, detecteaza_numerale_fara_de] + [
     _detector_familie(c) for c in FAMILII]
 
 

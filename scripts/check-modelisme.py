@@ -128,6 +128,32 @@ CATEGORII = {
         (r"\bse saruta\b" + CTX + r"\breciproc\b", "mereu", "se sărută"),
         (r"\bse casatoresc\b" + CTX + r"\bimpreuna\b", "mereu", "se căsătoresc"),
     ]),
+    # Pleonasme lexicale de funcție gramaticală și de limbaj comercial: perechi
+    # de conectori/adverbe cu sens identic și sintagme din anunțuri în care un
+    # termen conține deja sensul celuilalt.
+    "pleonasm_lexical": ("important", [
+        (r"\bdar insa\b", "mereu", "«dar» sau «însă»"),
+        (r"\bdecat numai\b", "mereu", "«decât» sau «numai»"),
+        (r"\bprefer(a|ez|am|ati|a)?\b" + CTX + r"\bmai bine\b", "mereu", "preferă"),
+        (r"\bmentine\b" + CTX + r"\bin continuare\b", "mereu", "menține"),
+        # verbe de mișcare + «înapoi»: direcția e deja în verb
+        (r"\b(intors|intoarsa|returnata?|revenit|reintors)\b" + CTX + r"\binapoi\b",
+         "mereu", "fără «înapoi»: întors / returnat / revenit"),
+        # adjectivul în -bil arată deja posibilitatea
+        (r"\b(cu putinta|posibila?|posibile)\b" + CTX + r"\b[a-z]+bil(a|e|ului|ilor|i)?\b",
+         "mereu", "taie «cu putință/posibil» — -bil arată deja posibilitatea"),
+        # limbaj comercial — erori întâlnite mai ales în anunțuri, dar eroare
+        # de registru neutru, nu specifică reclamei
+        (r"\bnou(a|e)?\s+inovat\w*\b", "mereu", "o inovație / o noutate"),
+        (r"\bcadou\s+gratuit\b", "mereu", "cadou"),
+    ]),
+    "accentuare_redundanta": ("minor", [
+        # «mai» și «încă» adaugă ambele ideea de continuare/persistență;
+        # „încă mai” colocvial e acceptabil, deci recitire, nu eroare
+        (r"\bmai\b[^.!?\n]{0,60}?\binca\b|\binca\b[^.!?\n]{0,60}?\bmai\b",
+         "la_densitate", "păstrează unul singur: «mai» sau «încă»"),
+        (r"\bbonus\s+gratuit\b", "mereu", "bonus / gratuit"),
+    ]),
     "anglicism": ("minor", [
         (r"\bboy-?band\b", "la_densitate"),
         (r"\bchart-?uri\b", "la_densitate", "topuri / clasamente"),

@@ -19,7 +19,9 @@ Usage:
     verifica.py <fisier> --json        # output structurat pentru procesare
     verifica.py <fisier> --prag 5      # densitate apariții/1000 cuvinte
     verifica.py <fisier> --human-voice # audit separat al vocii umane
-    verifica.py --help
+    verifica.py <fisier> --reclame     # audit de anunț (Google/Meta), pentru
+                                       # fișiere cu etichete H1:/D1:/Text:/Titlu:
+    verifica.py <fisier> --reclame --platform google --brand "Nume" --help
 
 Exit codes:
     0 = curat pe toate verificările
@@ -36,11 +38,13 @@ modelisme = _comun.incarca_script("check-modelisme")
 ritm = _comun.incarca_script("check-ritm")
 seo = _comun.incarca_script("check-seo")
 human_voice = _comun.incarca_script("check-human-voice")
+reclame = _comun.incarca_script("check-reclame")
 
 SCOR_MAXIM = tipare.SCOR_MAXIM + 3 + modelisme.SCOR_MAXIM  # 6 + 3 + 4 = 13
 
 
-def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False):
+def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False,
+                   cu_reclame=False, platforma=None, brand=None):
     """Returnează un dict cu rezultatele tuturor verificărilor."""
     rap_t, dep_t, cuvinte = _comun.scaneaza(
         text, tipare.CATEGORII, tipare.CATEGORII_ORIGINAL, prag,
@@ -66,6 +70,8 @@ def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False):
                  "text_prea_scurt": a["fraze"] < 5},
         "seo": {"probleme": probleme_seo, "verificat": cu_seo},
         "human_voice": human_voice.analizeaza(text) if cu_human_voice else None,
+        "reclame": (reclame.analizeaza(text, platform_forta=platforma,
+                                       brand=brand) if cu_reclame else None),
         "scor_automat": scor_t + scor_m + scor_r,
         "scor_maxim": SCOR_MAXIM,
     }
@@ -75,7 +81,8 @@ def are_semnale(rez):
     return bool(rez["tipare"]["potriviri"] or rez["tipare"]["depasiri"]
                 or rez["modelisme"]["potriviri"] or rez["modelisme"]["depasiri"]
                 or rez["ritm"]["semnale"] or rez["seo"]["probleme"]
-                or (rez["human_voice"] and rez["human_voice"]["potriviri"]))
+                or (rez["human_voice"] and rez["human_voice"]["potriviri"])
+                or (rez["reclame"] and rez["reclame"]["semnale"]))
 
 
 def ca_json(rez):
@@ -106,6 +113,7 @@ def ca_json(rez):
                 for s, c, d, ctx in rez["seo"]["probleme"]],
         "human_voice": (human_voice.ca_json(rez["human_voice"])
                         if rez["human_voice"] else None),
+        "reclame": (rez["reclame"] if rez["reclame"] else None),
         "de_evaluat_manual": ["naturalitate si ritm perceput", "densitate informatie",
                               "fapte si surse (nimic inventat)", "relevanta pentru public"],
     }
@@ -147,6 +155,10 @@ def tipareste(rez):
         print("== human voice")
         human_voice.tipareste(rez["human_voice"])
 
+    if rez["reclame"]:
+        print("== reclame")
+        reclame.tipareste(rez["reclame"])
+
     print("---")
     print(linie_scor(rez))
     print("de evaluat manual: naturalitate, densitate informatie, fapte/surse "
@@ -160,10 +172,12 @@ def main():
         return 0
 
     # Fișierul e primul argument pozițional; „-” e stdin chiar dacă începe cu „-”.
-    # Ordinea optiuni/fișier nu contează, dar valoarea lui --prag nu e fișier.
+    # Ordinea optiuni/fișier nu contează, dar valorile optiunilor cu argument
+    # (--prag, --platform, --brand) nu e fișier.
     sursa = None
+    optiuni_cu_valoare = ("--prag", "--platform", "--brand")
     for i, arg in enumerate(argv):
-        if arg == "--prag" or (i > 0 and argv[i - 1] == "--prag"):
+        if arg in optiuni_cu_valoare or (i > 0 and argv[i - 1] in optiuni_cu_valoare):
             continue
         if arg == "-" or not arg.startswith("-"):
             sursa = arg
@@ -178,6 +192,16 @@ def main():
         except (IndexError, ValueError):
             print("eroare: --prag cere un număr", file=sys.stderr)
             return 2
+    platforma = None
+    if "--platform" in argv:
+        platforma = argv[argv.index("--platform") + 1].lower()
+        if platforma not in ("google", "meta"):
+            print("eroare: --platform acceptă doar google sau meta",
+                  file=sys.stderr)
+            return 2
+    brand = None
+    if "--brand" in argv:
+        brand = argv[argv.index("--brand") + 1]
 
     try:
         text = _comun.citeste_intrare(sursa)
@@ -186,7 +210,9 @@ def main():
         return 2
 
     rez = analizeaza_tot(text, prag, cu_seo="--fara-seo" not in argv,
-                         cu_human_voice="--human-voice" in argv)
+                         cu_human_voice="--human-voice" in argv,
+                         cu_reclame="--reclame" in argv, platforma=platforma,
+                         brand=brand)
 
     if "--json" in argv:
         print(json.dumps(ca_json(rez), ensure_ascii=False, indent=1))
@@ -201,7 +227,10 @@ def main():
         if rez["human_voice"]:
             print("== human voice")
             human_voice.tipareste(rez["human_voice"], detalii=False)
-        else:
+        if rez["reclame"]:
+            print("== reclame")
+            reclame.tipareste(rez["reclame"])
+        if not rez["human_voice"]:
             print("de evaluat manual: naturalitate, densitate informatie, fapte/surse")
     else:
         tipareste(rez)

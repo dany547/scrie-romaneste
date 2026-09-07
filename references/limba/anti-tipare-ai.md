@@ -214,6 +214,43 @@ mare.
 - **Bold/italic excesiv**: `**text**` / `*text*` pentru accentuare deasă — tipic markdown
   de chat, nepotrivit pentru text publicat. Prag: `la_densitate`.
 
+## J. Afirmații goale (redundanță de conținut)
+
+O afirmație e goală când rămâne la fel de adevărată dacă scoți din ea
+subiectul, actorul sau produsul. Nu promite nimic — descrie lumea. E aceeași
+redundanță ca pleonasmul (`modelisme.md`), dar la nivel de propoziție întreagă:
+elemente de exprimare în plus față de conținut, pentru că efectul declarat nu
+depinde de nimeni.
+
+**Testul în 3 întrebări** — aplică-l pe fiecare propoziție care promite ceva
+(text persuasiv: reclame, pagini de produs, landing, postări de vânzare):
+
+1. **Agent** — efectul are agent? Produsul produce efectul, sau descrii doar o
+   rutină / un fapt universal?
+2. **Tautologie** — rămâne la fel de adevărată dacă scoți produsul din
+   propoziție? Atunci nu e promisiune, e o descriere a lumii.
+3. **Motivație** — efectul schimbă vreo decizie a cititorului? „Neted"
+   contează; „te poți pieptăni" nu aduce nimic — oricine se pieptănă.
+
+Orice „nu" → rescrie cu mecanism: actor + mecanism + consecință concretă.
+
+| Goală | Concretă | Ce lipsea |
+|---|---|---|
+| Seara cureți tenul, dimineața îl simți moale. | Balsamul cu acid hialuronic ține apa în ten până dimineața — nu mai trage. | agent + mecanism + consecință |
+| Te pieptănești, părul e neted. | Balsamul descurcă părul umed fără clătire. | efectul „neted" era al pieptănului, nu al produsului |
+| Pielea ta merită tot ce e mai bun. | Trei uleiuri cold-pressed, zero parfum sintetic. | meritismul nu spune nimic despre produs |
+| Îți transformăm afacerea. | Instalăm sistemul într-o zi; echipa ta prelucrează comenzi fără hârtie. | cine, ce, cu ce efect măsurabil |
+
+**Garda de gen:** în text literar, dialog sau expresii fixe, redundanța poate
+fi stil („viața-i viață") — nu tăia automat. Testul se aplică doar propozițiilor
+care *promit* ceva cititorului. În anunț plătit, unde fiecare caracter costă,
+redundanța de conținut nu are licență stilistică.
+
+În textul de reclamă, `scripts/check-reclame.py` (sau `verifica.py --reclame`)
+prinde determinist formele cele mai des întâlnite: perechea temporală fără
+cauză („seara X, dimineața Y") și acțiunea de rutină + rezultat pozitiv fără
+niciun token de produs în propoziție.
+
 ## Verificare rapidă înainte de livrare
 
 1. Caută tranzițiile din tabelul A. Numără-le. Peste trei într-un text scurt,
@@ -227,6 +264,8 @@ mare.
    (`tipare-ro.md`, `artefact_chatbot` și `amprenta_unealta`).
 6. Verifică emoji, liste cu „-" și bold/italic față de proporția de text din jur
    (secțiunea I) — un abuz izolat trece neobservat la citire, dar sare în ochi agregat.
+7. Pe text persuasiv, trece fiecare promisiune prin testul în 3 întrebări din
+   secțiunea J — agent, tautologie, motivație.
 
 Pentru verificarea mecanică: `scripts/check-tipare.py` acoperă tabelele de mai
 sus, iar `scripts/check-ritm.py` măsoară punctul 2.

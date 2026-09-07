@@ -114,14 +114,21 @@
 
 ### 3.1 â/î
 
-- **Scriem cu î** la începutul și sfârșitul cuvântului: „înțelept", „a coborî"
-- **Scriem cu â** în interiorul cuvântului: „mână", „câine", „român"
-- Excepții: „a-ți" (prepoziție + pronume) se scrie cu cratimă
+- **Scriem cu î**: la începutul cuvântului („în", „împreună", „a începe"), la
+  sfârșitul cuvântului („a coborî", „urî"), în compusele al căror al doilea
+  element începe cu î- („bineînțeles") și în derivatele cu prefixe de la baze
+  care încep cu î- („neînțeles", „reînvier(e)", „neînsemnat")
+- **Scriem cu â** în restul pozițiilor din interiorul cuvântului: „mână",
+  „câine", „român", „pâine"
+- Verbul „a fi": „sunt/suntem/sunteți" e forma recomandată; „sînt" rămâne
+  variantă acceptată, dar nu o folosi în text publicat
 
 ### 3.2 S/Ș/T/Ț
 
-- **ș** — alternanță fonetică de la s înainte de i/e: „cafea > cafele", „pas > pași"
-- **ț** — alternanță fonetică de la t înainte de i/e: „noapte > nopți", „cutie > cutii"
+- **ș** — alternanță s → ș în flexiune, înaintea lui i/e moale: „frumos →
+  frumoși", "pas → pași", "obosesc → obosești"
+- **ț** — alternanță t → ț în flexiune: „băiat → băieți", "noapte → nopți",
+  "cânt → cânți"
 - **ce/ci** — grupuri de litere care indică pronunția t + e/i: „ceas", „cireșe"
 - **ge/gi** — grupuri de litere care indică pronunția d + j înainte de e/i: „geantă", „girafă"
 - **che/chi** — pronunția k înainte de e/i: „cheie", „chiar"
@@ -130,10 +137,18 @@
 ### 3.3 Cratima
 
 - Marchează eliziunea (absenția unei vocale): „n-am" (nu + am), „m-a" (mă + a)
-- Marchează forma inversată a verbului: „trecut-au", „afla-mă-voi"
+- Marchează forma inversată a verbului: „trecut-au", "afla-mă-voi"
+- Marchează imperativul + pronumele enclitic: „dă-mi", "spune-ți",
+  „ascultă-l"; la negativ, pronumele rămâne separat: „nu-mi spune",
+  „nu-l asculta"
+- Marchează cliticul de dativ „și-" în acolire: „și-a spus", "și-au luat",
+  „să-și amintească"
 - Marchează substantivele compuse cu prefixoide/sufixoide: „prim-ministru", „redactor-șef"
-- Marchează viitorul popular prescurtat: „oi cânta" = „voi cânta"
-- NOTĂ: NU se pune cratimă între subiect și verb: „El vine" (nu „El- vine")
+- Marchează viitorul popular prescurtat: "oi cânta" = "voi cânta"
+- Numeralele compuse se scriu în cuvinte separate, fără cratime:
+  „douăzeci și trei", "o mie două sute"; aproximările, cu cratimă:
+  „doi-trei copii", "10-12 ore"
+- NOTĂ: NU se pune cratimă între subiect și verb: "El vine" (nu "El- vine")
 
 ### 3.4 Apostroful
 
@@ -157,9 +172,42 @@
 
 ### 3.7 Cuvinte recent împrumutate
 
-- Substantivele neutre primesc desinența de plural -uri:
-  - Legată direct (cele terminate în litere ce se pronunță ca în limba română): „boarduri", „clickuri", „itemuri", „weekenduri"
-  - Legată prin cratimă (cele a căror finală prezintă deosebiri între scriere și pronunțare): „bleu-uri", „service-uri", „party-uri", „story-uri", „show-uri"
+Substantivele neutre primesc desinența de plural -uri:
+- Legată direct (cu y pronunțat [i] și cu finale pronunțate ca în română):
+  „boarduri", "clickuri", "itemuri", "weekenduri", "bodyuri", "hobbyuri",
+  „sprayuri", "whiskyuri"; articolul hotărât, la fel fără cratimă: „bodyul"
+- Legată prin cratimă când finala se pronunță altfel decât se scrie:
+  „bleu-uri", "show-uri", "flash-uri", "chardonnay-uri" (y pronunțat [e]),
+  „service-uri"
+- Siglele și abrevierile iau cratimă: "CD-uri", "VIP-uri"
+
+### 3.8 Numeralele
+
+- Numeralele ≥ 20 cer prepoziția „de" înaintea substantivului: „1.500 de
+  cazuri", "treizeci de ani", "200 de produse"; sub 20, substantivul urmează
+  direct: "cinci cauze", "19 oameni". Detectat de `check-tipare.py`
+  (`numeral_fara_de`)
+- Adjectivul pronominal se acordă cu substantivul-număr (feminin), nu cu
+  determinantul lui: "aceste milioane", "câteva sute de oameni" — nu
+  „*acești milioane", "*câțiva sute". Detectat: `acord_numerale`
+
+### 3.9 Forme nonnormative frecvente
+
+| Greșit | Corect |
+|---|---|
+| vroiam, vroiai, vroia | voiam, voiai, voia |
+| (el) precede / succede; a precede / a succede | precedă / succedă; a preceda / a succeda |
+| mi-ar place | mi-ar plăcea |
+| se merită | merită |
+| de dinainte | dinainte / dinaintea |
+| nici un, nici o | niciun, nicio |
+| Amintim faptul că… (după verbe) | Amintim că… |
+| situația este una gravă | situația este gravă |
+| filmul este despre… | filmul vorbește despre… / are ca subiect… |
+
+Toate sunt detectate de `check-tipare.py` (`forme_nonnormative`, `romgleza`;
+„faptul că" ca semnal `minor` de recitire — în poziție de subiect poate fi
+legitim).
 
 ## 4. Diatezele verbului
 
@@ -174,6 +222,8 @@
 - Subiectul suportă acțiunea: „Autorul **este întrebat** de cititor."
 - Se alcătuiește din verbul „a fi" + participiul verbului de conjugat
 - Complementul de agent indică cine efectuează acțiunea: „Cartea a fost scrisă **de Ion**."
+- Agentul ne-uman se introduce cu „de", nu cu „de către”: „Rezultatele au fost
+  înregistrate **de** documente” — „de către” doar la persoane („de către istorici”)
 - Atunci când verbul e la diateza pasivă, participiul se acordă în gen și număr cu subiectul: „Cartea **a fost citită** rapid."
 - NOTĂ: Diateza pasivă e corectă gramatical dar sună birocratic/traducere. Preferă activul: „echipa a realizat proiectul", nu „proiectul a fost realizat de către echipă."
 - Excepție: diateza pasivă e recomandată când agentul e mai important decât acțiunea: „Opera a fost creată de un artist celebru."

@@ -190,12 +190,16 @@ scrie-romaneste/
 │       ├── local.md                # NAP, Google Business Profile
 │       ├── avansat.md              # Link building, advanced technical, audits
 │       └── scoring-checklist.md    # Pre-delivery SEO/information-density checklist
+│   └── reclame/                    # Paid ads — thin layer over the general rules
+│       ├── platforme.md            # Google/Meta character limits, policies, file format
+│       └── voce.md                 # Promise→proof→CTA, positive models, pointers
 ├── scripts/
 │   ├── verifica.py                 # Orchestrator: all checks, one call, combined score
-│   ├── check-tipare.py             # AI clichés, calques, generation artefacts
+│   ├── check-tipare.py             # AI clichés, calques, generation artefacts, non-normative forms
 │   ├── check-human-voice.py        # Conversational filler, punchlines, promo voice, contamination
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
-│   ├── check-modelisme.py          # Etymological pleonasms, anglicisms, paronyms
+│   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
+│   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing
 │   └── _comun.py                   # Shared scanning engine (not a CLI)
 └── tests/                          # Fixtures + unittest suite (stdlib only)
@@ -209,12 +213,14 @@ python3 scripts/verifica.py <file> --json   # structured output for programmatic
 python3 scripts/verifica.py <file> --scor   # scores only
 python3 scripts/verifica.py <file> --fara-seo  # skip SEO checks (literary text)
 python3 scripts/verifica.py <file> --human-voice  # separate voice audit: AI_PATTERN_SCORE/30, STATUS, blockers
+python3 scripts/verifica.py <file> --reclame [--platform google|meta] [--brand "Nume"]  # ad-copy audit (labeled files only)
 
 python3 scripts/check-tipare.py <file>      # AI clichés and calques only
 python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
+python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, empty claims
 ```
 
 Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.

@@ -382,6 +382,219 @@ class TestRegistruNominal(unittest.TestCase):
                 self.assertNotIn(categorie, iesire, f"{fixture}:\n{iesire}")
 
 
+class TestFormeNonnormative(unittest.TestCase):
+    """Forme contrazise explicit de norma academica si acorduri de numerale
+    frecvent gresite de modelele putin antrenate pe romana."""
+
+    def test_formele_nonnormative_sunt_prinse(self):
+        for text, sugestie in (
+                ("Vroiam să vin, dar am rămas.", "voiam"),
+                ("El precede pe ceilalți.", "precedă"),
+                ("Mi-ar place o cafea.", "plăcea"),
+                ("Se merită efortul.", "merită"),
+                ("Perioada de dinainte de război.", "dinainte"),
+                ("Nici un răspuns nu a venit.", "niciun")):
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertEqual(cod, 1, f"{text!r} nu a fost semnalat")
+            self.assertIn("forme_nonnormative", iesire)
+            self.assertIn(f"→ {sugestie}", iesire)
+
+    def test_formele_corecte_raman_tacute(self):
+        cod, iesire = ruleaza_stdin(
+            "check-tipare.py",
+            "Voiam să vin. El precedă pe ceilalți. Mi-ar plăcea o cafea. "
+            "Merită efortul. Dinaintea războiului. Niciun răspuns.")
+        self.assertEqual(cod, 0, f"forme corecte semnalate:\n{iesire}")
+
+    def test_acordul_cu_substantivul_numar(self):
+        cod, iesire = ruleaza_stdin(
+            "check-tipare.py", "Am primit acești milioane de lei.")
+        self.assertEqual(cod, 1)
+        self.assertIn("acord_numerale", iesire)
+        cod, _ = ruleaza_stdin(
+            "check-tipare.py", "Am primit aceste milioane de lei.")
+        self.assertEqual(cod, 0)
+
+    def test_numarul_fara_de_in_cifre(self):
+        cod, iesire = ruleaza_stdin("check-tipare.py", "Am vizitat 200 muzee.")
+        self.assertEqual(cod, 1)
+        self.assertIn("numeral_fara_de", iesire)
+
+    def test_numerele_legitime_raman_tacute(self):
+        for text in ("Am 20 de ani.", "Pe 30 iunie am plecat.",
+                     "În 1990 românii au votat.", "Am 5 lei.",
+                     "Redus cu 20% din preț.", "Ai 19 șanse."):
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertEqual(cod, 0, f"{text!r} semnalat greșit:\n{iesire}")
+
+
+class TestPleonasmLexical(unittest.TestCase):
+    """Perechi de conectori/adverbe cu sens identic și pleonasmele limbajului
+    comercial — eroare de registru neutru, pe orice tip de text."""
+
+    def test_perechile_duble_sunt_prinse(self):
+        for text, sugestie in (
+                ("Nu vrea, dar însă acceptă.", "«dar» sau «însă»"),
+                ("Nu am decât numai bine de spus.", "«decât» sau «numai»"),
+                ("Preferă mai bine varianta scurtă.", "preferă"),
+                ("Va menține în continuare contactul.", "menține"),
+                ("S-a întors înapoi acasă.", "fără «înapoi»"),
+                ("O nouă inovație ne așteaptă.", "o inovație / o noutate"),
+                ("Primești un cadou gratuit.", "cadou")):
+            cod, iesire = ruleaza_stdin("check-modelisme.py", text)
+            self.assertEqual(cod, 1, f"{text!r} neprins")
+            self.assertIn("pleonasm_lexical", iesire)
+            self.assertIn(f"→ {sugestie}", iesire)
+
+    def test_formele_corecte_raman_tacute(self):
+        cod, iesire = ruleaza_stdin(
+            "check-modelisme.py",
+            "Nu vrea, dar acceptă. Nu am decât bine de spus. Preferă varianta "
+            "scurtă. Va menține contactul. S-a întors acasă. O inovație ne "
+            "așteaptă. Primești un cadou.")
+        self.assertEqual(cod, 0, f"text curat semnalat:\n{iesire}")
+
+    def test_mai_inca_e_recitire_minor(self):
+        """La 3+ aparitii semnalul iese, dar ca `minor` — nu blochează scorul,
+        doar atenționează; «încă mai» colocvial e acceptabil, deci recitire."""
+        cod, iesire = ruleaza_stdin(
+            "check-modelisme.py",
+            "Dovezile mai erau încă vii. Au mai rămas încă trei zile. "
+            "Mai stai încă puțin.")
+        self.assertIn("minor|accentuare_redundanta", iesire)
+
+
+class TestReclame(unittest.TestCase):
+    """Scriptul de anunțuri: limite, politici, semnăturile afirmărilor goale.
+    Fără etichete → tăcere (genurile existente nu sunt atinse)."""
+
+    def test_fara_etichete_ramane_mut(self):
+        cod, iesire = ruleaza_stdin("check-reclame.py", "Un articol obișnuit.")
+        self.assertEqual(cod, 0)
+        self.assertIn("0 elemente de reclama", iesire)
+
+    def test_pseudologie_temporala(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py",
+            "H1: Seara cureți tenul, dimineața îl simți moale")
+        self.assertEqual(cod, 1)
+        self.assertIn("pseudologie_temporala", iesire)
+
+    def test_pseudologia_cu_conector_cauzal_tacere(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "check-reclame.py",
+            "Text: Aplică seara, pentru că noaptea pielea se regenerează",
+            "--platform", "meta")
+        self.assertEqual(cod, 0, f"cauzală legitimă semnalată:\n{iesire}")
+
+    def test_tautologia_beneficiu_si_contra_cazurile(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py", "H1: Te pieptănești, părul e neted")
+        self.assertEqual(cod, 1)
+        self.assertIn("tautologie_beneficiu", iesire)
+        # produs prezent / fără acțiune / agent explicit → tăcere
+        for text in ("Text: Aplică masca seara, părul e mătăsos",
+                     "Text: Piele moale 24h",
+                     "Text: Șamponul netezește părul uscat"):
+            cod, iesire = ruleaza_stdin_cu_flags(
+                "check-reclame.py", text, "--platform", "meta")
+            self.assertEqual(cod, 0, f"{text!r} semnalat greșit:\n{iesire}")
+
+    def test_limitele_google_hard(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py", "H1: " + "x" * 31 + "\nD1: " + "y" * 91)
+        self.assertEqual(cod, 1)
+        self.assertEqual(iesire.count("limita_caractere"), 2)
+
+    def test_limitele_la_limita_trec(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py",
+            "H1: a" + "x" * 29 + "\nH2: b" + "x" * 29 + "\nH3: c" + "x" * 29
+            + "\nD1: a" + "y" * 89 + "\nD2: b" + "y" * 89)
+        self.assertEqual(cod, 0, f"limite legitime semnalate:\n{iesire}")
+
+    def test_politica_exclamarii_google(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py", "H1: Vinzi mai mult!\nD1: Oferă! Două! Trei!")
+        self.assertEqual(cod, 1)
+        self.assertIn("politica_google", iesire)
+
+    def test_caps_emoji_duplicat(self):
+        text = "H1: CREMĂ NATURALĂ\nH1: Cremă naturală\nD1: Creme cu 😍 acum"
+        cod, iesire = ruleaza_stdin("check-reclame.py", text)
+        self.assertEqual(cod, 1)
+        self.assertIn("caps_nepotrivit", iesire)
+        self.assertIn("emoji_in_anunt", iesire)
+        self.assertIn("duplicat", iesire)
+
+    def test_structura_rsa(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py", "H1: Abcd\nH2: Efgh\nD1: Ijklmnop")
+        self.assertEqual(cod, 1)
+        self.assertIn("structura_rsa", iesire)
+
+    def test_limitele_recomandate_meta(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py", "Titlu: " + "x" * 41 + "\nText: " + "y" * 126)
+        self.assertEqual(cod, 1)
+        self.assertIn("titlu_peste_recomandat", iesire)
+        self.assertIn("text_peste_recomandat", iesire)
+        self.assertNotIn("limita_caractere", iesire)
+
+    def test_superlativ_si_calc(self):
+        cod, iesire = ruleaza_stdin(
+            "check-reclame.py",
+            "H1: Cea mai bună cremă\nD1: Trezește-te cu pielea frumoasă")
+        self.assertEqual(cod, 1)
+        self.assertIn("superlativ_nefundamentat", iesire)
+        self.assertIn("calc_reclama", iesire)
+
+    def test_platforma_din_heading_si_flag(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "check-reclame.py", "Titlu: " + "x" * 41, "--platform", "google")
+        self.assertEqual(cod, 0, "fără heading, Titlu e meta; forțat google, "
+                                 "limita de 30 nu se aplică titlului meta")
+
+    def test_flag_brand(self):
+        def ruleaza_cu_brand(text, brand):
+            return ruleaza_stdin_cu_flags(
+                "check-reclame.py",
+                "Text: " + text, "--platform", "meta", "--brand", brand)
+        cod, iesire = ruleaza_cu_brand("Creme naturale", "Verdea")
+        self.assertEqual(cod, 1)
+        self.assertIn("text_fara_brand", iesire)
+        cod, iesire = ruleaza_cu_brand("Creme Verdea", "Verdea")
+        self.assertEqual(cod, 0)
+
+    def test_fixtureurile_de_reclama(self):
+        cod, _ = ruleaza("check-reclame.py",
+                         str(FIXTURES / "reclame-google-rau.md"))
+        self.assertEqual(cod, 1)
+        cod, _ = ruleaza("check-reclame.py",
+                         str(FIXTURES / "reclame-google-bun.md"))
+        self.assertEqual(cod, 0, "anunțul google curat a fost semnalat")
+        cod, iesire = ruleaza("check-reclame.py",
+                              str(FIXTURES / "reclame-meta-rau.md"))
+        self.assertEqual(cod, 1)
+        self.assertIn("tautologie_beneficiu", iesire)
+        cod, _ = ruleaza("check-reclame.py",
+                         str(FIXTURES / "reclame-meta-bun.md"))
+        self.assertEqual(cod, 0, "anunțul meta curat a fost semnalat")
+
+    def test_integrare_verifica(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py", "H1: Seara cureți tenul, dimineața îl simți moale",
+            "--reclame")
+        self.assertEqual(cod, 1)
+        self.assertIn("== reclame", iesire)
+        self.assertIn("pseudologie_temporala", iesire)
+        # fără flag, același text: tăcere totală pe stratul de reclame
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py", "H1: Seara cureți tenul, dimineața îl simți moale")
+        self.assertEqual(cod, 0)
+        self.assertNotIn("pseudologie", iesire)
+
+
 class TestRitm(unittest.TestCase):
 
     def test_text_uniform_e_semnalat(self):
@@ -1037,7 +1250,7 @@ class TestMatriceFixtureuri(unittest.TestCase):
     """
 
     SCRIPTURI = ["check-tipare.py", "check-ritm.py", "check-modelisme.py",
-                 "check-seo.py", "check-human-voice.py"]
+                 "check-seo.py", "check-human-voice.py", "check-reclame.py"]
 
     def test_orice_script_ruleaza_pe_orice_fixture(self):
         erori = []

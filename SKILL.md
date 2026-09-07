@@ -87,6 +87,12 @@ praguri):
 - Romgleză și calcuri: „face sens" → „are sens"; „a adresa o problemă" → „a
   aborda"; „în termeni de" → „în ceea ce privește".
 - „Capcana concluziei" — nu încheia cu un rezumat forțat.
+- **Afirmații goale** — propoziția care rămâne la fel de adevărată fără
+  subiectul/actorul/produsul ei nu promite nimic („Seara cureți tenul,
+  dimineața îl simți moale”; „Te pieptănești, părul e neted”). În text
+  persuasiv, trece fiecare promisiune prin testul în 3 întrebări din
+  `references/limba/anti-tipare-ai.md` §J. În text literar, redundanța poate
+  fi stil — recitie, nu tăiere automată.
 - Paragrafe simetrice și ritm monoton — variază lungimea frazelor.
 - Abuz de simboluri: emoji decorative, liste cu „-" în locul prozei, liniuța ca
   paranteză improvizată, bold/italic dese — toate cu prag de abuz, nu interzicere
@@ -141,9 +147,11 @@ scripturilor și cu deciziile luate pe fiecare semnal.
      repetiția intenționată, ritmul și dialogul.
 2. **CONTRACT** — înainte de a scrie, stabilește intern (nu în livrare):
    scopul textului și ce vrei să facă cititorul; cine e cititorul concret și
-   cât știe deja; canalul și genul (email, pagină de produs, articol,
-   documentație, comunicat, text literar); registrul, persoana de adresare
-   (`tu`/`dumneavoastră`) și formalitatea; lungimea; faptele confirmate și
+   cât știe deja; canalul și genul (email, pagină de produs, articol, anunț
+   Google/Meta, documentație, comunicat, text literar); registrul, persoana de
+   adresare (`tu`/`dumneavoastră`) și formalitatea; lungimea — pentru anunțuri,
+   limitele de caractere ale platformei (`references/reclame/platforme.md`);
+   faptele confirmate și
    incertitudinile pe care le vei declara. Dacă lipsește ceva indispensabil,
    cere-l o singură dată și grupat; dacă nu e indispensabil, scrie fără să
    inventezi. Contractul rămâne intern — nu-l livra ca preambul.
@@ -174,6 +182,11 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    `scripts/verifica.py <fișier> --human-voice`. Nu amesteca auditul de voce cu
    editarea: citește fiecare semnal în context, blochează doar garbage-ul,
    contaminarea și placeholder-ele, iar pentru restul editează minim.
+   Dacă textul e anunț (fișier cu etichete H1:/D1:/Text:/Titlu:), rulează și
+   `verifica.py <fișier> --reclame` — limitele de caractere, politicile
+   platformei și afirmările goale structurale. Pentru orice text persuasiv,
+   aplică testul în 3 întrebări din `anti-tipare-ai.md` §J pe fiecare
+   promisiune.
 6. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
    își introduce propriile tipare: tranziții reciclate, sinonime rotite peste
    aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
@@ -197,6 +210,9 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    - dacă textul e de citit cap-coadă online: titlul promite ceva concret și
      corpul îl plătește; deschiderea nu e încălzire; subtitlurile citite în
      șir spun povestea articolului;
+   - dacă textul e anunț: `--reclame` nu are semnale — headline-urile și
+     descrierile în limitele platformei, fără politici încălcate, fiecare
+     promisiune cu agent și mecanism;
    - fiecare paragraf justifică spațiul prin informație, exemplu, cauză,
      consecință, decizie sau efect stilistic intenționat.
 
@@ -237,6 +253,16 @@ references/
     └── scoring-checklist.md   # criteriile SEO/densitate, ca listă de citit
 ```
 
+Plus `references/reclame/` pentru anunțuri plătite — un strat subțire care
+referă regulile generale, nu le duplică:
+
+```
+references/
+└── reclame/
+    ├── platforme.md           # limite Google/Meta, politici, format de fișier
+    └── voce.md                # promisiune→dovadă→CTA, modele pozitive, trimiteri
+```
+
 Rutare SEO — încarcă doar ce cere task-ul (plus `grounding.md` la orice conținut
 comercial, `titluri.md` la orice conținut cu titlu vizibil și `flux-articol.md`
 la orice text de citit cap-coadă):
@@ -245,6 +271,7 @@ la orice text de citit cap-coadă):
 |---|---|
 | articol de blog | `core.md`, `blog-keyword.md`, `geo.md`, `titluri.md`, `flux-articol.md` |
 | pagină de produs/categorie | `core.md`, `ecommerce.md`, `titluri.md`, `flux-articol.md` |
+| text de reclamă Google/Meta | `../reclame/platforme.md`, `../reclame/voce.md`, `../limba/anti-tipare-ai.md` §J, `grounding.md` |
 | afacere locală / pagină de contact | `core.md`, `local.md` |
 | schema / date structurate | `schema.md` |
 | audit SEO complet, link building | `core.md`, `avansat.md` |
@@ -340,6 +367,13 @@ care conține o bară.
   punchline, slogan/promo, metafore de copywriter, autobiografie fără context,
   CAPS și contaminare. Citește `human-voice-validator.md`; nu îl folosi pentru
   a decide automat că un text este AI sau pentru a rescrie voce legitimă.
+- `check-reclame.py` — doar pentru fișiere de anunț (cu etichete H1:/D1:/
+  Text:/Titlu:; fără ele, tace). Limitele de caractere Google/Meta, politicile
+  editoriale ale platformei („!", CAPS, emoji, duplicate) și semnăturile
+  afirmărilor goale: perechea temporală fără cauză și tautologia de beneficiu
+  (acțiune + rezultat fără produs în propoziție). Limitele oficiale și formatul:
+  `references/reclame/platforme.md`. Flags: `--platform google|meta`,
+  `--brand "Nume"`.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
 - `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),
