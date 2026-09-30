@@ -241,6 +241,10 @@ rereading", never as proof of machine authorship.
 python3 -m unittest discover tests
 ```
 
+## Releasing
+
+A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-release suffix is allowed (`vX.Y.Z-alpha:`). After the `tests` workflow passes, the `release` workflow creates the annotated tag if you did not push one, then publishes a GitHub Release from the commit message. An existing tag is never moved. To publish a tag that is already on the repo, run the `release` workflow manually and set `tag` to `vX.Y.Z`.
+
 ## Version
 
 - **v0.7.1** — En-dash banned outright; chat symbols. `–` (U+2013) moves out of

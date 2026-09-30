@@ -1,0 +1,108 @@
+name: release
+
+on:
+  workflow_run:
+    workflows: ["tests"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Publică un tag deja existent (ex. v0.8.0)."
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Publică tag-ul și GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          event_name="${GITHUB_EVENT_NAME}"
+
+          if [ "$event_name" = "workflow_dispatch" ]; then
+            tag="$(python3 -c 'import json,os; print((json.load(open(os.environ["GITHUB_EVENT_PATH"])).get("inputs") or {}).get("tag") or "")')"
+            if [ -z "$tag" ]; then
+              echo "::error::Lipsește tag-ul."
+              exit 1
+            fi
+            if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)*$ ]]; then
+              echo "::error::Tag invalid: ${tag}. Aștept vX.Y.Z sau vX.Y.Z-sufix."
+              exit 1
+            fi
+            if ! git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+              echo "::error::Tagul ${tag} nu există. Nu creez tag-uri din dispatch."
+              exit 1
+            fi
+            sha="$(git rev-parse "${tag}^{}")"
+          elif [ "$event_name" = "workflow_run" ]; then
+            read -r conclusion triggering head_branch head_sha <<< "$(python3 -c 'import json,os; w=json.load(open(os.environ["GITHUB_EVENT_PATH"]))["workflow_run"]; print(w.get("conclusion") or "", w.get("event") or "", w.get("head_branch") or "", w.get("head_sha") or "")')"
+            if [ "$conclusion" != "success" ] || [ "$triggering" != "push" ] || [ "$head_branch" != "main" ]; then
+              echo "Nu public: conclusion=${conclusion} event=${triggering} branch=${head_branch}."
+              exit 0
+            fi
+            git checkout --detach "$head_sha"
+            sha="$(git rev-parse HEAD)"
+            subject="$(git log -1 --format='%s' "$sha")"
+            if [[ ! "$subject" =~ ^(v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)*):($|[[:space:]]) ]]; then
+              echo "Commitul nu e o versiune (${subject}). Nu public nimic."
+              exit 0
+            fi
+            tag="${BASH_REMATCH[1]}"
+            if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+              tagged="$(git rev-parse "${tag}^{}")"
+              if [ "$tagged" != "$sha" ]; then
+                echo "::error::Tagul ${tag} există deja pe ${tagged}, nu pe ${sha}. Nu mut tag-uri."
+                exit 1
+              fi
+            else
+              git -c user.name='github-actions[bot]' \
+                  -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+                  tag -a "$tag" "$sha" -m "$(git log -1 --format='%B' "$sha")"
+              if ! git push origin "refs/tags/${tag}"; then
+                git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
+                tagged="$(git rev-parse "${tag}^{}")"
+                if [ "$tagged" != "$sha" ]; then
+                  echo "::error::Tagul ${tag} a fost creat între timp pe ${tagged}. Nu mut tag-uri."
+                  exit 1
+                fi
+              fi
+            fi
+          else
+            echo "::error::Eveniment neașteptat: ${event_name}"
+            exit 1
+          fi
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release ${tag} există deja: $(gh release view "$tag" --json url --jq .url)"
+            exit 0
+          fi
+
+          notes="${RUNNER_TEMP}/release-notes.md"
+          git log -1 --format='%B' "$sha" > "$notes"
+          if ! grep -q '[^[:space:]]' "$notes"; then
+            git log -1 --format='%s' "$sha" > "$notes"
+          fi
+
+          args=(release create "$tag" --target "$sha" --title "$tag" --notes-file "$notes")
+          if [[ "$tag" == *-* ]]; then
+            args+=(--prerelease)
+          fi
+          gh "${args[@]}"
+          gh release view "$tag" --json url --jq .url

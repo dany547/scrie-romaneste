@@ -15,9 +15,9 @@ jobs:
         python-version: ["3.9", "3.11", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -26,19 +26,25 @@ jobs:
 
       - name: Toate scripturile rulează pe toate fixture-urile (fără eroare de input)
         run: |
+          # Runner-ul pornește bash -e. Exit 1 e rezultat valid (semnale găsite),
+          # nu eroare: fără `|| code=$?` pasul moare la primul fixture „rău"
+          # și nu apucă să vadă exit >= 2.
           status=0
+          noteaza() {
+            code=0
+            python3 "$@" >/dev/null 2>&1 || code=$?
+            if [ "$code" -ge 2 ]; then
+              echo "EROARE ($code): python3 $*"
+              status=1
+            fi
+          }
           for f in tests/fixtures/*.md; do
-            for s in verifica check-tipare check-ritm check-modelisme check-seo check-human-voice; do
-              python3 scripts/$s.py "$f" >/dev/null 2>&1
-              code=$?
-              # 0 = curat, 1 = semnale găsite (rezultat valid); >=2 = eroare reală
-              if [ "$code" -ge 2 ]; then
-                echo "EROARE ($code): $s.py pe $f"
-                status=1
-              fi
+            for s in verifica check-tipare check-ritm check-modelisme check-seo check-human-voice check-reclame; do
+              noteaza "scripts/$s.py" "$f"
             done
+            noteaza scripts/verifica.py --fara-seo --human-voice "$f"
           done
-          exit $status
+          exit "$status"
 
       - name: Fixture-ile curate rămân curate
         run: |
@@ -53,12 +59,24 @@ jobs:
 
       - name: Fixture-ile rele sunt prinse
         run: |
-          python3 scripts/verifica.py tests/fixtures/rau-cu-diacritice.md
-          python3 scripts/verifica.py tests/fixtures/rau-fara-diacritice.md
-          python3 scripts/verifica.py tests/fixtures/rau-sedila.md
-          python3 scripts/verifica.py tests/fixtures/rau-titlu.md
-          python3 scripts/verifica.py tests/fixtures/human-voice-rau.md --human-voice
-          python3 scripts/verifica.py tests/fixtures/human-voice-contaminare.md --human-voice
+          # Exit 1 e succesul acestui pas. Sub bash -e trebuie capturat,
+          # altfel „prins" și „neprins" eșuează la fel.
+          fail=0
+          asteapta_semnal() {
+            code=0
+            python3 "$@" >/dev/null 2>&1 || code=$?
+            if [ "$code" -ne 1 ]; then
+              echo "NEPRINS (exit $code): python3 $*"
+              fail=1
+            fi
+          }
+          # human-voice-rau.md nu e prins fără --human-voice; nu-l băga în globul ăsta.
+          for f in tests/fixtures/rau-*.md tests/fixtures/reclame-*-rau.md; do
+            asteapta_semnal scripts/verifica.py "$f"
+          done
+          asteapta_semnal scripts/verifica.py tests/fixtures/human-voice-rau.md --human-voice
+          asteapta_semnal scripts/verifica.py tests/fixtures/human-voice-contaminare.md --human-voice
+          exit "$fail"
 
       - name: Text pe stdin (cazul obișnuit al agentului)
         run: |
