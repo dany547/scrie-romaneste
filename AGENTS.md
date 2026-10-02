@@ -37,7 +37,7 @@ Punct de intrare: `scripts/verifica.py`; documentația de contract: `SKILL.md` +
 - Scripturile trebuie să rămână diacritic-insensibile și deterministe (testele verifică).
 - Fără date reale de client în repo public sau în exemple.
 
-## Ce NU atinge Hermes-QA
+## Ce nu se atinge (regulă pentru orice agent)
 Secrete, `.github/workflows/*`, releases/tags, `main`, Administration. Fix-urile: branch + PR; merge = Dan.
 
 ## Severitate
