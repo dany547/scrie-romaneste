@@ -51,6 +51,11 @@ pleonasme, diacritice cu virgulă (`ș`/`ț`) nu cu sedilă.
 informative — scriptul vede două cuvinte în aceeași frază, nu sensul; verifică-le tu și
 ignoră semnalul dacă ambele sunt folosite corect.
 
+**Cuvinte inexistente:** blocante, și nevăzute de script. Un raport curat nu le exclude.
+Citește textul integral. Vorbele de care ești sigur le lași. Pe cele nesigure le cauți
+câte una, `https://dexonline.ro/definitie/CUVÂNT` — `tipare-ro.md` §cuvant_inexistent.
+`arămriu` și `petechelui` sunt mostre de formă, nu o listă de interzis.
+
 **Titlu și excerpt** se recitesc separat pentru acord: neutre la plural (virusuri
 funcționale, nu virusuri funcționali), numeral+substantiv (primii/primele, doi/două),
 genul adjectivelor — `tipare-ro.md` § `acord_plural_neutru`.

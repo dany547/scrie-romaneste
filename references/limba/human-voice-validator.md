@@ -15,6 +15,9 @@ spune nimic concret.
 susținută de repere verificabile sunt alegeri posibile, nu erori automate.
 - `garbage`, contaminarea conversațională și placeholderele sunt blocere: nu se
 publică până nu dispar.
+- Validatorul nu are dicționar. `arămriu` și `petechelui` trec. Un `PASS` nu
+spune că vorbele există; controlul lexical e în `tipare-ro.md` §cuvant_inexistent,
+înainte de livrare.
 
 ## Categorii A–J
 

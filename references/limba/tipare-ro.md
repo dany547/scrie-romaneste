@@ -9,6 +9,57 @@ vocabular, vezi `anti-tipare-ai.md`. Pentru normă generală, `gramatica-stil.md
 
 ---
 
+## cuvant_inexistent
+
+Un cuvânt poate arăta românește și să nu existe. Modelul lipește o rădăcină
+cunoscută de o desinență plauzibilă; fraza curge, iar niciun script nu
+clipește.
+
+`verifica.py`, `check-tipare.py`, `check-modelisme.py` și `--human-voice` nu
+au dicționar. `scor_automat=0/13` și `AI_PATTERN_SCORE=0/30` nu dovedesc că
+vorbele există. Nu băga mostrele de mai jos într-o listă de interdicții și nu
+le adăuga în regex: prind un caz, nu clasa.
+
+| Formă | Ce e, ca formă | Nu face |
+|---|---|---|
+| arămriu | adjectiv de culoare pe calapodul lui „cenușiu"; cuvântul, dacă sensul e ăsta, e **arămiu** | nu căuta șirul și să te oprești |
+| petechelui | desinență de genitiv pe un radical care nu e cuvânt | nu înlocui automat cu o vorbă care sună apropiat |
+
+Forma de căutat: rădăcină reală plus o desinență care nu se atașează, genitiv
+sau plural al unui cuvânt care nu e în limbă, verb conjugat după o clasă
+greșită dar cu înfățișare regulată (`morfologie_flexiune`). Numele proprii,
+mărcile, codul, termenii tehnici confirmați de utilizator și împrumuturile cu
+politică stabilită (`articol_imprumuturi`) nu se caută în dicționar și nu se
+declară inexistente fiindcă lipsesc de acolo.
+
+Înainte de livrare, citește textul integral — titlu, excerpt, corp. La vorbele
+de care ești sigur, nu face nimic. La cele de care nu ești sigur, caută-le pe
+dexonline, **câte una**, nu textul întreg și nu în buclă:
+
+`https://dexonline.ro/definitie/CUVÂNT`
+
+În locul lui `CUVÂNT` pui forma din text, cu diacritice, fără punctuația din
+jur. O cerere = un cuvânt. Nu trimite sintagme. Nu copia definiția în textul
+livrat: lookup-ul răspunde la „există forma asta?", nu strânge material.
+Dexonline interzice extragerea automată; nu parcurge articolul cuvânt cu
+cuvânt.
+
+Cum citești răspunsul:
+
+- există intrare sau paradigmă care conține forma — vorba e reală; flexiunea
+  o verifici acolo, nu o presupui (o formă flexionată, „funcționale", își
+  găsește lema);
+- pagina spune „Cuvântul … nu este în dicționar" — forma nu există.
+  Sugestiile de sub frază nu sunt confirmare. O sugestie poate fi corecția
+  doar dacă sensul din text e același; altfel întreabă, nu lua prima
+  potrivire;
+- un cod HTTP sau o pagină goală nu e verdict. Semnalul e fraza „nu este în
+  dicționar", nu statusul.
+
+Nu înlocui din burtă și nu livra o formă pe care n-o poți susține.
+
+---
+
 ## calc_sintactic
 
 Traducere literală care sună inteligibil, dar nu e română.

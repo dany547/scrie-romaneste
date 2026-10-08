@@ -29,14 +29,23 @@ jobs:
           # Runner-ul pornește bash -e. Exit 1 e rezultat valid (semnale găsite),
           # nu eroare: fără `|| code=$?` pasul moare la primul fixture „rău"
           # și nu apucă să vadă exit >= 2.
+          # I3: un traceback iese tot cu exit 1, deci condiția de exit nu-l
+          # prinde — captura stderr și „Traceback" ca eșec, nu doar exit >= 2.
           status=0
           noteaza() {
             code=0
-            python3 "$@" >/dev/null 2>&1 || code=$?
+            err=$(mktemp)
+            python3 "$@" >/dev/null 2>"$err" || code=$?
             if [ "$code" -ge 2 ]; then
               echo "EROARE ($code): python3 $*"
               status=1
             fi
+            if grep -q "Traceback" "$err"; then
+              echo "TRACEBACK: python3 $*"
+              cat "$err"
+              status=1
+            fi
+            rm -f "$err"
           }
           for f in tests/fixtures/*.md; do
             for s in verifica check-tipare check-ritm check-modelisme check-seo check-human-voice check-reclame; do
@@ -48,11 +57,35 @@ jobs:
 
       - name: Fixture-ile curate rămân curate
         run: |
+          # I4: legit-* ies cu 1 intenționat (semnale minore de familie) —
+          # criteriul e zero linii critic|/important|, nu exit 0 pur.
+          # Sub bash -e, `$(...)` moștenește exit 1, deci `|| true` e obligatoriu.
+          verifica_legit() {
+            err=$(mktemp)
+            iesire=$(python3 scripts/verifica.py "$1" --fara-seo --human-voice 2>"$err") || true
+            if grep -q "Traceback" "$err"; then
+              echo "TRACEBACK: $1"
+              cat "$err"
+              rm -f "$err"
+              exit 1
+            fi
+            rm -f "$err"
+            grave=$(printf '%s\n' "$iesire" | grep -e "^critic|" -e "^important|" || true)
+            if [ -n "$grave" ]; then
+              echo "SEMNAL GRAV pe $1:"
+              echo "$grave"
+              exit 1
+            fi
+          }
           python3 scripts/verifica.py tests/fixtures/bun-articol.md
           python3 scripts/verifica.py tests/fixtures/human-voice-curat.md --fara-seo --human-voice
           python3 scripts/verifica.py tests/fixtures/human-voice-autobiografie.md --fara-seo --human-voice
           python3 scripts/verifica.py tests/fixtures/human-voice-metafora-legitima.md --fara-seo --human-voice
-          python3 scripts/verifica.py tests/fixtures/legit-literar.md --fara-seo --human-voice
+          verifica_legit tests/fixtures/legit-literar.md
+          verifica_legit tests/fixtures/legit-juridic.md
+          verifica_legit tests/fixtures/legit-academic.md
+          python3 scripts/verifica.py tests/fixtures/reclame-google-bun.md --reclame
+          python3 scripts/verifica.py tests/fixtures/reclame-meta-bun.md --reclame
           python3 scripts/check-tipare.py tests/fixtures/bun-articol.md
           python3 scripts/check-ritm.py tests/fixtures/bun-articol.md
           python3 scripts/check-seo.py tests/fixtures/bun-articol.md
@@ -61,18 +94,30 @@ jobs:
         run: |
           # Exit 1 e succesul acestui pas. Sub bash -e trebuie capturat,
           # altfel „prins" și „neprins" eșuează la fel.
+          # I3: traceback-ul iese tot cu exit 1 — captură stderr și eșec pe el.
           fail=0
           asteapta_semnal() {
             code=0
-            python3 "$@" >/dev/null 2>&1 || code=$?
+            err=$(mktemp)
+            python3 "$@" >/dev/null 2>"$err" || code=$?
             if [ "$code" -ne 1 ]; then
               echo "NEPRINS (exit $code): python3 $*"
               fail=1
             fi
+            if grep -q "Traceback" "$err"; then
+              echo "TRACEBACK: python3 $*"
+              cat "$err"
+              fail=1
+            fi
+            rm -f "$err"
           }
           # human-voice-rau.md nu e prins fără --human-voice; nu-l băga în globul ăsta.
           for f in tests/fixtures/rau-*.md tests/fixtures/reclame-*-rau.md; do
             asteapta_semnal scripts/verifica.py "$f"
+          done
+          # Regresia A3 trăia aici: anunțurile rele trebuie prinse și cu --reclame.
+          for f in tests/fixtures/reclame-*-rau.md; do
+            asteapta_semnal scripts/verifica.py "$f" --reclame
           done
           asteapta_semnal scripts/verifica.py tests/fixtures/human-voice-rau.md --human-voice
           asteapta_semnal scripts/verifica.py tests/fixtures/human-voice-contaminare.md --human-voice

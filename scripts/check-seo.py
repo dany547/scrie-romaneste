@@ -190,6 +190,26 @@ def sectiuni_prea_lungi(text):
     return probleme
 
 
+def verifica_sedila(text):
+    """Doar sedila (ş/ţ în loc de ș/ț) — normă, nu SEO.
+
+    Apelat din `verifica.py` și pe rulările cu `--fara-seo`: sedila trece
+    mereu, indiferent de destinația textului.
+    """
+    probleme = []
+    for m in SEDILA.finditer(text):
+        start = max(0, m.start() - 20)
+        probleme.append((
+            "critic",
+            "sedila",
+            m.group(0),
+            text[start:m.end() + 20].replace("\n", " ").strip(),
+        ))
+        if len(probleme) > 200:  # text integral cu sedilă — un semnal e destul
+            break
+    return probleme
+
+
 def verifica(text):
     probleme = []
     headinguri = extrage_headinguri(text)
@@ -221,16 +241,7 @@ def verifica(text):
         if n >= prag_stuffing and len(fraza) > 8:
             probleme.append(("important", "keyword_stuffing", f"x{n}", fraza))
 
-    for m in SEDILA.finditer(text):
-        start = max(0, m.start() - 20)
-        probleme.append((
-            "critic",
-            "sedila",
-            m.group(0),
-            text[start:m.end() + 20].replace("\n", " ").strip(),
-        ))
-        if len(probleme) > 200:  # text integral cu sedilă — un semnal e destul
-            break
+    probleme.extend(verifica_sedila(text))
 
     for m in URL.finditer(text):
         url = m.group(1)
@@ -264,12 +275,8 @@ def main():
 
     sursa = argv[0]
     try:
-        if sursa == "-":
-            text = sys.stdin.read()
-        else:
-            with open(sursa, "r", encoding="utf-8") as f:
-                text = f.read()
-    except OSError as e:
+        text = _comun.citeste_intrare(sursa)
+    except (OSError, UnicodeDecodeError) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 

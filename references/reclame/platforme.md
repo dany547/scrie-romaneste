@@ -47,8 +47,8 @@ heading-ul anterior („Google", „Meta/Facebook/Instagram") sau forțată cu
 ```markdown
 # Campanie „Toamna pielii" — Google Search
 
-H1: Creme naturale cu ulei de măsline
-H2: Hidratare 24h, fără parfum sintetic
+H1: Creme naturale cu măsline
+H2: Hidratare 24h, fără parfum
 H3: Lucrate în România, lot mic
 D1: Șapte uleiuri cold-pressed pentru ten uscat.
 D2: Livrare în 24 de ore, oriunde în țară.
@@ -59,7 +59,7 @@ Cale2: reduceri
 
 Text: Creme cu 7 uleiuri cold-pressed, fără parfum sintetic. Lot mic, dată fabricației pe cutie.
 Titlu: Hidratare 24 de ore
-Descriere: Testează setul de dimineață
+Descriere: Testează-l dimineața
 ```
 
 Etichete canonice: `H1…H15`, `D1…D4`, `Cale1/Cale2` (Google); `Text`, `Titlu`,

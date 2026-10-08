@@ -12,7 +12,7 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 
 - **Four modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits), `human-voice` (separate audit for mechanical voice reflexes, with a 30-point score and hard blockers)
 - **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
-- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, syntactic calques, false friends, borrowed-word articulation, diacritic restoration
+- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words the scripts do not catch, syntactic calques, false friends, borrowed-word articulation, diacritic restoration
 - **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
 - **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
 - **Writing techniques** — rhythm, conciseness, structure, audience calibration
@@ -211,11 +211,13 @@ scrie-romaneste/
 python3 scripts/verifica.py <file>          # all checks in one pass + combined score
 python3 scripts/verifica.py <file> --json   # structured output for programmatic use
 python3 scripts/verifica.py <file> --scor   # scores only
+python3 scripts/verifica.py <file> --prag N   # density threshold (appearances/1000 words)
 python3 scripts/verifica.py <file> --fara-seo  # skip SEO checks (literary text)
 python3 scripts/verifica.py <file> --human-voice  # separate voice audit: AI_PATTERN_SCORE/30, STATUS, blockers
 python3 scripts/verifica.py <file> --reclame [--platform google|meta] [--brand "Nume"]  # ad-copy audit (labeled files only)
 
 python3 scripts/check-tipare.py <file>      # AI clichés and calques only
+python3 scripts/check-tipare.py <file> --tot  # also show sub-threshold matches
 python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
@@ -247,6 +249,21 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.9.0** — Invented words, and a definition of done. The scripts, including
+  `--human-voice`, have no dictionary: a clean report does not prove the words
+  exist. Before delivery, read the whole text for invented words, agreement and
+  verb forms. Look up only the words you are not sure of, one at a time, at
+  `https://dexonline.ro/definitie/CUVÂNT`. "Nu este în dicționar" means the
+  form does not exist; suggestions are not confirmation, and an HTTP status is
+  not the verdict. Writing a file is not done: the mode's deliverable has to be
+  in the reply, and an edit lands in the file the user named, not in a side
+  copy. Same cut, on the tools: cedilla is checked even with `--fara-seo`; a
+  real ad file under `--reclame` no longer takes article-title SEO signals from
+  its markdown heading; non-UTF-8 input is exit 2, not a traceback with exit 1.
+  151 tests.
+- **v0.8.0** — DOOM forms in the general checkers (non-normative verbs, numeral
+  agreement, lexical pleonasms) and a thin ad layer: `verifica.py --reclame`
+  for Google/Meta length, policy and empty-claim signals.
 - **v0.7.1** — En-dash banned outright; chat symbols. `–` (U+2013) moves out of
   the frequency-based `punctuatie_carja` into its own category `liniuta_engleza`,
   flagged at every single occurrence: Romanian has no use for it — compounds and

@@ -49,6 +49,8 @@ import re
 import sys
 import unicodedata
 
+import _comun
+
 # Încredere medie — derivate din literatură, calibrate pe engleză.
 CV_UNIFORM = 0.16          # sub -> suspect de uniform
 CV_VARIAT = 0.22           # peste -> variație de tip uman
@@ -203,9 +205,8 @@ def main():
 
     sursa = argv[0]
     try:
-        text = sys.stdin.read() if sursa == "-" else open(
-            sursa, "r", encoding="utf-8").read()
-    except OSError as e:
+        text = _comun.citeste_intrare(sursa)
+    except (OSError, UnicodeDecodeError) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 

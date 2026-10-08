@@ -270,11 +270,19 @@ def tipareste_raport(raportate, depasiri, cuvinte, eticheta):
 
 
 def citeste_intrare(sursa):
-    """Citește fișierul sau stdin ('-'). Aruncă OSError la eșec."""
-    if sursa == "-":
-        return sys.stdin.read()
-    with open(sursa, "r", encoding="utf-8") as f:
-        return f.read()
+    """Citește fișierul sau stdin ('-').
+
+    Stdin se decodează strict din bytes (determinist, indiferent de locale);
+    fișierul acceptă BOM UTF-8 (utf-8-sig, nu mai păcălește `lipsă H1`).
+    Aruncă OSError la eșec, inclusiv la intrare non-UTF-8 (→ exit 2).
+    """
+    try:
+        if sursa == "-":
+            return sys.stdin.buffer.read().decode("utf-8")
+        with open(sursa, "r", encoding="utf-8-sig") as f:
+            return f.read()
+    except UnicodeDecodeError as e:
+        raise OSError(f"intrarea nu e UTF-8 valid ({sursa}): {e}") from e
 
 
 def ruleaza_cli(doc, argv, categorii, categorii_original, calculeaza_scor,
@@ -297,7 +305,7 @@ def ruleaza_cli(doc, argv, categorii, categorii_original, calculeaza_scor,
 
     try:
         text = citeste_intrare(sursa)
-    except OSError as e:
+    except (OSError, UnicodeDecodeError) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 

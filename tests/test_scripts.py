@@ -13,10 +13,18 @@ SCRIPTS = RADACINA / "scripts"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
+def _fara_traceback(script, argumente, stderr):
+    """I3: un traceback iese tot cu exit 1 — cere explicit absența lui."""
+    if "Traceback" in stderr:
+        raise AssertionError(
+            f"{script} {list(argumente)}: traceback pe stderr:\n{stderr}")
+
+
 def ruleaza(script, *argumente):
     r = subprocess.run(
         [sys.executable, str(SCRIPTS / script), *argumente],
-        capture_output=True, text=True)
+        capture_output=True, text=True, encoding="utf-8")
+    _fara_traceback(script, argumente, r.stderr)
     return r.returncode, r.stdout
 
 
@@ -594,6 +602,37 @@ class TestReclame(unittest.TestCase):
         self.assertEqual(cod, 0)
         self.assertNotIn("pseudologie", iesire)
 
+    def test_verifica_reclame_pe_fixtureuri_curate(self):
+        """Regresie A3: stratul SEO semnala `titlu_eticheta` pe H1-ul de anunț,
+        deci `verifica --reclame` ieșea 1 pe fixture-uri curate."""
+        for fixture in ("reclame-google-bun.md", "reclame-meta-bun.md",
+                        "reclame-format-oficial.md"):
+            cod, iesire = ruleaza("verifica.py", "--reclame",
+                                  str(FIXTURES / fixture))
+            self.assertEqual(cod, 0, f"{fixture} semnalat greșit:\n{iesire}")
+            self.assertIn("== reclame", iesire, fixture)
+            self.assertNotIn("titlu_eticheta", iesire, fixture)
+
+    def test_reclame_bun_ies_0_doar_cu_reclame(self):
+        """I4: garanția de exit 0 pe `reclame-*-bun` ține doar cu `--reclame`.
+        Fără flag, H1-ul markdown de 3 cuvinte e etichetă pentru stratul SEO
+        (`titlu_eticheta` minor → exit 1) — comportament intenționat."""
+        cod, iesire = ruleaza("verifica.py",
+                              str(FIXTURES / "reclame-meta-bun.md"))
+        self.assertEqual(cod, 1, f"fără --reclame trebuia semnal SEO:\n{iesire}")
+        self.assertIn("titlu_eticheta", iesire)
+
+    def test_articol_cu_reclame_pastreaza_seo_pe_titlu(self):
+        """B1: doar fișierul CU etichete sare SEO-ul (`elemente > 0`). Un
+        articol rulat din greșeală cu `--reclame` (`elemente == 0`) se
+        comportă ca înainte — titlul-șablon tot e semnalat."""
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py",
+            "# Ghidul suprem pentru centrale termice\n\nUn paragraf despre montaj.",
+            "--reclame")
+        self.assertIn("titlu_sablon", iesire,
+                      f"SEO-ul de titlu a fost ascuns greșit:\n{iesire}")
+
 
 class TestRitm(unittest.TestCase):
 
@@ -766,6 +805,70 @@ class TestVerifica(unittest.TestCase):
         self.assertIn("scor_automat=0/13", iesire)
         self.assertEqual(cod, 0)
 
+    def test_fara_seo_raporteaza_sedila(self):
+        """Regresie A2: sedila se verifică mereu, indiferent de --fara-seo."""
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py", "Acesta eşte textul cu ţară.", "--fara-seo")
+        self.assertEqual(cod, 1, f"sedila trecută nedetectată:\n{iesire}")
+        self.assertIn("critic|sedila", iesire)
+
+    def test_fara_seo_pe_text_curat_da_exit_0(self):
+        cod, iesire = ruleaza_stdin_cu_flags(
+            "verifica.py", "Un text scurt si cuminte despre nimic.", "--fara-seo")
+        self.assertEqual(cod, 0, f"text curat semnalat:\n{iesire}")
+
+    def test_fisier_non_utf8_e_eroare_de_input(self):
+        """Regresie A8+I1: bytes non-UTF-8 → exit 2 cu `eroare:` pe stderr,
+        fără traceback, pe toate cele 7 scripturi (exit 1 = semnale,
+        exit 2 = eroare de input)."""
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
+            f.write(b"salut \xe9\n")
+            cale = f.name
+        try:
+            scripturi = ("verifica.py", "check-tipare.py", "check-ritm.py",
+                         "check-modelisme.py", "check-seo.py",
+                         "check-human-voice.py", "check-reclame.py")
+            for script in scripturi:
+                cod, stdout, stderr = ruleaza_tot(script, cale)
+                self.assertEqual(cod, 2,
+                                 f"{script}: stdout:\n{stdout}\nstderr:\n{stderr}")
+                self.assertIn("eroare", stderr, script)
+                self.assertNotIn("Traceback", stdout + stderr, script)
+        finally:
+            Path(cale).unlink()
+
+    def test_stdin_non_utf8_e_eroare_determinista(self):
+        """I2: stdin se decodează strict din buffer (`utf-8`), nu prin
+        `sys.stdin.read()` cu surrogateescape — intrarea invalidă dă exit 2
+        identic indiferent de locale."""
+        import os
+        for locale in ("C", "C.UTF-8"):
+            env = dict(os.environ)
+            env["LC_ALL"] = locale
+            r = subprocess.run(
+                [sys.executable, str(SCRIPTS / "verifica.py"), "-"],
+                input=b"salut \xe9\n", capture_output=True, env=env)
+            stdout = r.stdout.decode("utf-8", errors="replace")
+            stderr = r.stderr.decode("utf-8", errors="replace")
+            self.assertEqual(r.returncode, 2,
+                             f"LC_ALL={locale}: stdout:\n{stdout}\nstderr:\n{stderr}")
+            self.assertIn("eroare", stderr, f"LC_ALL={locale}")
+            self.assertNotIn("Traceback", stdout + stderr, f"LC_ALL={locale}")
+
+    def test_flag_cu_valoare_lipsa_da_exit_2(self):
+        """I1: `--platform`/`--brand`/`--prag` fără valoare → exit 2 cu
+        `eroare:`, nu IndexError + traceback. În verifica.py (toate trei)
+        și check-reclame.py (flag-urile lui cu valoare)."""
+        cazuri = ([("verifica.py", f) for f in ("--platform", "--brand", "--prag")] +
+                  [("check-reclame.py", f) for f in ("--platform", "--brand")])
+        for script, flag in cazuri:
+            cod, stdout, stderr = ruleaza_tot(script, "-", flag, text="Text scurt.")
+            self.assertEqual(cod, 2,
+                             f"{script} {flag}: stdout:\n{stdout}\nstderr:\n{stderr}")
+            self.assertIn("eroare", stderr, f"{script} {flag}")
+            self.assertNotIn("Traceback", stdout + stderr, f"{script} {flag}")
+
 
 class TestHumanVoice(unittest.TestCase):
 
@@ -911,6 +1014,9 @@ class TestDriftGuard(unittest.TestCase):
         "În concluzie, asta e tot.",
         "Trăim în era digitală.",
         "Este important de menționat că plouă.",
+        # M8: regex-ul cere „că" (opțional „faptul că") — forma izolată
+        # „Merită subliniat" nu e detectabilă și nu trebuie pretinsă.
+        "Merită subliniat faptul că plouă tare azi.",
         "Compania are o abordare holistică.",
         "Oferim o multitudine de servicii.",
         "Asta face sens pentru noi.",
@@ -938,6 +1044,45 @@ class TestDriftGuard(unittest.TestCase):
                 cod, 1, f"titlu-șablon neprins: {text!r}\n{iesire}")
             self.assertIn("titlu_sablon", iesire, text)
 
+    # Restul listei Interzis e pe densitate (la_aglomerare): o apariție
+    # izolată tace intenționat, repetiția declanșează pragul
+    # (vezi _comun.PRAG_DENSITATE_IMPLICIT și A4 în PLAN-audit-skill.md).
+    EXPRESII_DENSITATE = [
+        ("Prin urmare, lucrarea merge bine și rezultatul e clar.", "structura"),
+        ("Totodată, lucrarea merge bine și rezultatul e clar.", "structura"),
+        ("De asemenea, lucrarea merge bine și rezultatul e clar.", "structura"),
+        ("Un rezultat impresionant pentru lucrarea noastră de laborator.",
+         "vocabular_corporatist"),
+        ("Am primit o serie de sesizări de la cititori atenți.",
+         "cuantificari_vagi"),
+        ("Este posibil ca lucrarea să întârzie o săptămână întreagă.",
+         "hedging"),
+        ("S-ar putea ca lucrarea să întârzie o săptămână întreagă.",
+         "hedging"),
+    ]
+
+    def _text_dens(self, propozitie):
+        return ((propozitie + " ") * 8
+                + ("Vremea era bună și drumul lung. " * 20))
+
+    def test_expresiile_cu_prag_sunt_prinse_la_repetitie(self):
+        for propozitie, categorie in self.EXPRESII_DENSITATE:
+            cod, iesire = ruleaza_stdin(
+                "check-tipare.py", self._text_dens(propozitie))
+            self.assertEqual(
+                cod, 1,
+                f"expresie neprinsă la repetiție: {propozitie!r}\n{iesire}")
+            self.assertIn(categorie, iesire, propozitie)
+
+    def test_o_aparitie_izolata_de_hedging_nu_declanseaza_prag(self):
+        """Comportament intenționat: o singură apariție sub pragul de
+        densitate nu apare în raport."""
+        text = ("Este posibil ca lucrarea să întârzie. "
+                + "Vremea era bună și drumul lung. " * 60)
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("hedging", iesire,
+                         f"o apariție izolată a fost semnalată:\n{iesire}")
+
 
 class TestGenuriLegitime(unittest.TestCase):
     """Text formal si literar corect nu trebuie stricat de detectoare.
@@ -964,10 +1109,13 @@ class TestGenuriLegitime(unittest.TestCase):
             self.assertIn("modelisme=0/4", linie, f"{fixture}: {iesire}")
 
     def test_nicio_eroare_critica(self):
+        """I4: legit-* ies cu 1 intenționat (semnale minore de familie) —
+        criteriul e zero linii `critic|`/`important|`, nu exit 0."""
         for fixture in self.GENURI:
             cod, iesire = ruleaza("verifica.py", str(FIXTURES / fixture), "--fara-seo")
-            critice = [l for l in iesire.splitlines() if l.startswith("critic|")]
-            self.assertEqual(critice, [], f"{fixture}: text legitim semnalat ca eroare")
+            grave = [l for l in iesire.splitlines()
+                     if l.startswith(("critic|", "important|"))]
+            self.assertEqual(grave, [], f"{fixture}: text legitim semnalat ca eroare")
 
     def test_familiile_raporteaza_fara_sa_penalizeze(self):
         """Juridicul foloseste «constituie» de trei ori, academicul are trei
@@ -982,10 +1130,13 @@ class TestGenuriLegitime(unittest.TestCase):
 
     def test_proza_literara_ramane_intacta(self):
         """Repetitie intentionata, paralelism si dialog cu linie de pauza —
-        niciunul nu e tipar de model."""
+        niciunul nu e tipar de model. Criteriul e I4 (zero linii grave),
+        nu exit 0."""
         cod, iesire = ruleaza("verifica.py", str(FIXTURES / "legit-literar.md"),
                               "--fara-seo")
-        self.assertEqual(cod, 0, f"proza literara semnalata:\n{iesire}")
+        grave = [l for l in iesire.splitlines()
+                 if l.startswith(("critic|", "important|"))]
+        self.assertEqual(grave, [], f"proza literara semnalata grav:\n{iesire}")
 
 
 class TestTrimiteriDocumentatie(unittest.TestCase):
@@ -1087,6 +1238,30 @@ class TestSeo(unittest.TestCase):
         cod, iesire = ruleaza_stdin("check-seo.py", "# Titlu\n\nAcesta eşte textul.")
         self.assertEqual(cod, 1)
         self.assertIn("sedila", iesire)
+
+    def test_bom_nu_ascunde_h1(self):
+        """M4: fișierul cu BOM UTF-8 se citește la fel ca fără BOM — H1-ul
+        e detectat, fără fals `lipsă H1`."""
+        import tempfile
+        continut = ("# Titlu despre centrale termice bune\n\n"
+                    "text despre montaj aici.\n\n"
+                    "## Montajul la bloc\n\nAlte detalii aici.\n")
+        with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
+            f.write(b"\xef\xbb\xbf" + continut.encode("utf-8"))
+            cale_bom = f.name
+        with tempfile.NamedTemporaryFile(suffix=".md", delete=False,
+                                          mode="w", encoding="utf-8") as f:
+            f.write(continut)
+            cale_curat = f.name
+        try:
+            cod_bom, iesire_bom = ruleaza("check-seo.py", cale_bom)
+            _, iesire_curat = ruleaza("check-seo.py", cale_curat)
+        finally:
+            Path(cale_bom).unlink()
+            Path(cale_curat).unlink()
+        self.assertEqual(iesire_bom, iesire_curat,
+                         f"BOM-ul schimbă raportul SEO:\n{iesire_bom}\n---\n{iesire_curat}")
+        self.assertNotIn("lipsă H1", iesire_bom)
 
     def test_virgula_corecta_nu_e_semnalata(self):
         cod, iesire = ruleaza_stdin("check-seo.py", "# Titlu\n\nAceșția sunt corecți.")
@@ -1221,7 +1396,8 @@ class TestSeo(unittest.TestCase):
 class TestContractCLI(unittest.TestCase):
 
     TOATE = ("check-tipare.py", "check-ritm.py", "check-seo.py",
-             "check-modelisme.py", "check-human-voice.py", "verifica.py")
+             "check-modelisme.py", "check-human-voice.py", "check-reclame.py",
+             "verifica.py")
 
     def test_help_pe_toate(self):
         for script in self.TOATE:
@@ -1235,10 +1411,74 @@ class TestContractCLI(unittest.TestCase):
             self.assertEqual(cod, 2, script)
 
 
+class TestParitateFlaguri(unittest.TestCase):
+    """Flag-urile din `verifica.py --help` trebuie documentate în SKILL.md
+    și README.md, iar doc-urile nu trebuie să promită flag-uri inexistente.
+
+    Direcțiile (cerința criticului): (1) orice flag din SKILL/README trebuie să
+    existe în `--help`-ul unui script din skill; (2) toate flagurile din
+    `verifica.py --help` trebuie să apară în SKILL și în blocul „Verification
+    scripts" din README. README se extrage doar din acel bloc, fiindcă restul
+    documentului conține flaguri ale altor unelte (ex. `--read` la Aider).
+    """
+
+    SCRIPTURI = ("verifica", "check-tipare", "check-ritm", "check-modelisme",
+                 "check-seo", "check-human-voice", "check-reclame")
+
+    def _flaguri_help(self):
+        import re
+        cod, iesire = ruleaza("verifica.py", "--help")
+        self.assertEqual(cod, 0)
+        return set(re.findall(r"--[a-z][a-z-]*", iesire))
+
+    def _flaguri_toate_scripturile(self):
+        import re
+        unite = set()
+        for script in self.SCRIPTURI:
+            cod, iesire = ruleaza(script + ".py", "--help")
+            self.assertEqual(cod, 0, script)
+            unite |= set(re.findall(r"--[a-z][a-z-]*", iesire))
+        return unite
+
+    def _flaguri_doc(self, cale, doar_bloc=False):
+        import re
+        text = cale.read_text(encoding="utf-8")
+        if doar_bloc:
+            m = re.search(r"## Verification scripts\n(.*?)(?=\n## )", text, re.S)
+            self.assertIsNotNone(m, "README: lipsește secțiunea Verification scripts")
+            text = m.group(1)
+        return set(re.findall(r"--[a-z][a-z-]*", text))
+
+    def test_flagurile_din_help_sunt_in_skill(self):
+        lipsa = sorted(self._flaguri_help() - {"--help"}
+                       - self._flaguri_doc(RADACINA / "SKILL.md"))
+        self.assertEqual(lipsa, [],
+                         f"flag-uri nedocumentate în SKILL.md: {lipsa}")
+
+    def test_flagurile_din_help_sunt_in_readme(self):
+        lipsa = sorted(self._flaguri_help() - {"--help"}
+                       - self._flaguri_doc(RADACINA / "README.md", doar_bloc=True))
+        self.assertEqual(lipsa, [],
+                         f"flag-uri nedocumentate în README.md: {lipsa}")
+
+    def test_flagurile_din_skill_exista_in_help(self):
+        in_plus = sorted(self._flaguri_doc(RADACINA / "SKILL.md")
+                         - self._flaguri_toate_scripturile())
+        self.assertEqual(in_plus, [],
+                         f"flag-uri din SKILL.md inexistente în --help: {in_plus}")
+
+    def test_flagurile_din_readme_exista_in_help(self):
+        in_plus = sorted(self._flaguri_doc(RADACINA / "README.md", doar_bloc=True)
+                         - self._flaguri_toate_scripturile())
+        self.assertEqual(in_plus, [],
+                         f"flag-uri din README.md inexistente în --help: {in_plus}")
+
+
 def ruleaza_stdin(script, text):
     r = subprocess.run(
         [sys.executable, str(SCRIPTS / script), "-"],
-        input=text, capture_output=True, text=True)
+        input=text, capture_output=True, text=True, encoding="utf-8")
+    _fara_traceback(script, ("-",), r.stderr)
     return r.returncode, r.stdout
 
 
@@ -1247,6 +1487,8 @@ class TestMatriceFixtureuri(unittest.TestCase):
 
     Exit 2 înseamnă eroare de input — adică scriptul nu suportă un fișier
     valid din propriul corpus de test. Asta e defect, indiferent de verdict.
+    I3: tot defect e și un traceback pe stderr — iese tot cu exit 1, deci
+    condiția de exit nu-l prinde; se cere explicit absența lui.
     """
 
     SCRIPTURI = ["check-tipare.py", "check-ritm.py", "check-modelisme.py",
@@ -1256,14 +1498,20 @@ class TestMatriceFixtureuri(unittest.TestCase):
         erori = []
         for fisier in sorted(FIXTURES.glob("*.md")):
             for script in self.SCRIPTURI:
-                cod, iesire = ruleaza(script, str(fisier))
+                cod, iesire, stderr = ruleaza_tot(script, str(fisier))
                 if cod >= 2:
                     erori.append(f"{script} pe {fisier.name}: exit {cod}\n{iesire}")
-            cod, iesire = ruleaza("verifica.py", "--fara-seo", "--human-voice",
-                                  str(fisier))
+                if "Traceback" in stderr:
+                    erori.append(f"{script} pe {fisier.name}: "
+                                 f"traceback pe stderr\n{stderr}")
+            cod, iesire, stderr = ruleaza_tot(
+                "verifica.py", "--fara-seo", "--human-voice", str(fisier))
             if cod >= 2:
                 erori.append(f"verifica.py --fara-seo --human-voice "
                              f"pe {fisier.name}: exit {cod}\n{iesire}")
+            if "Traceback" in stderr:
+                erori.append(f"verifica.py --fara-seo --human-voice "
+                             f"pe {fisier.name}: traceback pe stderr\n{stderr}")
         self.assertEqual(erori, [],
                          "scripturile au dat eroare de input pe fixture-uri valide:\n"
                          + "\n".join(erori))
@@ -1279,8 +1527,18 @@ class TestMatriceFixtureuri(unittest.TestCase):
 def ruleaza_stdin_cu_flags(script, text, *flags):
     r = subprocess.run(
         [sys.executable, str(SCRIPTS / script), "-", *flags],
-        input=text, capture_output=True, text=True)
+        input=text, capture_output=True, text=True, encoding="utf-8")
+    _fara_traceback(script, ("-", *flags), r.stderr)
     return r.returncode, r.stdout
+
+
+def ruleaza_tot(script, *argumente, text=None):
+    """Variantă cu stderr inclus, fără aserțiune — pentru testele care
+    verifică explicit stderr (I3, A8, I1)."""
+    r = subprocess.run(
+        [sys.executable, str(SCRIPTS / script), *argumente],
+        input=text, capture_output=True, text=True, encoding="utf-8")
+    return r.returncode, r.stdout, r.stderr
 
 
 if __name__ == "__main__":

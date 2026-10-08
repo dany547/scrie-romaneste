@@ -482,6 +482,9 @@ def main():
     i = 0
     while i < len(argv):
         arg = argv[i]
+        if arg in ("--platform", "--brand") and i + 1 >= len(argv):
+            print(f"eroare: {arg} cere o valoare", file=sys.stderr)
+            return 2
         if arg == "--platform" and i + 1 < len(argv):
             platforma = argv[i + 1].lower()
             if platforma not in ("google", "meta"):
@@ -502,7 +505,7 @@ def main():
         return 2
     try:
         text = _comun.citeste_intrare(sursa)
-    except OSError as error:
+    except (OSError, UnicodeDecodeError) as error:
         print(f"eroare: {error}", file=sys.stderr)
         return 2
 

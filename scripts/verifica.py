@@ -14,6 +14,7 @@ references/*/scoring-checklist.md. Un scor mic nu garantează un text bun.
 Usage:
     verifica.py <fisier_sau_->
     verifica.py <fisier> --fara-seo    # text literar / fără destinație online
+                                       # (sedila se verifică mereu, e normă)
     verifica.py [optiuni] <fisier_sau_->   # ordinea optiuni/fișier nu contează
     verifica.py <fisier> --scor        # doar scorurile, fără potriviri
     verifica.py <fisier> --json        # output structurat pentru procesare
@@ -26,7 +27,8 @@ Usage:
 Exit codes:
     0 = curat pe toate verificările
     1 = cel puțin un semnal raportat
-    2 = eroare de input
+    2 = eroare de input (inclusiv intrare non-UTF-8 — convertește cu
+        iconv, nu reîncerca cu escaping)
 """
 import json
 import sys
@@ -58,7 +60,16 @@ def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False,
     semnale_r = ritm.semnale(a) if a["fraze"] >= 5 else []
     scor_r = ritm.calculeaza_scor(semnale_r)
 
-    probleme_seo = seo.verifica(text) if cu_seo else []
+    rez_reclame = (reclame.analizeaza(text, platform_forta=platforma,
+                                      brand=brand) if cu_reclame else None)
+
+    if cu_seo and not (rez_reclame and rez_reclame["elemente"] > 0):
+        probleme_seo = seo.verifica(text)
+    else:
+        # --fara-seo sau anunț real (--reclame cu elemente detectate):
+        # sedila e normă, nu SEO — se verifică mereu. Un articol rulat
+        # din greșeală cu --reclame (elemente == 0) ia stratul SEO complet.
+        probleme_seo = seo.verifica_sedila(text)
 
     return {
         "cuvinte": cuvinte,
@@ -70,8 +81,7 @@ def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False,
                  "text_prea_scurt": a["fraze"] < 5},
         "seo": {"probleme": probleme_seo, "verificat": cu_seo},
         "human_voice": human_voice.analizeaza(text) if cu_human_voice else None,
-        "reclame": (reclame.analizeaza(text, platform_forta=platforma,
-                                       brand=brand) if cu_reclame else None),
+        "reclame": rez_reclame,
         "scor_automat": scor_t + scor_m + scor_r,
         "scor_maxim": SCOR_MAXIM,
     }
@@ -194,18 +204,27 @@ def main():
             return 2
     platforma = None
     if "--platform" in argv:
-        platforma = argv[argv.index("--platform") + 1].lower()
+        try:
+            platforma = argv[argv.index("--platform") + 1].lower()
+        except IndexError:
+            print("eroare: --platform cere o valoare (google sau meta)",
+                  file=sys.stderr)
+            return 2
         if platforma not in ("google", "meta"):
             print("eroare: --platform acceptă doar google sau meta",
                   file=sys.stderr)
             return 2
     brand = None
     if "--brand" in argv:
-        brand = argv[argv.index("--brand") + 1]
+        try:
+            brand = argv[argv.index("--brand") + 1]
+        except IndexError:
+            print("eroare: --brand cere o valoare", file=sys.stderr)
+            return 2
 
     try:
         text = _comun.citeste_intrare(sursa)
-    except OSError as e:
+    except (OSError, UnicodeDecodeError) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 

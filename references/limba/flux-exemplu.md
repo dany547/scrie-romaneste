@@ -103,5 +103,10 @@ ultima frază închide pe fapt, nu pe formulă.
 
 Reverifici textul final (`scor_automat=0/13`), apoi treci lista din `SKILL.md`:
 fapte confirmate, fără placeholdere rămase, contractul respectat — registru
-direct, `tu`, 81 de cuvinte, cititorul care compară. Livrezi textul curat, fără
-metacomentarii, și semnalezi separat orice `[DE COMPLETAT: …]`.
+direct, `tu`, 81 de cuvinte, cititorul care compară. `0/13` nu spune că vorbele
+există: înainte de livrare citești textul integral pentru acord, verbe și vorbele
+pe care nu le poți susține. Doar alea, câte una:
+`https://dexonline.ro/definitie/CUVÂNT` (`tipare-ro.md` §cuvant_inexistent).
+Livrezi textul curat, fără metacomentarii, și semnalezi separat orice
+`[DE COMPLETAT: …]`.
+Fișierul scris nu e livrarea: la rescriere, livrabilul e textul din răspuns.
