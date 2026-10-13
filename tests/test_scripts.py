@@ -1722,8 +1722,8 @@ class TestCuvinte(unittest.TestCase):
         self.assertNotIn("|clienti|", iesire)
 
     def test_invenții_plauzibile_si_romgleza_din_textele_grele_sunt_listate(self):
-        # Adevărul de bază: fiecare formă lipsește de pe dexonline („nu este în
-        # dicționar" / 404) la data scrierii. Sunt derivate care sună a română,
+        # Adevărul de bază: pentru fiecare formă, pagina dexonline spune „nu este
+        # în dicționar" (verificat în corpul răspunsului, nu după statusul HTTP). Sunt derivate care sună a română,
         # nu mostre evidente. Capcanele valide absente din Rospell apar și ele în
         # listă: lista e de verificat, nu verdict.
         asteptate = {

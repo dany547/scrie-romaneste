@@ -255,6 +255,13 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.10.1** — Harder checks and a licence file. Adds the MIT `LICENSE` (the
+  Rospell word list keeps MPL 1.1 / LGPL 2.1). A benchmark of plausible invented
+  Romanian words and romgleză (`tests/fixtures/cuvinte-grele-*.md`, ground truth
+  checked on dexonline) pins what `check-cuvinte.py` must list. The dexonline
+  procedure now covers a bodyless HTTP 404: retry once with a browser
+  user-agent, and if the body is still missing the form stays unclear, not
+  "nonexistent". 181 tests.
 - **v0.10.0** — A lexicon filter for words that may not exist. New
   `check-cuvinte.py` lists the forms missing from a bundled Rospell-derived
   lexicon (`scripts/lexicon/`, MPL 1.1 / LGPL 2.1, the rest of the repo stays
