@@ -170,7 +170,12 @@ def main(argv=None):
 
     try:
         text = _comun.citeste_intrare(sursa)
-        lexicon = incarca_lexicon(cale_lexicon)
+        try:
+            lexicon = incarca_lexicon(cale_lexicon)
+        except (OSError, EOFError) as e:
+            print(f"eroare: lexiconul {cale_lexicon} nu poate fi citit ({e}); "
+                  "vezi --lexicon / SCRIE_RO_LEXICON", file=sys.stderr)
+            return 2
         allow = incarca_allow(cale_allow) if cale_allow else frozenset()
         allow = allow | incarca_completari(cale_lexicon)
     except (OSError, EOFError) as e:

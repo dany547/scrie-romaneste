@@ -452,7 +452,12 @@ care conține o bară.
   altă listă. `scripts/lexicon/completari.txt` are formele românești confirmate
   pe dexonline și lipsă din Rospell. Peste 30% forme lipsă (text englezesc,
   cod, log) raportul e o singură linie `info|cuvinte|text predominant
-  neromânesc`, nu o listă. Fără lexicon: exit 2.
+  neromânesc`, nu o listă (exit 1 și aici, sub 40 de forme unice nu se aplică).
+  Ieșirea: liniile `important|cuvant_de_verificat|L<linie>|<formă> xN|→ <url>`,
+  `mai_sunt|N forme neafișate (--tot)` când e depășit plafonul, apoi `---`,
+  `total=…` și o linie `nota:`; citește și de pe stdin (`-`). Exit: 0 nimic de
+  verificat, 1 forme de verificat (caz normal, nu eșec), 2 eroare de input sau
+  lexicon indisponibil.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
 - `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),

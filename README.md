@@ -223,7 +223,7 @@ python3 scripts/check-tipare.py <file>      # AI clichés and calques only
 python3 scripts/check-tipare.py <file> --tot  # also show sub-threshold matches
 python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
-python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon, to check on dexonline
+python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon, to check on dexonline (exit 0 clean, 1 forms to check, 2 input/lexicon error)
 python3 scripts/check-cuvinte.py <file> --allow terms.txt --tot  # confirmed terms to skip; show all (default cap 10); --lexicon PATH overrides the bundled list
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
@@ -254,6 +254,18 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.10.0** — A lexicon filter for words that may not exist. New
+  `check-cuvinte.py` lists the forms missing from a bundled Rospell-derived
+  lexicon (`scripts/lexicon/`, MPL 1.1 / LGPL 2.1, the rest of the repo stays
+  MIT), each with its dexonline address. It is a list to check, not a verdict:
+  no score, not part of `verifica.py`. Capped at 10 forms (`--tot` shows all),
+  `--allow` for confirmed terms, `--lexicon` for another list, one info line
+  instead of a list when the text is mostly not Romanian. Sentence-initial words
+  are checked; mid-sentence proper names are not. `lexicon/completari.txt` holds
+  dexonline-confirmed forms that Rospell lacks. The dexonline procedure
+  (`tipare-ro.md`) now says how to read the page, what to do with inflected
+  forms and anglicisms, and that a replacement must carry the same sense and be
+  looked up too. 171 tests.
 - **v0.9.0** — Invented words, and a definition of done. The scripts, including
   `--human-voice`, have no dictionary: a clean report does not prove the words
   exist. Before delivery, read the whole text for invented words, agreement and

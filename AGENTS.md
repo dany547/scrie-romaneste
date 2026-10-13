@@ -18,7 +18,7 @@ Punct de intrare: `scripts/verifica.py`; documentația de contract: `SKILL.md` +
 - `python3 scripts/verifica.py <fișier>` (citește și de pe stdin): `--json`, `--scor`, `--human-voice`,
   `--reclame`, `--fara-seo`
 - Scripturi individuale: `check-tipare.py`, `check-modelisme.py`, `check-ritm.py`, `check-seo.py`,
-  `check-human-voice.py`, `check-reclame.py`
+  `check-human-voice.py`, `check-reclame.py`, `check-cuvinte.py` (lista formelor lipsă din lexiconul din `scripts/lexicon/`, fără scor, nu intră în `verifica.py`)
 
 ## CI / release
 - `.github/workflows/tests.yml` (push/PR pe `main`): testele unittest + verificări de contract pe fixture-uri
