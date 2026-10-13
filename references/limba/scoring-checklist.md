@@ -51,8 +51,8 @@ pleonasme, diacritice cu virgulă (`ș`/`ț`) nu cu sedilă.
 informative — scriptul vede două cuvinte în aceeași frază, nu sensul; verifică-le tu și
 ignoră semnalul dacă ambele sunt folosite corect.
 
-**Cuvinte inexistente:** blocante, și nevăzute de script. Un raport curat nu le exclude.
-Citește textul integral. Vorbele de care ești sigur le lași. Pe cele nesigure le cauți
+**Cuvinte inexistente:** blocante, și nevăzute de `verifica.py`. Un raport curat nu le exclude.
+`scripts/check-cuvinte.py` listează formele de verificat. Citește textul integral. Vorbele de care ești sigur le lași. Pe cele nesigure le cauți
 câte una, `https://dexonline.ro/definitie/CUVÂNT` — `tipare-ro.md` §cuvant_inexistent.
 `arămriu` și `petechelui` sunt mostre de formă, nu o listă de interzis.
 

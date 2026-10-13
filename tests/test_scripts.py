@@ -1423,7 +1423,7 @@ class TestParitateFlaguri(unittest.TestCase):
     """
 
     SCRIPTURI = ("verifica", "check-tipare", "check-ritm", "check-modelisme",
-                 "check-seo", "check-human-voice", "check-reclame")
+                 "check-seo", "check-human-voice", "check-reclame", "check-cuvinte")
 
     def _flaguri_help(self):
         import re
@@ -1539,6 +1539,117 @@ def ruleaza_tot(script, *argumente, text=None):
         [sys.executable, str(SCRIPTS / script), *argumente],
         input=text, capture_output=True, text=True, encoding="utf-8")
     return r.returncode, r.stdout, r.stderr
+
+
+class TestCuvinte(unittest.TestCase):
+    """check-cuvinte.py: listă de forme de verificat, nu verdict."""
+
+    @classmethod
+    def setUpClass(cls):
+        import gzip
+        import tempfile
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.lex = Path(cls.tmp.name) / "lex.txt.gz"
+        # forme pliate, ca în lexiconul real
+        forme = ["pereti", "erau", "tavanul", "purta", "urma", "etajul", "clientii",
+                 "echipa", "proiectul", "timp", "livrat", "lansat", "vezi"]
+        with gzip.open(cls.lex, "wt", encoding="utf-8") as f:
+            f.write("\n".join(sorted(forme)))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def _ruleaza(self, text, *extra, nume="t.md"):
+        cale = Path(self.tmp.name) / nume
+        cale.write_text(text, encoding="utf-8")
+        return ruleaza("check-cuvinte.py", str(cale), "--lexicon", str(self.lex), *extra)
+
+    def test_forma_lipsa_e_listata_cu_url_dexonline(self):
+        cod, iesire = self._ruleaza("Pereții erau zzgrumpf.\n")
+        self.assertEqual(cod, 1)
+        self.assertIn("important|cuvant_de_verificat|L1|zzgrumpf|"
+                      "→ https://dexonline.ro/definitie/zzgrumpf", iesire)
+
+    def test_diacriticele_nu_conteaza(self):
+        cod, iesire = self._ruleaza("Pereti erau; clienții purta; urma.\n")
+        self.assertEqual(cod, 0, iesire)
+        self.assertIn("0 forme de verificat", iesire)
+
+    def test_ignora_majuscule_cod_url_scurte(self):
+        text = ("Google a lansat Zzqxv. Vezi https://exemplu.ro/qqwwee si "
+                "`qqwweea` si ARNN.\n```\nqqwweeb zzqq\n```\nPurta urma.\n")
+        cod, iesire = self._ruleaza(text)
+        self.assertEqual(cod, 0, iesire)
+
+    def test_numara_aparitiile_si_da_linia_primei(self):
+        cod, iesire = self._ruleaza("Urma.\nzzgrumpf si zzgrumpf, zzgrumpf.\n")
+        self.assertIn("|L2|zzgrumpf x3|", iesire)
+
+    def test_compusul_se_verifica_pe_parti(self):
+        cod, iesire = self._ruleaza("Urma zzgrumpf-urile.\n")
+        self.assertIn("|zzgrumpf-urile|→ https://dexonline.ro/definitie/zzgrumpf",
+                      iesire)
+
+    def test_allow_scoate_termenul(self):
+        allow = Path(self.tmp.name) / "allow.txt"
+        allow.write_text("# brand\nZzgrumpf\n", encoding="utf-8")
+        cod, iesire = self._ruleaza("Urma zzgrumpf.\n", "--allow", str(allow))
+        self.assertEqual(cod, 0, iesire)
+
+    def test_plafon_de_afisare_si_tot(self):
+        text = " ".join(f"qqwwe{c}{c}x" for c in "abcdefghijklmn") + "\n"
+        _, scurt = self._ruleaza(text)
+        self.assertEqual(scurt.count("important|cuvant_de_verificat"), 10)
+        self.assertIn("mai_sunt|4 forme neafișate", scurt)
+        _, lung = self._ruleaza(text, "--tot")
+        self.assertEqual(lung.count("important|cuvant_de_verificat"), 14)
+
+    def test_iesire_deterministica(self):
+        t = "zzb zza zzc zzb\n"
+        self.assertEqual(self._ruleaza(t), self._ruleaza(t))
+
+    def test_stdin(self):
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "check-cuvinte.py"), "-", "--lexicon",
+             str(self.lex)], input="Urma zzgrumpf.\n".encode("utf-8"),
+            capture_output=True)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("zzgrumpf", r.stdout.decode("utf-8"))
+
+    def test_lexicon_lipsa_e_exit_2_fara_traceback(self):
+        cod, _ = ruleaza("check-cuvinte.py", str(FIXTURES / "bun-articol.md"),
+                         "--lexicon", "/nu/exista.gz")
+        self.assertEqual(cod, 2)
+
+    def test_flag_fara_valoare_e_exit_2(self):
+        cod, _ = ruleaza("check-cuvinte.py", str(FIXTURES / "bun-articol.md"),
+                         "--allow")
+        self.assertEqual(cod, 2)
+
+    def test_procedura_dexonline_e_in_doc(self):
+        """Verdictul dexonline decide; înlocuirea se verifică și ea."""
+        tipare = (RADACINA / "references" / "limba" / "tipare-ro.md").read_text(
+            encoding="utf-8")
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Ce faci după verdictul dexonline", tipare)
+        self.assertIn("înlocuirea se verifică și ea", tipare)
+        self.assertIn("check-cuvinte.py", skill)
+        self.assertIn("§cuvant_inexistent", skill)
+
+    def test_lexiconul_real_prinde_mostrele_si_lasa_textul_curat(self):
+        cod, iesire = ruleaza("check-cuvinte.py",
+                              str(FIXTURES / "cuvinte-inventate.md"))
+        self.assertEqual(cod, 1)
+        self.assertIn("|arămriu|", iesire)
+        self.assertIn("|petechelui|", iesire)
+        self.assertNotIn("|clienții", iesire)
+        cod, iesire = ruleaza("check-cuvinte.py", str(FIXTURES / "bun-articol.md"))
+        self.assertEqual(cod, 0, iesire)
+        cod, iesire = ruleaza("check-cuvinte.py",
+                              str(FIXTURES / "rau-fara-diacritice.md"))
+        self.assertNotIn("|daca|", iesire)
+        self.assertNotIn("|clienti|", iesire)
 
 
 if __name__ == "__main__":

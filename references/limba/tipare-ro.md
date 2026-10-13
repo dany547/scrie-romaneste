@@ -17,7 +17,12 @@ clipește.
 
 `verifica.py`, `check-tipare.py`, `check-modelisme.py` și `--human-voice` nu
 au dicționar. `scor_automat=0/13` și `AI_PATTERN_SCORE=0/30` nu dovedesc că
-vorbele există. Nu băga mostrele de mai jos într-o listă de interdicții și nu
+vorbele există. `scripts/check-cuvinte.py` e separat: listează formele care
+lipsesc din lexiconul Rospell, cu adresa dexonline. E o listă de verificat,
+nu verdict: Rospell (2013) nu are neologisme și forme rare, iar un cuvânt
+inventat care coincide cu o formă reală trece. Cauți pe dexonline doar ce
+listează (și ce te îndoiești singur); forma pe care dexonline o declară
+inexistentă o corectezi pe sens, nu din raport. Nu băga mostrele de mai jos într-o listă de interdicții și nu
 le adăuga în regex: prind un caz, nu clasa.
 
 | Formă | Ce e, ca formă | Nu face |
@@ -57,6 +62,32 @@ Cum citești răspunsul:
   dicționar", nu statusul.
 
 Nu înlocui din burtă și nu livra o formă pe care n-o poți susține.
+
+### Ce faci după verdictul dexonline
+
+Lexiconul (`scripts/check-cuvinte.py`) doar ridică întrebarea. Răspunsul îl dă
+dexonline, sursa pentru „există în română". Un anglicism nu e greșit în sine:
+`review`, `smart` sau `living` au intrare pe dexonline și rămân. `gamutul`
+nu are, deci nu intră în text așa.
+
+| Ce găsești pe dexonline | Ce faci |
+|---|---|
+| Intrare sau paradigmă care conține forma | Vorba e acceptată. Nu o atingi. Dacă lexiconul o ratează de regulă (`dronele`, `inchi`), e lacună a lexiconului, nu a textului. |
+| „Nu este în dicționar", iar forma e stem străin + desinență românească (`gamutul`, `reviewerul`, `livingul`) | Romgleză. Cauți **lema** (fără articol și desinență) înainte să concluzionezi: `living` există, deci `livingul` e forma lui articulată; `gamut` nu există, deci `gamutul` se înlocuiește. |
+| „Nu este în dicționar", iar forma e românească (`subumflată`, `hiperrealist`) | Nu o corectezi singur. Cauți forma de bază sau sinonimul pe dexonline; dacă nu găsești o formă atestată cu același sens, îl întrebi pe utilizator. |
+| Nume de marcă, produs sau standard (`webOS`, `eARC`, `iPad`), termen tehnic confirmat de utilizator | Nu e cuvânt de dicționar. Lași forma și, dacă se repetă, o treci în `--allow`. |
+| Pagină goală, cod HTTP, sugestii fără intrare | Neclar. Nu decide; întreabă. |
+
+Când forma nu există și trebuie înlocuită, **înlocuirea se verifică și ea** pe
+dexonline: cauți forma propusă (`gamă`, `cromatic`), citești definiția și
+confirmi că sensul se potrivește cu cel din text. Dexonline dă sugestii sub
+„nu este în dicționar"; o sugestie nu e confirmare. Fără o formă atestată cu
+același sens, nu livra o înlocuire din memorie și întreabă. Nu copia
+definiția în text.
+
+Exemplu: `gamutul` (L5, „spațiul de culori al ecranului") → dexonline: forma
+nu există → `gamut` nu există nici el → propui `gama de culori`, cauți
+`gamă` și `cromatic` pe dexonline, confirmi sensul → corectezi în text.
 
 ---
 

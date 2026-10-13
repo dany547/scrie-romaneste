@@ -46,10 +46,12 @@ Alege modul din cerință. Dacă nu e clar, e **rescriere**.
   (`acord_numerale`: „acești milioane", „câțiva sute"); restul, inclusiv
   „doi/două" și „primii/primele", rămâne la recitirea manuală — ca și topica
   și alegerea lexicală. Nici `verifica.py`, nici `--human-voice` nu au
-  dicționar: un raport curat nu dovedește că vorbele există. `arămriu` și
-  `petechelui` trec fără semnal. Recitește textul integral, în special
-  titlul și excerptul, pentru acord, forme verbale și cuvinte inexistente,
-  separat de script (`references/limba/tipare-ro.md` §cuvant_inexistent).
+  dicționar: un raport curat nu dovedește că vorbele există. Rulează separat
+  `scripts/check-cuvinte.py <fișier>`: listează formele care lipsesc din
+  lexiconul Rospell, de verificat pe dexonline (nu e verdict). Recitește
+  oricum textul integral, în special titlul și excerptul, pentru acord, forme
+  verbale și cuvinte inexistente (`references/limba/tipare-ro.md`
+  §cuvant_inexistent).
 - **editare** — modificări minime și țintite în fișier. Păstrează intacte
   pasajele care sunt deja bune. Nu rescrie ce nu e stricat. Corecția intră
   în fișierul indicat de utilizator: nu lăsa varianta bună doar în răspuns
@@ -133,9 +135,10 @@ praguri):
   datelor de business — nume, adrese, telefoane, prețuri, autori: dacă nu le ai
   confirmate, cere-le sau lasă `[DE COMPLETAT: …]`.
 - Diacritice cu virgulă (`ș`, `ț`), nu cu sedilă (`ş`, `ţ`).
-- Nu livra un cuvânt pe care nu-l poți susține. Scripturile nu au dicționar;
-  `arămriu` și `petechelui` trec curate. Doar vorbele de care nu ești sigur,
-  câte una, nu tot textul: `https://dexonline.ro/definitie/CUVÂNT`.
+- Nu livra un cuvânt pe care nu-l poți susține. `verifica.py` nu are
+  dicționar; `scripts/check-cuvinte.py` dă lista formelor lipsă din lexicon.
+  Cauți doar acele forme (și vorbele de care nu ești sigur), câte una, nu tot
+  textul: `https://dexonline.ro/definitie/CUVÂNT`.
   „Nu este în dicționar" înseamnă că forma nu există; sugestiile nu sunt
   confirmare. Nu înlocui din burtă (`references/limba/tipare-ro.md`
   §cuvant_inexistent).
@@ -233,9 +236,11 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    - textul a fost citit integral, nu doar pe semnalele din raport. Cuvintele
      care nu există, acordurile neprinse de script și formele verbale greșite
      sunt corectate. `scor_automat` și `--human-voice` nu fac controlul ăsta:
-     `arămriu` și `petechelui` ies curate. Vorbele nesigure se caută pe dex,
-     câte una (`https://dexonline.ro/definitie/CUVÂNT`); o formă cu „nu este
-     în dicționar" nu se livrează (`references/limba/tipare-ro.md`
+     `arămriu` și `petechelui` ies curate. Rulează `scripts/check-cuvinte.py`
+     pe text; formele listate (și vorbele nesigure) se caută pe dex, câte una
+     (`https://dexonline.ro/definitie/CUVÂNT`); o formă cu „nu este
+     în dicționar" nu se livrează, iar înlocuirea ei se verifică tot pe dex
+     (tabelul din `references/limba/tipare-ro.md` §cuvant_inexistent) (`references/limba/tipare-ro.md`
      §cuvant_inexistent);
    - semnalele stilistice (ritm, concluzie, paralelism, listă) au fost
      recitite în context și păstrate sau tăiate deliberat;
@@ -438,6 +443,13 @@ care conține o bară.
   (acțiune + rezultat fără produs în propoziție). Limitele oficiale și formatul:
   `references/reclame/platforme.md`. Flags: `--platform google|meta`,
   `--brand "Nume"`.
+- `check-cuvinte.py` — formele care lipsesc din lexiconul Rospell
+  (`scripts/lexicon/`, MPL/LGPL, nu MIT), cu adresa dexonline pentru fiecare.
+  Nu intră în `verifica.py` și nu are scor. Lipsa din lexicon nu e verdict:
+  Rospell (2013) nu are tot vocabularul, iar un cuvânt inventat care
+  coincide cu o formă reală trece. Plafon 10 forme afișate (`--tot` le dă pe
+  toate), `--allow fișier` pentru termeni confirmați, `--lexicon cale` pentru
+  altă listă. Fără lexicon: exit 2.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
 - `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),

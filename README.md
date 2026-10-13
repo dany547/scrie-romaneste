@@ -198,6 +198,9 @@ scrie-romaneste/
 │   ├── check-tipare.py             # AI clichés, calques, generation artefacts, non-normative forms
 │   ├── check-human-voice.py        # Conversational filler, punchlines, promo voice, contamination
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
+│   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> dexonline lookup list
+│   ├── construieste-lexicon.py     # Maintainer only: rebuild lexicon/ from Rospell (needs unmunch)
+│   ├── lexicon/                    # lexicon-ro.txt.gz + LICENTA-ROSPELL.txt (MPL/LGPL, not MIT)
 │   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
 │   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing
@@ -220,6 +223,8 @@ python3 scripts/check-tipare.py <file>      # AI clichés and calques only
 python3 scripts/check-tipare.py <file> --tot  # also show sub-threshold matches
 python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
+python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon, to check on dexonline
+python3 scripts/check-cuvinte.py <file> --allow terms.txt --tot  # confirmed terms to skip; show all (default cap 10); --lexicon PATH overrides the bundled list
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
 python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, empty claims
@@ -389,4 +394,6 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## License
 
-MIT
+MIT, except `scripts/lexicon/lexicon-ro.txt.gz`: a word list derived from the
+Rospell Romanian dictionary (2005-2013 Rospell Team), used under MPL 1.1 /
+LGPL 2.1. See `scripts/lexicon/LICENTA-ROSPELL.txt`.
