@@ -265,7 +265,7 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
   dexonline-confirmed forms that Rospell lacks. The dexonline procedure
   (`tipare-ro.md`) now says how to read the page, what to do with inflected
   forms and anglicisms, and that a replacement must carry the same sense and be
-  looked up too. 179 tests.
+  looked up too. 180 tests.
 - **v0.9.0** — Invented words, and a definition of done. The scripts, including
   `--human-voice`, have no dictionary: a clean report does not prove the words
   exist. Before delivery, read the whole text for invented words, agreement and

@@ -37,6 +37,7 @@ import gzip
 import os
 import re
 import sys
+import zlib
 from pathlib import Path
 
 import _comun
@@ -178,7 +179,7 @@ def main(argv=None):
         text = _comun.citeste_intrare(sursa)
         try:
             lexicon = incarca_lexicon(cale_lexicon)
-        except (OSError, EOFError, UnicodeDecodeError) as e:
+        except (OSError, EOFError, UnicodeDecodeError, zlib.error) as e:
             print(f"eroare: lexiconul {cale_lexicon} nu poate fi citit ({e}); "
                   "vezi --lexicon / SCRIE_RO_LEXICON", file=sys.stderr)
             return 2
@@ -189,7 +190,7 @@ def main(argv=None):
                   file=sys.stderr)
             return 2
         allow = allow | incarca_completari(cale_lexicon)
-    except (OSError, EOFError, UnicodeDecodeError) as e:
+    except (OSError, EOFError, UnicodeDecodeError, zlib.error) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 

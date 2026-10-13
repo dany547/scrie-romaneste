@@ -1747,6 +1747,18 @@ class TestCuvinte(unittest.TestCase):
         self.assertEqual(cod, 2)
         self.assertIn("eroare: lexiconul", eroare)
 
+    def test_lexicon_gzip_cu_date_corupte_e_exit_2_fara_traceback(self):
+        import gzip as _gz
+        brut = bytearray(_gz.compress(b"abc " * 5000))
+        brut[20:30] = b"\xff" * 10
+        cale = Path(self.tmp.name) / "lex-corupt.txt.gz"
+        cale.write_bytes(bytes(brut))
+        cod, eroare = self._ruleaza_stderr(str(FIXTURES / "bun-articol.md"),
+                                           "--lexicon", str(cale))
+        self.assertEqual(cod, 2)
+        self.assertIn("eroare: lexiconul", eroare)
+        self.assertNotIn("Traceback", eroare)
+
     def test_allow_non_utf8_e_exit_2_fara_traceback(self):
         cale = Path(self.tmp.name) / "allow-bad.txt"
         cale.write_bytes(b"\xff\xfe")
