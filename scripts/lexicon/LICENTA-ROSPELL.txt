@@ -3,8 +3,9 @@ expandate cu `unmunch` și pliate fără diacritice (vezi construieste-lexicon.p
 
 Acest fișier de date NU e sub licența MIT a restului repo-ului. Rămâne sub
 licența Rospell: tri-licență GPL 2.0 / LGPL 2.1 / MPL 1.1. Se folosește sub
-MPL 1.1 sau LGPL 2.1 (la alegere). Textele integrale ale licențelor sunt în
-arhiva originală Rospell: http://rospell.sourceforge.net
+MPL 1.1 sau LGPL 2.1 (la alegere). Textele integrale ale acestor licențe sunt
+în acest director: MPL-1.1.txt și LGPL-2.1.txt. Sursa originală:
+http://rospell.sourceforge.net
 
 Nota originală a pachetului urmează.
 ----------------------------------------------------------------------

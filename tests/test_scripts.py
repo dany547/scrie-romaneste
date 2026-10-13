@@ -1623,8 +1623,12 @@ class TestCuvinte(unittest.TestCase):
         self.assertEqual(lung.count("important|cuvant_de_verificat"), 14)
 
     def test_iesire_deterministica(self):
-        t = "zzb zza zzc zzb\n"
-        self.assertEqual(self._ruleaza(t), self._ruleaza(t))
+        t = "zzbbq zzaaq zzccq zzbbq\n"
+        rulari = [self._ruleaza(t) for _ in range(2)]
+        self.assertEqual(rulari[0], rulari[1])
+        ordine = [l.split("|")[3] for l in rulari[0][1].splitlines()
+                  if l.startswith("important|")]
+        self.assertEqual(ordine, ["zzbbq x2", "zzaaq", "zzccq"])
 
     def test_stdin(self):
         r = subprocess.run(
@@ -1662,8 +1666,13 @@ class TestCuvinte(unittest.TestCase):
         engleza = " ".join(f"engword{c}{d}x" for c in "abcdefg" for d in "abcdefg")
         cod, iesire = self._ruleaza(engleza + " " + " ".join(ro[:3]) + "\n")
         self.assertEqual(cod, 1)
-        self.assertIn("info|cuvinte|text predominant neromânesc", iesire)
-        self.assertNotIn("important|cuvant_de_verificat", iesire)
+        self.assertEqual(iesire.splitlines(), [
+            "info|cuvinte|text predominant neromânesc: 49 din 52 forme unice (94%) "
+            "lipsesc din lexicon; lista nu se afișează (--tot o dă)",
+            "---",
+            "total=49 forme de verificat | 52 cuvinte | lexicon=13 forme",
+        ])
+        self.assertNotIn("nota:", iesire)
 
     def test_tot_listeaza_chiar_si_textul_neromanesc(self):
         engleza = " ".join(f"engword{c}{d}x" for c in "abcdefg" for d in "abcdefg")
@@ -1711,6 +1720,72 @@ class TestCuvinte(unittest.TestCase):
                               str(FIXTURES / "rau-fara-diacritice.md"))
         self.assertNotIn("|daca|", iesire)
         self.assertNotIn("|clienti|", iesire)
+
+    def _ruleaza_stderr(self, *argumente):
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "check-cuvinte.py"), *argumente],
+            capture_output=True, text=True, encoding="utf-8")
+        _fara_traceback("check-cuvinte.py", argumente, r.stderr)
+        return r.returncode, r.stderr
+
+    def test_lexicon_gzip_non_utf8_e_exit_2_fara_traceback(self):
+        import gzip
+        cale = Path(self.tmp.name) / "lex-bad-utf8.txt.gz"
+        with gzip.open(cale, "wb") as f:
+            f.write(b"\xff\xfe\n")
+        cod, eroare = self._ruleaza_stderr(str(FIXTURES / "bun-articol.md"),
+                                           "--lexicon", str(cale))
+        self.assertEqual(cod, 2)
+        self.assertIn("eroare: lexiconul", eroare)
+        self.assertIn(str(cale), eroare)
+
+    def test_lexicon_gzip_stricat_e_exit_2_fara_traceback(self):
+        cale = Path(self.tmp.name) / "lex-nu-e-gzip.txt.gz"
+        cale.write_bytes(b"nu sunt gzip\n")
+        cod, eroare = self._ruleaza_stderr(str(FIXTURES / "bun-articol.md"),
+                                           "--lexicon", str(cale))
+        self.assertEqual(cod, 2)
+        self.assertIn("eroare: lexiconul", eroare)
+
+    def test_allow_non_utf8_e_exit_2_fara_traceback(self):
+        cale = Path(self.tmp.name) / "allow-bad.txt"
+        cale.write_bytes(b"\xff\xfe")
+        cod, eroare = self._ruleaza_stderr(str(FIXTURES / "bun-articol.md"),
+                                           "--lexicon", str(self.lex),
+                                           "--allow", str(cale))
+        self.assertEqual(cod, 2)
+        self.assertIn("eroare: fișierul --allow", eroare)
+        self.assertIn(str(cale), eroare)
+
+    def test_replica_cu_liniuta_dialog_e_inceput_de_propozitie(self):
+        text = "— Zzgrumpfarea purta urma.\n– Zzfrumpfarea purta.\n- Zzgrimpfarea purta.\n"
+        cod, iesire = self._ruleaza(text)
+        self.assertEqual(cod, 1)
+        for f in ("Zzgrumpfarea", "Zzfrumpfarea", "Zzgrimpfarea"):
+            self.assertIn(f"|{f}", iesire)
+
+    def test_compus_cu_capitala_la_inceput_de_propozitie_e_verificat(self):
+        cod, iesire = self._ruleaza("Zzgrumpf-Zzfrumpf a venit.\n")
+        self.assertEqual(cod, 1)
+        self.assertIn("|Zzgrumpf-Zzfrumpf|", iesire)
+        self.assertIn("|→ https://dexonline.ro/definitie/zzgrumpf", iesire)
+
+    def test_brand_cu_majuscula_interna_intr_o_parte_ramane_ignorat(self):
+        cod, iesire = self._ruleaza("SlashGear-Zzfrumpf a venit. Urma.\n")
+        self.assertNotIn("SlashGear", iesire)
+        self.assertNotIn("Zzfrumpf", iesire)
+
+    def test_termen_compus_din_allow_e_suprimat_intreg(self):
+        allow = Path(self.tmp.name) / "allow-compus.txt"
+        allow.write_text("cold-pressed\n", encoding="utf-8")
+        cod, iesire = self._ruleaza("Urma cold-pressed.\n", "--allow", str(allow))
+        self.assertEqual(cod, 0, iesire)
+
+    def test_parti_din_allow_scot_compusul(self):
+        allow = Path(self.tmp.name) / "allow-parti.txt"
+        allow.write_text("cold\npressed\n", encoding="utf-8")
+        cod, iesire = self._ruleaza("Urma cold-pressed.\n", "--allow", str(allow))
+        self.assertEqual(cod, 0, iesire)
 
 
 if __name__ == "__main__":

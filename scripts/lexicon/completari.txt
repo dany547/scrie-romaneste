@@ -1,8 +1,8 @@
 # Forme românești confirmate pe dexonline (sau paradigma unui cuvânt atestat)
 # care lipsesc din Rospell 3.3.10 (2013). Un termen pe linie; `#` = comentariu.
 # Se adaugă DOAR ce a confirmat dexonline. Mărcile și numele (iPad, webOS) nu
-# intră aici: se pun în --allow, per proiect. Nu e fișier MIT; e completare la
-# lexiconul Rospell, vezi LICENTA-ROSPELL.txt.
+# intră aici: se pun în --allow, per proiect. Sunt forme de cuvinte, fără text
+# preluat; fișierul urmează licența MIT a repo-ului.
 
 # dronă (paradigma completă)
 drona

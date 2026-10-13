@@ -451,8 +451,8 @@ care conține o bară.
   toate), `--allow fișier` pentru termeni confirmați, `--lexicon cale` pentru
   altă listă. `scripts/lexicon/completari.txt` are formele românești confirmate
   pe dexonline și lipsă din Rospell. Peste 30% forme lipsă (text englezesc,
-  cod, log) raportul e o singură linie `info|cuvinte|text predominant
-  neromânesc`, nu o listă (exit 1 și aici, sub 40 de forme unice nu se aplică).
+  cod, log) raportul are în loc de listă linia `info|cuvinte|text predominant
+  neromânesc`, apoi `---` și `total=…` (fără `nota:`) (exit 1 și aici, sub 40 de forme unice nu se aplică).
   Ieșirea: liniile `important|cuvant_de_verificat|L<linie>|<formă> xN|→ <url>`,
   `mai_sunt|N forme neafișate (--tot)` când e depășit plafonul, apoi `---`,
   `total=…` și o linie `nota:`; citește și de pe stdin (`-`). Exit: 0 nimic de

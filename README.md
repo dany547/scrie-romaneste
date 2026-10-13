@@ -200,7 +200,7 @@ scrie-romaneste/
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
 │   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> dexonline lookup list
 │   ├── construieste-lexicon.py     # Maintainer only: rebuild lexicon/ from Rospell (needs unmunch)
-│   ├── lexicon/                    # lexicon-ro.txt.gz + completari.txt + LICENTA-ROSPELL.txt (MPL/LGPL, not MIT)
+│   ├── lexicon/                    # lexicon-ro.txt.gz (MPL/LGPL, not MIT) + completari.txt + licence texts
 │   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
 │   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing
@@ -265,7 +265,7 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
   dexonline-confirmed forms that Rospell lacks. The dexonline procedure
   (`tipare-ro.md`) now says how to read the page, what to do with inflected
   forms and anglicisms, and that a replacement must carry the same sense and be
-  looked up too. 171 tests.
+  looked up too. 179 tests.
 - **v0.9.0** — Invented words, and a definition of done. The scripts, including
   `--human-voice`, have no dictionary: a clean report does not prove the words
   exist. Before delivery, read the whole text for invented words, agreement and
@@ -408,4 +408,5 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 MIT, except `scripts/lexicon/lexicon-ro.txt.gz`: a word list derived from the
 Rospell Romanian dictionary (2005-2013 Rospell Team), used under MPL 1.1 /
-LGPL 2.1. See `scripts/lexicon/LICENTA-ROSPELL.txt`.
+LGPL 2.1. The full texts (`MPL-1.1.txt`, `LGPL-2.1.txt`) and the attribution
+note (`LICENTA-ROSPELL.txt`) are in `scripts/lexicon/`.

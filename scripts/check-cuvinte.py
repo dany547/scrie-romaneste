@@ -23,8 +23,8 @@ Usage:
 Lângă lexicon, `scripts/lexicon/completari.txt` are forme românești confirmate
 pe dexonline și lipsă din Rospell (`dronele`, `inchi`...); se aplică automat.
 Dacă peste 30% din formele unice lipsesc din lexicon (text în engleză, cod,
-mesaje de eroare), raportul are o singură linie `info|cuvinte|text
-predominant neromânesc` în loc de listă; `--tot` o dă oricum.
+mesaje de eroare), raportul are în loc de listă linia `info|cuvinte|text
+predominant neromânesc`, apoi `---` și totalul; `--tot` dă lista oricum.
 
 Raport: `important|cuvant_de_verificat|L<linie>|<formă> xN|→ <URL dexonline>`
 
@@ -55,7 +55,7 @@ _CUVANT = re.compile(r"[^\W\d_]+(?:-[^\W\d_]+)*")
 # Ce precede un cuvânt la început de propoziție: punct, două puncte, început de
 # rând, eventual cu marcator markdown (#, *, -, >, 1.) sau ghilimea deschisă.
 _INCEPUT_PROPOZITIE = re.compile(
-    r"(?:[.!?:]|\n|^)[ \t]*(?:(?:[#>*\-•]+|\d+[.)])[ \t]*)?[„\"«(]*$")
+    r"(?:[.!?:]|\n|^)[ \t]*(?:(?:[#>*\-•—–]+|\d+[.)])[ \t]*)?[„\"«(]*$")
 
 
 def incarca_lexicon(cale):
@@ -115,12 +115,18 @@ def gaseste(text, lexicon, allow=frozenset()):
             # interne (SlashGear), sigle (ARN) sau un cuvânt care apare altundeva
             # cu majusculă. Un cuvânt capitalizat doar la început de propoziție
             # se verifică, altfel „Procesorarea" ar trece drept nume.
-            if (not la_inceput[m.start()] or token.isupper()
-                    or any(c.isupper() for c in token[1:])
+            # majuscula de la începutul unei părți (după cratimă) nu e brand:
+            # brand = majusculă internă într-o parte (SlashGear, iPhone)
+            brand = any(c.isupper() for p in token.split("-") for c in p[1:])
+            if (not la_inceput[m.start()] or token.isupper() or brand
                     or _comun.pliaza(token) in nume):
                 continue
         if any(len(p) >= LUNGIME_MINIMA for p in token.split("-")):
             examinate.add(_comun.pliaza(token))
+        # termenul întreg (ex. `cold-pressed`) din lexicon sau --allow, înainte de
+        # împărțirea pe părți; părțile separate se pot scoate și ele
+        if _comun.pliaza(token) in lexicon or _comun.pliaza(token) in allow:
+            continue
         necunoscut = None  # prima parte a compusului care lipsește
         for parte in token.split("-"):
             if len(parte) < LUNGIME_MINIMA:
@@ -172,13 +178,18 @@ def main(argv=None):
         text = _comun.citeste_intrare(sursa)
         try:
             lexicon = incarca_lexicon(cale_lexicon)
-        except (OSError, EOFError) as e:
+        except (OSError, EOFError, UnicodeDecodeError) as e:
             print(f"eroare: lexiconul {cale_lexicon} nu poate fi citit ({e}); "
                   "vezi --lexicon / SCRIE_RO_LEXICON", file=sys.stderr)
             return 2
-        allow = incarca_allow(cale_allow) if cale_allow else frozenset()
+        try:
+            allow = incarca_allow(cale_allow) if cale_allow else frozenset()
+        except (OSError, EOFError, UnicodeDecodeError) as e:
+            print(f"eroare: fișierul --allow {cale_allow} nu poate fi citit ({e})",
+                  file=sys.stderr)
+            return 2
         allow = allow | incarca_completari(cale_lexicon)
-    except (OSError, EOFError) as e:
+    except (OSError, EOFError, UnicodeDecodeError) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 
