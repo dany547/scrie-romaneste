@@ -18,6 +18,12 @@ Usage:
     check-cuvinte.py <fisier> --tot                 # fără plafon de afișare
     check-cuvinte.py <fisier> --lexicon cale.txt.gz # sau SCRIE_RO_LEXICON
 
+Lângă lexicon, `scripts/lexicon/completari.txt` are forme românești confirmate
+pe dexonline și lipsă din Rospell (`dronele`, `inchi`...); se aplică automat.
+Dacă peste 30% din formele unice lipsesc din lexicon (text în engleză, cod,
+mesaje de eroare), raportul are o singură linie `info|cuvinte|text
+predominant neromânesc` în loc de listă; `--tot` o dă oricum.
+
 Raport: `important|cuvant_de_verificat|L<linie>|<formă> xN|→ <URL dexonline>`
 
 Exit codes:
@@ -34,7 +40,10 @@ from pathlib import Path
 import _comun
 
 LEXICON_IMPLICIT = Path(__file__).resolve().parent / "lexicon" / "lexicon-ro.txt.gz"
+COMPLETARI_IMPLICIT = Path(__file__).resolve().parent / "lexicon" / "completari.txt"
 PLAFON = 10
+PRAG_NEROMANESC = 0.30  # peste această pondere din formele unice → text neromânesc
+MIN_EXAMINATE = 40      # sub atâtea forme unice nu se judecă limba textului
 LUNGIME_MINIMA = 4
 DEXONLINE = "https://dexonline.ro/definitie/"
 
@@ -49,6 +58,7 @@ def incarca_lexicon(cale):
 
 
 def incarca_allow(cale):
+    """Fișier cu un termen pe linie; `#` începe un comentariu."""
     termeni = set()
     with open(cale, encoding="utf-8-sig") as f:
         for linie in f:
@@ -56,6 +66,15 @@ def incarca_allow(cale):
             if linie:
                 termeni.add(_comun.pliaza(linie))
     return termeni
+
+
+def incarca_completari(cale_lexicon):
+    """Completări manuale, lângă lexicon: forme confirmate pe dexonline, lipsă
+    din Rospell. Cu `--lexicon` propriu, completările implicite nu se aplică."""
+    cale = COMPLETARI_IMPLICIT if Path(cale_lexicon) == LEXICON_IMPLICIT else None
+    if cale is None or not cale.exists():
+        return frozenset()
+    return frozenset(incarca_allow(cale))
 
 
 def _maskeaza(text):
@@ -66,13 +85,20 @@ def _maskeaza(text):
 
 
 def gaseste(text, lexicon, allow=frozenset()):
-    """Returnează {formă_pliată: {"afisat", "parte", "linie", "nr"}}, în ordinea apariției."""
+    """Returnează ({formă_pliată: {"afisat", "parte", "linie", "nr"}}, examinate).
+
+    `examinate` = câte forme unice au fost judecate (baza pentru ponderea
+    formelor lipsă). Rezultatul păstrează ordinea apariției.
+    """
     text = _maskeaza(text)
     rezultat = {}
+    examinate = set()
     for m in _CUVANT.finditer(text):
         token = m.group(0)
         if token[0].isupper():
             continue
+        if any(len(p) >= LUNGIME_MINIMA for p in token.split("-")):
+            examinate.add(_comun.pliaza(token))
         necunoscut = None  # prima parte a compusului care lipsește
         for parte in token.split("-"):
             if len(parte) < LUNGIME_MINIMA:
@@ -88,7 +114,7 @@ def gaseste(text, lexicon, allow=frozenset()):
         else:
             rezultat[cheie] = {"afisat": token, "parte": necunoscut, "nr": 1,
                                "linie": text.count("\n", 0, m.start()) + 1}
-    return rezultat
+    return rezultat, len(examinate)
 
 
 def main(argv=None):
@@ -124,17 +150,26 @@ def main(argv=None):
         text = _comun.citeste_intrare(sursa)
         lexicon = incarca_lexicon(cale_lexicon)
         allow = incarca_allow(cale_allow) if cale_allow else frozenset()
+        allow = allow | incarca_completari(cale_lexicon)
     except (OSError, EOFError) as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
 
-    gasite = gaseste(text, lexicon, allow)
+    gasite, examinate = gaseste(text, lexicon, allow)
     cuvinte = _comun.numara_cuvinte(text)
     if not gasite:
         print(f"0 forme de verificat ({cuvinte} cuvinte, lexicon={len(lexicon)} forme)")
         return 0
 
     elemente = list(gasite.values())
+    pondere = len(elemente) / max(examinate, 1)
+    if examinate >= MIN_EXAMINATE and pondere > PRAG_NEROMANESC and "--tot" not in argv:
+        print(f"info|cuvinte|text predominant neromânesc: {len(elemente)} din "
+              f"{examinate} forme unice ({pondere:.0%}) lipsesc din lexicon; lista nu "
+              f"se afișează (--tot o dă)")
+        print(f"---\ntotal={len(elemente)} forme de verificat | {cuvinte} cuvinte | "
+              f"lexicon={len(lexicon)} forme")
+        return 1
     afisate = elemente if "--tot" in argv else elemente[:PLAFON]
     for g in afisate:
         sufix = f" x{g['nr']}" if g["nr"] > 1 else ""

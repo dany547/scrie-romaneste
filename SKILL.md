@@ -449,7 +449,10 @@ care conține o bară.
   Rospell (2013) nu are tot vocabularul, iar un cuvânt inventat care
   coincide cu o formă reală trece. Plafon 10 forme afișate (`--tot` le dă pe
   toate), `--allow fișier` pentru termeni confirmați, `--lexicon cale` pentru
-  altă listă. Fără lexicon: exit 2.
+  altă listă. `scripts/lexicon/completari.txt` are formele românești confirmate
+  pe dexonline și lipsă din Rospell. Peste 30% forme lipsă (text englezesc,
+  cod, log) raportul e o singură linie `info|cuvinte|text predominant
+  neromânesc`, nu o listă. Fără lexicon: exit 2.
 - `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
   capcana concluziei.
 - `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),

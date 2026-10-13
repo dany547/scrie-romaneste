@@ -1629,13 +1629,57 @@ class TestCuvinte(unittest.TestCase):
 
     def test_procedura_dexonline_e_in_doc(self):
         """Verdictul dexonline decide; înlocuirea se verifică și ea."""
-        tipare = (RADACINA / "references" / "limba" / "tipare-ro.md").read_text(
-            encoding="utf-8")
+        tipare = " ".join((RADACINA / "references" / "limba" / "tipare-ro.md")
+                          .read_text(encoding="utf-8").split())
         skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Ce faci după verdictul dexonline", tipare)
         self.assertIn("înlocuirea se verifică și ea", tipare)
+        for formulare in ("Niciun rezultat pentru", "termen englezesc pur",
+                          "text predominant neromânesc", "Un sens doar apropiat"):
+            self.assertIn(formulare, tipare)
         self.assertIn("check-cuvinte.py", skill)
         self.assertIn("§cuvant_inexistent", skill)
+
+    def test_text_predominant_neromanesc_da_o_singura_linie(self):
+        ro = ["pereti", "erau", "tavanul", "purta", "urma", "etajul"]
+        engleza = " ".join(f"engword{c}{d}x" for c in "abcdefg" for d in "abcdefg")
+        cod, iesire = self._ruleaza(engleza + " " + " ".join(ro[:3]) + "\n")
+        self.assertEqual(cod, 1)
+        self.assertIn("info|cuvinte|text predominant neromânesc", iesire)
+        self.assertNotIn("important|cuvant_de_verificat", iesire)
+
+    def test_tot_listeaza_chiar_si_textul_neromanesc(self):
+        engleza = " ".join(f"engword{c}{d}x" for c in "abcdefg" for d in "abcdefg")
+        _, iesire = self._ruleaza(engleza + "\n", "--tot")
+        self.assertIn("important|cuvant_de_verificat", iesire)
+        self.assertNotIn("text predominant neromânesc", iesire)
+
+    def test_text_scurt_nu_e_declarat_neromanesc(self):
+        cod, iesire = self._ruleaza("zzgrumpf zzfrumpf zzgrimpf zzgrompf\n")
+        self.assertNotIn("predominant neromânesc", iesire)
+        self.assertIn("important|cuvant_de_verificat", iesire)
+
+    def test_completarile_implicite_se_aplica_doar_cu_lexiconul_implicit(self):
+        # dronele lipsește din Rospell, dar e în completari.txt
+        cale = Path(self.tmp.name) / "d.md"
+        cale.write_text("Vedem dronele zburau deasupra, iar chatbotul tacea.\n",
+                        encoding="utf-8")
+        cod, iesire = ruleaza("check-cuvinte.py", str(cale))
+        self.assertEqual(cod, 0, iesire)
+        # cu lexicon propriu (mic), completările implicite nu se aplică
+        cod, iesire = ruleaza("check-cuvinte.py", str(cale), "--lexicon",
+                              str(self.lex))
+        self.assertEqual(cod, 1)
+        self.assertIn("|dronele|", iesire)
+
+    def test_completarile_nu_contin_marci_sau_duplicate(self):
+        linii = [l.split("#", 1)[0].strip() for l in
+                 (SCRIPTS / "lexicon" / "completari.txt").read_text(
+                     encoding="utf-8").splitlines()]
+        forme = [l for l in linii if l]
+        self.assertEqual(len(forme), len(set(forme)), "forme duplicate")
+        self.assertTrue(all(f == f.lower() for f in forme),
+                        "mărcile/numele (cu majusculă) merg în --allow, nu aici")
 
     def test_lexiconul_real_prinde_mostrele_si_lasa_textul_curat(self):
         cod, iesire = ruleaza("check-cuvinte.py",

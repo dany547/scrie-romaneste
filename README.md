@@ -200,7 +200,7 @@ scrie-romaneste/
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
 │   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> dexonline lookup list
 │   ├── construieste-lexicon.py     # Maintainer only: rebuild lexicon/ from Rospell (needs unmunch)
-│   ├── lexicon/                    # lexicon-ro.txt.gz + LICENTA-ROSPELL.txt (MPL/LGPL, not MIT)
+│   ├── lexicon/                    # lexicon-ro.txt.gz + completari.txt + LICENTA-ROSPELL.txt (MPL/LGPL, not MIT)
 │   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
 │   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing

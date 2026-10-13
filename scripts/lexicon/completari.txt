@@ -1,0 +1,41 @@
+# Forme românești confirmate pe dexonline (sau paradigma unui cuvânt atestat)
+# care lipsesc din Rospell 3.3.10 (2013). Un termen pe linie; `#` = comentariu.
+# Se adaugă DOAR ce a confirmat dexonline. Mărcile și numele (iPad, webOS) nu
+# intră aici: se pun în --allow, per proiect. Nu e fișier MIT; e completare la
+# lexiconul Rospell, vezi LICENTA-ROSPELL.txt.
+
+# dronă (paradigma completă)
+drona
+drone
+dronei
+dronele
+dronelor
+
+# inch
+inchi
+inci
+
+# chatbot
+chatbot
+chatbotul
+chatbotului
+chatboturi
+chatboturile
+
+# anglicisme cu intrare pe dexonline (DOOM 3 / DEX)
+cloud
+living
+live
+smart
+hub
+hubul
+rating
+ratinguri
+gamer
+gameri
+roaming
+offline
+interview
+discount
+discountul
+checklist
