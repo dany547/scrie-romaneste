@@ -12,13 +12,13 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 
 - **Four modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits), `human-voice` (separate audit for mechanical voice reflexes, with a 30-point score and hard blockers)
 - **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
-- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words the scripts do not catch, syntactic calques, false friends, borrowed-word articulation, diacritic restoration
+- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words (the lexicon filter lists suspects, dexonline decides), syntactic calques, false friends, borrowed-word articulation, diacritic restoration
 - **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
 - **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
 - **Writing techniques** — rhythm, conciseness, structure, audience calibration
 - **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search
 - **Title craft and article flow** — titles with a concrete promise and a precision element, not labels or tabloid clickbait; openings that skip the warmup; section rhythm that isn't a five-H2 template
-- **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker
+- **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker, and a lexicon filter that lists words to look up on dexonline
 
 ## Installation
 
@@ -205,6 +205,7 @@ scrie-romaneste/
 │   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing
 │   └── _comun.py                   # Shared scanning engine (not a CLI)
+├── LICENSE                         # MIT (the lexicon word list keeps its own licence)
 └── tests/                          # Fixtures + unittest suite (stdlib only)
 ```
 
@@ -406,7 +407,7 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## License
 
-MIT, except `scripts/lexicon/lexicon-ro.txt.gz`: a word list derived from the
+MIT (see `LICENSE`), except `scripts/lexicon/lexicon-ro.txt.gz`: a word list derived from the
 Rospell Romanian dictionary (2005-2013 Rospell Team), used under MPL 1.1 /
 LGPL 2.1. The full texts (`MPL-1.1.txt`, `LGPL-2.1.txt`) and the attribution
 note (`LICENTA-ROSPELL.txt`) are in `scripts/lexicon/`.
