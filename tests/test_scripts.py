@@ -1576,8 +1576,25 @@ class TestCuvinte(unittest.TestCase):
         self.assertEqual(cod, 0, iesire)
         self.assertIn("0 forme de verificat", iesire)
 
+    def test_cuvantul_inventat_la_inceput_de_propozitie_e_verificat(self):
+        cod, iesire = self._ruleaza("Urma erau.\n\nZzgrumpfarea purta urma.\n")
+        self.assertEqual(cod, 1)
+        self.assertIn("|Zzgrumpfarea|", iesire)
+        cod, iesire = self._ruleaza("- Zzgrumpfarea\n# Zzfrumpfarea titlu\n„Zzgrimpfarea” purta.\n")
+        for f in ("Zzgrumpfarea", "Zzfrumpfarea", "Zzgrimpfarea"):
+            self.assertIn(f"|{f}", iesire)
+
+    def test_numele_proprii_raman_ignorate_si_la_inceput_de_propozitie(self):
+        text = ("Urma erau. Zzgrumpf a lansat ceva. Ieri a vorbit Zzgrumpf. "
+                "SlashGear a scris. Zzqxvt Labs a plecat.\nTechCrunch purta.\n")
+        cod, iesire = self._ruleaza(text)
+        # Zzgrumpf apare cu majusculă și în mijlocul propoziției → nume
+        self.assertNotIn("|Zzgrumpf", iesire)
+        self.assertNotIn("SlashGear", iesire)
+        self.assertNotIn("TechCrunch", iesire)
+
     def test_ignora_majuscule_cod_url_scurte(self):
-        text = ("Google a lansat Zzqxv. Vezi https://exemplu.ro/qqwwee si "
+        text = ("Urma a lansat Google si Zzqxv. Vezi https://exemplu.ro/qqwwee si "
                 "`qqwweea` si ARNN.\n```\nqqwweeb zzqq\n```\nPurta urma.\n")
         cod, iesire = self._ruleaza(text)
         self.assertEqual(cod, 0, iesire)

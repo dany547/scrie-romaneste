@@ -39,3 +39,11 @@ interview
 discount
 discountul
 checklist
+
+# forme articulate regulate ale lemelor de mai sus (paradigma dexonline nu
+# listează articulatele, dar lema e atestată)
+livingul
+roamingul
+cloudul
+ratingul
+gamerul

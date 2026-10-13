@@ -7,8 +7,10 @@ care coincide cu o formă reală trece. Scriptul doar restrânge ce trebuie
 verificat; agentul caută fiecare formă listată, pe rând, la adresa din raport.
 Corectezi doar când dexonline spune „nu este în dicționar".
 
-Se ignoră: blocuri/fragmente de cod, URL-uri, emailuri, cuvinte cu majusculă
-(nume proprii, mărci), cuvinte sub 4 litere. Din cuvintele compuse cu cratimă
+Se ignoră: blocuri/fragmente de cod, URL-uri, emailuri, cuvinte sub 4 litere
+și numele proprii (majusculă în mijlocul propoziției, majuscule interne ca
+`SlashGear`, sigle). Un cuvânt cu majusculă doar la început de propoziție se
+verifică, ca un cuvânt inventat acolo să nu treacă drept nume. Din cuvintele compuse cu cratimă
 se verifică fiecare parte de cel puțin 4 litere. Comparația e diacritic-
 insensibilă (aceeași pliere ca restul scripturilor).
 
@@ -50,6 +52,10 @@ DEXONLINE = "https://dexonline.ro/definitie/"
 _COD = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.S)
 _URL = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+")
 _CUVANT = re.compile(r"[^\W\d_]+(?:-[^\W\d_]+)*")
+# Ce precede un cuvânt la început de propoziție: punct, două puncte, început de
+# rând, eventual cu marcator markdown (#, *, -, >, 1.) sau ghilimea deschisă.
+_INCEPUT_PROPOZITIE = re.compile(
+    r"(?:[.!?:]|\n|^)[ \t]*(?:(?:[#>*\-•]+|\d+[.)])[ \t]*)?[„\"«(]*$")
 
 
 def incarca_lexicon(cale):
@@ -93,10 +99,26 @@ def gaseste(text, lexicon, allow=frozenset()):
     text = _maskeaza(text)
     rezultat = {}
     examinate = set()
+    la_inceput = {}
+    nume = set()  # forme care apar cu majusculă în mijlocul propoziției
     for m in _CUVANT.finditer(text):
         token = m.group(0)
         if token[0].isupper():
-            continue
+            la_inceput[m.start()] = bool(
+                _INCEPUT_PROPOZITIE.search(text[max(0, m.start() - 12):m.start()]))
+            if not la_inceput[m.start()]:
+                nume.add(_comun.pliaza(token))
+    for m in _CUVANT.finditer(text):
+        token = m.group(0)
+        if token[0].isupper():
+            # nume propriu/marcă: majusculă în mijlocul propoziției, majuscule
+            # interne (SlashGear), sigle (ARN) sau un cuvânt care apare altundeva
+            # cu majusculă. Un cuvânt capitalizat doar la început de propoziție
+            # se verifică, altfel „Procesorarea" ar trece drept nume.
+            if (not la_inceput[m.start()] or token.isupper()
+                    or any(c.isupper() for c in token[1:])
+                    or _comun.pliaza(token) in nume):
+                continue
         if any(len(p) >= LUNGIME_MINIMA for p in token.split("-")):
             examinate.add(_comun.pliaza(token))
         necunoscut = None  # prima parte a compusului care lipsește
