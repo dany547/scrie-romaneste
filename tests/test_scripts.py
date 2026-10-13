@@ -1721,6 +1721,29 @@ class TestCuvinte(unittest.TestCase):
         self.assertNotIn("|daca|", iesire)
         self.assertNotIn("|clienti|", iesire)
 
+    def test_invenții_plauzibile_si_romgleza_din_textele_grele_sunt_listate(self):
+        # Adevărul de bază: fiecare formă lipsește de pe dexonline („nu este în
+        # dicționar" / 404) la data scrierii. Sunt derivate care sună a română,
+        # nu mostre evidente. Capcanele valide absente din Rospell apar și ele în
+        # listă: lista e de verificat, nu verdict.
+        asteptate = {
+            1: ["descărcabilitatea", "portabilizarea", "performanțialul",
+                "încălzibil", "brandingul"],
+            2: ["deconectivitatea", "afișabilitatea", "conectivizarea",
+                "apăsabilitatea", "scrollarea"],
+            3: ["întreținibil", "ergonomicitatea", "agățabilul", "sunetistica",
+                "setupul", "clickuiește"],
+        }
+        for nr, formele in asteptate.items():
+            cod, iesire = ruleaza("check-cuvinte.py",
+                                  str(FIXTURES / f"cuvinte-grele-{nr}.md"))
+            self.assertEqual(cod, 1, iesire)
+            linii = [l.lower() for l in iesire.splitlines()]
+            for forma in formele:
+                self.assertTrue(any(f"|{forma}|" in l or f"|{forma} x" in l
+                                    for l in linii),
+                                f"cuvinte-grele-{nr}: lipsește {forma}\n{iesire}")
+
     def _ruleaza_stderr(self, *argumente):
         r = subprocess.run(
             [sys.executable, str(SCRIPTS / "check-cuvinte.py"), *argumente],

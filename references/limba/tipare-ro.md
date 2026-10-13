@@ -59,7 +59,12 @@ Cum citești răspunsul:
   doar dacă sensul din text e același; altfel întreabă, nu lua prima
   potrivire;
 - un cod HTTP sau o pagină goală nu e verdict. Semnalul e fraza „nu este în
-  dicționar", nu statusul.
+  dicționar", nu statusul;
+- pentru un cuvânt inexistent dexonline răspunde adesea cu HTTP 404, dar cu
+  pagina completă în corp. Dacă unealta ta arată doar „404" fără corp, repetă
+  o singură dată cu un user-agent de browser (ex. `curl -s -L -A "Mozilla/5.0"
+  <adresa>`) și citește fraza din corp. Rămas fără corp, 404-ul nu e verdict:
+  forma e **neclară**, nu „inexistentă" și nu „acceptată".
 
 Nu înlocui din burtă și nu livra o formă pe care n-o poți susține.
 
