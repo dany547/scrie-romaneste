@@ -47,5 +47,11 @@ Secrete, `.github/workflows/*`, releases/tags, `main`, Administration. Fix-urile
   inconsistență `SKILL.md` ↔ `README.md` ↔ `--help`.
 - `NIT`: formulare, ordine, spațiere.
 
+## Config pentru skill-uri de agent
+`docs/agents/` ține configurația pe care o citesc skill-urile de engineering:
+`issue-tracker.md` (unde trăiesc issue-urile + convenții), `triage-labels.md` (vocabularul de etichete),
+`domain.md` (cum se consumă documentația de domeniu). Se schimbă rar; se actualizează când se schimbă
+tracker-ul sau vocabularul.
+
 ## Owner
 Dan Mutu (`dany547`, adcelerum.ro)
