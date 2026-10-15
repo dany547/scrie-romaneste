@@ -42,7 +42,7 @@ biografii; acesta rămâne un control uman și de surse.
 ## Scor, status și blocere
 
 `AI_PATTERN_SCORE` este o penalizare, nu o probabilitate și nu o notă de
-„umanitate”. Are intervalul `0/30`; fiecare categorie A-J contribuie o singură
+„umanitate”. Are intervalul `0/29`; fiecare categorie A-J contribuie o singură
 dată, ca repetarea aceluiași tic să nu domine rezultatul. Statusul este:
 
 - `PASS` — scor `0–5`;
@@ -76,7 +76,7 @@ Schema JSON a fluxului integrat este:
 ```
 
 Outputul text are aceleași valori ca linii separate:
-`AI_PATTERN_SCORE=…/30`, `STATUS=…`, `FABRICATED_EXPERIENCE=YES|NO`,
+`AI_PATTERN_SCORE=…/29`, `STATUS=…`, `FABRICATED_EXPERIENCE=YES|NO`,
 `CONTAMINATION_FOUND=YES|NO`, `PATTERNS_REMOVED=0` și
 `HUMAN_VOICE_BLOCKERS=…`. `PATTERNS_REMOVED` este mereu `0` în detector;
 editorul îl completează după editare.

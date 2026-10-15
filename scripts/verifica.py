@@ -42,7 +42,7 @@ seo = _comun.incarca_script("check-seo")
 human_voice = _comun.incarca_script("check-human-voice")
 reclame = _comun.incarca_script("check-reclame")
 
-SCOR_MAXIM = tipare.SCOR_MAXIM + 3 + modelisme.SCOR_MAXIM  # 6 + 3 + 4 = 13
+SCOR_MAXIM = tipare.SCOR_MAXIM + 3 + modelisme.SCOR_MAXIM  # 6 + 3 + 3 = 12
 
 
 def analizeaza_tot(text, prag, cu_seo=True, cu_human_voice=False,

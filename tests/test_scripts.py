@@ -235,7 +235,7 @@ class TestPunctuatieCarja(unittest.TestCase):
                          f"rescrierea-model semnalata pentru doua linii de pauza:\n{iesire}")
 
     def test_nu_intra_in_scorul_automat(self):
-        """Semnal de recitire, nu penalizare — `/13` ramane neschimbat."""
+        """Semnal de recitire, nu penalizare — `/12` ramane neschimbat."""
         cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "rau-liniuta.md"),
                               "--scor")
         self.assertIn("scor_automat=0/6", iesire, iesire)
@@ -694,7 +694,7 @@ class TestModelisme(unittest.TestCase):
         cod, iesire = ruleaza_stdin_cu_flags(
             "check-modelisme.py",
             "Un savant eminent a anuntat un pericol iminent.", "--scor")
-        self.assertIn("scor_automat=0/4", iesire)
+        self.assertIn("scor_automat=0/3", iesire)
 
     def test_pleonasmul_nu_sare_granita_de_propozitie(self):
         """Regresie: fereastra de 80 de caractere prindea doua clauze diferite."""
@@ -737,7 +737,7 @@ class TestVerifica(unittest.TestCase):
         self.assertEqual(cod, 1)
         self.assertIn("== tipare AI", iesire)
         self.assertIn("scor_automat=", iesire)
-        self.assertIn("/13", iesire)
+        self.assertIn("/12", iesire)
 
     def test_text_curat_da_exit_0(self):
         cod, iesire = ruleaza("verifica.py", str(FIXTURES / "bun-articol.md"))
@@ -770,7 +770,7 @@ class TestVerifica(unittest.TestCase):
         cod, iesire = ruleaza_stdin_cu_flags("verifica.py", "Asta face sens.", "--json")
         date = json.loads(iesire)
         self.assertEqual(cod, 1)
-        self.assertEqual(date["scor_maxim"], 13)
+        self.assertEqual(date["scor_maxim"], 12)
         romgleza = [t for t in date["tipare"] if t["categorie"] == "romgleza"]
         self.assertTrue(romgleza)
         self.assertEqual(romgleza[0]["sugestie"], "are sens")
@@ -802,7 +802,7 @@ class TestVerifica(unittest.TestCase):
     def test_scor_compact(self):
         cod, iesire = ruleaza_stdin_cu_flags(
             "verifica.py", "Un text scurt si cuminte despre nimic.", "--scor")
-        self.assertIn("scor_automat=0/13", iesire)
+        self.assertIn("scor_automat=0/12", iesire)
         self.assertEqual(cod, 0)
 
     def test_fara_seo_raporteaza_sedila(self):
@@ -879,14 +879,14 @@ class TestHumanVoice(unittest.TestCase):
         for categorie in ("filler", "promotional", "metafora_copywriter",
                           "punchline"):
             self.assertIn(categorie, iesire)
-        self.assertIn("AI_PATTERN_SCORE=11/30", iesire)
+        self.assertIn("AI_PATTERN_SCORE=11/29", iesire)
         self.assertIn("STATUS=REWRITE", iesire)
 
     def test_textul_curat_trece(self):
         cod, iesire = ruleaza("check-human-voice.py",
                               str(FIXTURES / "human-voice-curat.md"))
         self.assertEqual(cod, 0, iesire)
-        self.assertIn("AI_PATTERN_SCORE=0/30", iesire)
+        self.assertIn("AI_PATTERN_SCORE=0/29", iesire)
         self.assertIn("STATUS=PASS", iesire)
 
     def test_metafora_literara_legitima_nu_e_prinsa(self):
@@ -921,8 +921,8 @@ class TestHumanVoice(unittest.TestCase):
             "verifica.py", "assistant: [DE COMPLETAT: nume]", "--human-voice", "--json")
         date = json.loads(iesire)
         self.assertEqual(cod, 1)
-        self.assertEqual(date["scor_maxim"], 13)
-        self.assertEqual(date["human_voice"]["ai_pattern_maxim"], 30)
+        self.assertEqual(date["scor_maxim"], 12)
+        self.assertEqual(date["human_voice"]["ai_pattern_maxim"], 29)
         self.assertEqual(date["human_voice"]["STATUS"], "REWRITE")
         self.assertEqual(date["human_voice"]["CONTAMINATION_FOUND"], "YES")
         self.assertEqual(date["human_voice"]["blockers"],
@@ -951,23 +951,75 @@ class TestHumanVoice(unittest.TestCase):
         # A (2) + B (3) = 5: PASS.
         _, iesire = ruleaza_stdin("check-human-voice.py",
                                   "Hai să. Asta e tot ce contează.")
-        self.assertIn("AI_PATTERN_SCORE=5/30", iesire)
+        self.assertIn("AI_PATTERN_SCORE=5/29", iesire)
         self.assertIn("STATUS=PASS", iesire)
         # A (2) + C (3) + F (3) = 8: EDITED.
         _, iesire = ruleaza_stdin(
             "check-human-voice.py",
             "Hai să. Busola ta arată drumul. Pe scurt, alegi simplu.")
-        self.assertIn("AI_PATTERN_SCORE=8/30", iesire)
+        self.assertIn("AI_PATTERN_SCORE=8/29", iesire)
         self.assertIn("STATUS=EDITED", iesire)
         # J=3 ar intra numeric la PASS, dar contaminarea forțează REWRITE.
         _, iesire = ruleaza_stdin("check-human-voice.py", "assistant: salut")
-        self.assertIn("AI_PATTERN_SCORE=3/30", iesire)
+        self.assertIn("AI_PATTERN_SCORE=3/29", iesire)
         self.assertIn("STATUS=REWRITE", iesire)
         # CAPS rămâne un semnal J, fără greutate suplimentară.
         _, iesire = ruleaza_stdin("check-human-voice.py", "ACESTA ESTE UN TITLU CAPS.")
         self.assertIn("|J|caps|", iesire)
-        self.assertIn("AI_PATTERN_SCORE=0/30", iesire)
+        self.assertIn("AI_PATTERN_SCORE=0/29", iesire)
         self.assertIn("STATUS=PASS", iesire)
+
+
+class TestPlafonScorAtingibil(unittest.TestCase):
+    """Regresie issue #4: plafoanele declarate trebuie sa fie atingibile.
+
+    SCOR_MAXIM era 4 (modelisme) / 30 (human-voice), dar maximul real pe
+    caile de scor era 3 / 29. Testele calculeaza maximul pe functiile
+    reale si cer egalitatea cu constanta declarata — picau pe baza,
+    trec cu fixul.
+    """
+
+    def _incarca(self, nume_script):
+        import importlib.util
+        cale = SCRIPTS / nume_script
+        spec = importlib.util.spec_from_file_location(
+            nume_script.replace("-", "_").replace(".py", ""), cale)
+        modul = importlib.util.module_from_spec(spec)
+        sys.path.insert(0, str(SCRIPTS))
+        try:
+            spec.loader.exec_module(modul)
+        finally:
+            sys.path.remove(str(SCRIPTS))
+        return modul
+
+    def test_modelisme_plafon_atingibil(self):
+        mod = self._incarca("check-modelisme.py")
+        raportate = ([{"severitate": "critic",
+                       "categorie": "pleonasm_etimologic"} for _ in range(5)]
+                     + [{"severitate": "critic", "categorie": "anglicism"}
+                        for _ in range(3)])
+        semnale, scor = mod.calculeaza_scor(raportate, depasiri=True)
+        self.assertEqual(len(semnale), 3, semnale)
+        self.assertEqual(scor, mod.SCOR_MAXIM,
+                         f"plafon imposibil: declarat {mod.SCOR_MAXIM}, "
+                         f"maxim atins {scor} {semnale}")
+
+    def test_human_voice_plafon_atingibil(self):
+        hv = self._incarca("check-human-voice.py")
+        maxime = {}
+        for categorie, _, _, puncte, _, _ in hv.REGULI:
+            maxime[categorie] = max(maxime.get(categorie, 0), puncte)
+        posibil = sum(maxime.values())
+        self.assertEqual(posibil, hv.SCOR_MAXIM,
+                         f"plafon imposibil: declarat {hv.SCOR_MAXIM}, "
+                         f"suma maximelor per categorie {posibil} {maxime}")
+
+    def test_verifica_plafon_12(self):
+        v = self._incarca("verifica.py")
+        self.assertEqual(v.SCOR_MAXIM, 12,
+                         f"scor_automat/{v.SCOR_MAXIM}: maximul real e 12")
+        self.assertEqual(v.SCOR_MAXIM,
+                         v.tipare.SCOR_MAXIM + 3 + v.modelisme.SCOR_MAXIM)
 
 
 class TestIgienaTiparelor(unittest.TestCase):
@@ -1106,7 +1158,7 @@ class TestGenuriLegitime(unittest.TestCase):
             cod, iesire = ruleaza("verifica.py", str(FIXTURES / fixture), "--fara-seo")
             linie = next(l for l in iesire.splitlines() if l.startswith("scor_automat"))
             self.assertIn("tipare=0/6", linie, f"{fixture}: {iesire}")
-            self.assertIn("modelisme=0/4", linie, f"{fixture}: {iesire}")
+            self.assertIn("modelisme=0/3", linie, f"{fixture}: {iesire}")
 
     def test_nicio_eroare_critica(self):
         """I4: legit-* ies cu 1 intenționat (semnale minore de familie) —

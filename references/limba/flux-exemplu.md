@@ -58,7 +58,7 @@ important|cuantificari_vagi|L6|materiale de ultimă generație și printr-o gam�
 total=2 (critic=1, important=1) | 72 cuvinte | densitate=27.8/1000cuv
 == ritm: text prea scurt pentru statistica (4 fraze)
 ---
-scor_automat=1/13 (tipare=1/6, ritm=0/3, modelisme=0/4)
+scor_automat=1/12 (tipare=1/6, ritm=0/3, modelisme=0/3)
 ```
 
 ## Ce faci cu raportul
@@ -101,9 +101,9 @@ ultima frază închide pe fapt, nu pe formulă.
 
 ## Pasul 7 — poarta
 
-Reverifici textul final (`scor_automat=0/13`), apoi treci lista din `SKILL.md`:
+Reverifici textul final (`scor_automat=0/12`), apoi treci lista din `SKILL.md`:
 fapte confirmate, fără placeholdere rămase, contractul respectat — registru
-direct, `tu`, 81 de cuvinte, cititorul care compară. `0/13` nu spune că vorbele
+direct, `tu`, 81 de cuvinte, cititorul care compară. `0/12` nu spune că vorbele
 există: înainte de livrare citești textul integral pentru acord, verbe și vorbele
 pe care nu le poți susține. Doar alea, câte una:
 `https://dexonline.ro/definitie/CUVÂNT` (`tipare-ro.md` §cuvant_inexistent).

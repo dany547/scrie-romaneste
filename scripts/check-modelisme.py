@@ -225,7 +225,7 @@ CATEGORII = {
 }
 
 
-SCOR_MAXIM = 4
+SCOR_MAXIM = 3  # atins: pleonasme_etimologice + anglicisme_frecvente + praguri_depasite
 
 
 def calculeaza_scor(raportate, depasiri):
