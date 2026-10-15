@@ -21,7 +21,7 @@ import sys
 
 import _comun
 
-SCOR_MAXIM = 30
+SCOR_MAXIM = 29  # suma maximelor per categorie A-J: A=2, B-I=3, J=3
 # Categoriile A-J sunt contractul extern. `subcategorie` păstrează motivul
 # mecanic fără să fragmenteze calculul scorului pe zece categorii.
 REGULI = (

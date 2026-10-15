@@ -16,7 +16,7 @@ cunoscută de o desinență plauzibilă; fraza curge, iar niciun script nu
 clipește.
 
 `verifica.py`, `check-tipare.py`, `check-modelisme.py` și `--human-voice` nu
-au dicționar. `scor_automat=0/13` și `AI_PATTERN_SCORE=0/30` nu dovedesc că
+au dicționar. `scor_automat=0/12` și `AI_PATTERN_SCORE=0/29` nu dovedesc că
 vorbele există. `scripts/check-cuvinte.py` e separat: listează formele care
 lipsesc din lexiconul Rospell, cu adresa dexonline. E o listă de verificat,
 nu verdict: Rospell (2013) nu are neologisme și forme rare, iar un cuvânt

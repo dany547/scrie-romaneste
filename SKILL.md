@@ -58,7 +58,7 @@ Alege modul din cerință. Dacă nu e clar, e **rescriere**.
   sau într-o copie alăturată, cât timp sursa rămâne greșită.
 - **human-voice** — audit separat pentru reflexe mecanice de voce. Rulează
   `scripts/verifica.py <fișier> --human-voice`; raportează citatele, scorul
-  `AI_PATTERN_SCORE/30`, `STATUS` (`PASS`/`EDITED`/`REWRITE`) și blocerele.
+  `AI_PATTERN_SCORE/29`, `STATUS` (`PASS`/`EDITED`/`REWRITE`) și blocerele.
   **Nu rescrie** în acest mod. Un `PASS` aici nu e pașaport lexical:
   validatorul nu vede cuvintele inexistente.
   Regulile, excepțiile și schema sunt în
@@ -224,7 +224,7 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
    uniformizat la curățenie. Pasul ăsta prinde ce a apărut la pasul 5.
 7. **POARTA DE LIVRARE** — `scripts/verifica.py <fișier> --scor` dă partea
-   deterministă (`scor_automat=X/13`, penalizări, nu notă). Restul se
+   deterministă (`scor_automat=X/12`, penalizări, nu notă). Restul se
    verifică pe listă, nu pe punctaj — treci textul doar dacă toate se
    confirmă:
    - niciun fapt, citat, preț sau date de business inventate;
@@ -403,12 +403,12 @@ Doar secțiunea `seo` are format propriu de linie, fără `L<n>`
 `minor|A|filler|L1|…`) și `reclame` (ex. `critic|limita_caractere|H1|L3|…`) au
 `L<n>` ca tiparele — pentru procesare programatică folosește `--json`.
 
-`scor_automat=X/13` numără penalizări deterministe, nu calitate. 0/13 nu
+`scor_automat=X/12` numără penalizări deterministe, nu calitate. 0/12 nu
 înseamnă text bun și nu înseamnă că vorbele există: înseamnă doar că n-a
 călcat pe nicio mină automată.
 
 Secțiunea `seo` din raport are și ea severitate (`critic`/`important`/`minor`),
-ca ghid de citire. Nu intră în `scor_automat` — `/13` rămâne neschimbat.
+ca ghid de citire. Nu intră în `scor_automat` — `/12` rămâne neschimbat.
 
 Dacă iei decizii pe baza raportului în loc să-l citești (filtrezi pe severitate,
 numeri categorii, iterezi până la un prag), folosește `--json`. E același
@@ -419,11 +419,11 @@ care conține o bară.
 
 - **`verifica.py` — punctul de intrare recomandat.** Rulează toate verificările
   dintr-un singur apel și calculează scorul combinat
-  (`scor_automat=X/13`). Flags: `--fara-seo` (text literar), `--scor` (doar
+  (`scor_automat=X/12`). Flags: `--fara-seo` (text literar), `--scor` (doar
   scorurile), `--json` (output structurat), `--prag N`, `--human-voice`
-  (audit separat, cu `AI_PATTERN_SCORE/30`, `STATUS` și blocere). Combinația
+  (audit separat, cu `AI_PATTERN_SCORE/29`, `STATUS` și blocere). Combinația
   `--human-voice --json` adaugă obiectul `human_voice` fără să modifice scorul
-  existent /13. Celelalte scripturi sunt
+  existent /12. Celelalte scripturi sunt
   utile doar pentru verificări punctuale — implicit rulezi `verifica.py`.
 - `check-tipare.py` — clișee, calcuri, artefacte de generare. Potrivirea ignoră
   diacriticele, deci merge și pe text scris fără ele sau cu sedilă. Raportează

@@ -217,7 +217,7 @@ python3 scripts/verifica.py <file> --json   # structured output for programmatic
 python3 scripts/verifica.py <file> --scor   # scores only
 python3 scripts/verifica.py <file> --prag N   # density threshold (appearances/1000 words)
 python3 scripts/verifica.py <file> --fara-seo  # skip SEO checks (literary text)
-python3 scripts/verifica.py <file> --human-voice  # separate voice audit: AI_PATTERN_SCORE/30, STATUS, blockers
+python3 scripts/verifica.py <file> --human-voice  # separate voice audit: AI_PATTERN_SCORE/29, STATUS, blockers
 python3 scripts/verifica.py <file> --reclame [--platform google|meta] [--brand "Nume"]  # ad-copy audit (labeled files only)
 
 python3 scripts/check-tipare.py <file>      # AI clichés and calques only

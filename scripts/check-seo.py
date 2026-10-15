@@ -20,7 +20,7 @@ SEVERITATE FĂRĂ PUNCTAJ
 
 Returnează tupluri (severitate, categorie, detaliu, context), ca restul
 scripturilor. Severitatea e ghid de citire, nu contribuție la `scor_automat`:
-SEO nu alimentează scorul, iar /13 rămâne neschimbat.
+SEO nu alimentează scorul, iar /12 rămâne neschimbat.
 
 Alinierea la modelul comun s-a făcut când a apărut prima verificare care cere
 judecată — detecția de registru în titlu. Faptele structurale (două H1, salt

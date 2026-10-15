@@ -4,7 +4,7 @@ Listă de citit înainte de livrare, partea de limbă. Pentru densitatea informa
 partea online vezi `references/seo/scoring-checklist.md`.
 
 Nu e o rubrică de punctaj. Un text nu devine bun fiindcă adună puncte, iar
-`scripts/verifica.py` numără penalizări deterministe (`scor_automat=X/13`), nu
+`scripts/verifica.py` numără penalizări deterministe (`scor_automat=X/12`), nu
 calitate. Întrebarea la fiecare punct e „e corectat sau e o alegere pe care o susțin?",
 nu „câte puncte îmi dau?".
 
