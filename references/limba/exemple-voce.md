@@ -114,3 +114,61 @@ Trei propoziții, ultima de trei cuvinte, care conține judecata. Într-un regis
 formal aceeași informație se scrie altfel — „Montajul durează o zi și nu cere
 coș, avize sau revizii ISCIR; în rest, avantajele se opresc aici" — dar tot cu
 judecata pusă pe față, nu diluată în echilibru.
+
+## 9. Colocație neobișnuită → alegere deliberată, nu corecție automată
+
+> **Înainte:** Raportul face o poză de ansamblu a pieței.
+> **După (neutră):** Raportul dă o vedere de ansamblu a pieței.
+
+„Poză de ansamblu" poate fi metaforă, poate fi formulă neașezată — fără sursă
+care s-o infirme și fără ruptură logică în context, verdictul e `preferință`,
+nu eroare. Verifici expresia, nu cuvintele (procedura în `revizie-contextuala.md`)
+și alegi deliberat după registru: într-un text cu voce poți păstra metafora,
+altfel iei varianta neutră.
+
+## 10. Referent rupt și comparație cu scară confirmată → propoziția care spune pe cine și cât
+
+Context confirmat: paragraful anterior spune că distribuitorul și-a schimbat
+directorul după preluare.
+
+> **Înainte:** După ce firma a preluat distribuitorul, și-a schimbat directorul.
+> **După:** După ce firma a preluat distribuitorul, distribuitorul și-a schimbat directorul.
+
+Cu doi candidați în frază, posesivul nu mai trimite nicăieri sigur. Contextul
+spune aici al cui e directorul, deci corecția minimă e legitimă. Într-un text
+realmente ambiguu — unde contextul nu spune — nu completezi din burtă: întrebi
+înainte să alegi, fiindcă o rescriere care alege singură poate inversa sensul.
+Repetiția clară bate eleganța ambiguă.
+
+Context confirmat: abonamentul vechi costă 100 de lei pe lună, cel nou 50;
+comparația e cu vechiul abonament, pe preț.
+
+> **Înainte:** Noul abonament e de două ori mai accesibil.
+> **După:** Noul abonament costă la jumătate față de cel vechi.
+
+„Accesibil" e ambiguu — poate fi financiar sau de utilizare — și nu e mereu
+gradabil numeric. Cu prețurile confirmate, comparația are scară măsurabilă,
+deci verdict `eroare susținută`, cu sprijinul în context. Fără date confirmate
+nu inventezi raportul 2:1 — întrebi.
+
+## 11. Ce i se cere cititorului — și controale care rămân așa
+
+Context confirmat: procedura de garanție e apelul la numărul de pe factură;
+magazinul nu are conturi de client.
+
+> **Înainte:** Activează-ți garanția din contul de client.
+> **După:** Sună la numărul de pe factură ca să activezi garanția.
+
+Dacă acțiunea cerută e imposibilă (cititorul n-are cont), propoziția e greșită
+indiferent cât de curat sună. Protejezi intenția: nu ștergi pasul, îl redai cu
+mecanismul real, confirmat. „După" nu aduce nimic nou neconfirmat. Dacă
+mecanismul nu se poate reconstrui, întrebi.
+
+Controale — aici nu corectezi nimic:
+
+> „Datele au curs toată noaptea prin conductă." — metaforă legitimă într-un text
+> cu voce; verdict `preferință`, se păstrează.
+
+> „Rata de respingere a crescut la 70%." — termen de meserie într-un raport de
+> analytics; nu se „simplifică" în „rată de refuz" fiindcă sună greu. Jargonul
+> potrivit genului rămâne (registrul ales la CONTRACT decide).

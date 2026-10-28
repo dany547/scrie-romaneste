@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Listă de forme care lipsesc din lexiconul românesc, de verificat pe dexonline.
+"""Listă de forme care lipsesc din lexiconul românesc, de verificat în surse permise.
 
 NU e verdict. „Lipsește din lexicon" nu înseamnă „nu există": Rospell (2013)
 nu are tot vocabularul (neologisme, forme rare). Invers, un cuvânt inventat
 care coincide cu o formă reală trece. Scriptul doar restrânge ce trebuie
-verificat; agentul caută fiecare formă listată, pe rând, la adresa din raport.
-Corectezi doar când dexonline spune „nu este în dicționar".
+verificat; verificarea fiecărei forme se face în sursele permise, prin
+revizuire contextuală — linkul din raport e doar un punct de pornire.
+Absența din lexicon nu e verdict și nu impune nicio corectură: verifică forma,
+lema și sensul în sursele permise, apoi decide; nu aplica automat
+sugestiile.
 
 Se ignoră: blocuri/fragmente de cod, URL-uri, emailuri, cuvinte sub 4 litere
 și numele proprii (majusculă în mijlocul propoziției, majuscule interne ca
@@ -19,6 +22,17 @@ Usage:
     check-cuvinte.py <fisier> --allow termeni.txt   # un termen pe linie, # comentariu
     check-cuvinte.py <fisier> --tot                 # fără plafon de afișare
     check-cuvinte.py <fisier> --lexicon cale.txt.gz # sau SCRIE_RO_LEXICON
+    check-cuvinte.py <fisier> --sugestii            # variante ortografice (hunspell)
+    check-cuvinte.py <fisier> --sugestii --dictionar NUME  # nume sau prefix de cale
+                                                      # (fără .dic/.aff), implicit ro_RO
+
+Cu `--sugestii`, imediat după fiecare formă afișată apare o linie
+`sugestii|L<linie>|<afisat>|<var1> / <var2> ...` (maximum 5) sau
+`sugestii|L<linie>|<afisat>|fără sugestii`. E opțional și doar informativ:
+sugestiile NU se aplică automat și NU confirmă sensul. Fără flag nu se invocă
+niciun proces hunspell. Cu flag, dacă motorul nu e disponibil pentru o listă
+chiar afișată, scriptul iese cu 2 fără raport parțial; `--dictionar` fără
+`--sugestii` e eroare de invocare (2).
 
 Lângă lexicon, `scripts/lexicon/completari.txt` are forme românești confirmate
 pe dexonline și lipsă din Rospell (`dronele`, `inchi`...); se aplică automat.
@@ -31,7 +45,7 @@ Raport: `important|cuvant_de_verificat|L<linie>|<formă> xN|→ <URL dexonline>`
 Exit codes:
     0 = nicio formă de verificat
     1 = cel puțin o formă de verificat
-    2 = eroare de input sau lexicon indisponibil
+    2 = eroare de input, lexicon indisponibil sau --sugestii fără motor disponibil
 """
 import gzip
 import os
@@ -41,6 +55,7 @@ import zlib
 from pathlib import Path
 
 import _comun
+import _hunspell
 
 LEXICON_IMPLICIT = Path(__file__).resolve().parent / "lexicon" / "lexicon-ro.txt.gz"
 COMPLETARI_IMPLICIT = Path(__file__).resolve().parent / "lexicon" / "completari.txt"
@@ -164,10 +179,22 @@ def main(argv=None):
         cale_lexicon = (valoare("--lexicon") or os.environ.get("SCRIE_RO_LEXICON")
                         or LEXICON_IMPLICIT)
         cale_allow = valoare("--allow")
+        dictionar = valoare("--dictionar")
     except ValueError as e:
         print(f"eroare: {e}", file=sys.stderr)
         return 2
-    optiuni_cu_valoare = {"--lexicon", "--allow"}
+    cu_sugestii = "--sugestii" in argv
+    if dictionar is not None and not cu_sugestii:
+        print("eroare: --dictionar se folosește doar împreună cu --sugestii",
+              file=sys.stderr)
+        return 2
+    if dictionar is not None and not dictionar.strip():
+        print("eroare: --dictionar cere un nume sau o cale nevidă",
+              file=sys.stderr)
+        return 2
+    if dictionar is None:
+        dictionar = "ro_RO"
+    optiuni_cu_valoare = {"--lexicon", "--allow", "--dictionar"}
     pozitionale = [a for i, a in enumerate(argv)
                    if not a.startswith("--") and (i == 0 or argv[i - 1] not in optiuni_cu_valoare)]
     if len(pozitionale) != 1:
@@ -210,16 +237,37 @@ def main(argv=None):
               f"lexicon={len(lexicon)} forme")
         return 1
     afisate = elemente if "--tot" in argv else elemente[:PLAFON]
+    # Rezolvăm toate sugestiile ÎNAINTE de tipărit: o eroare a motorului nu
+    # trebuie să lase un raport pe jumătate printat (succes parțial).
+    sugestii = {}
+    if cu_sugestii:
+        forme = []
+        vazute = set()
+        for g in afisate:
+            if g["parte"] not in vazute:
+                vazute.add(g["parte"])
+                forme.append(g["parte"])
+        try:
+            sugestii = _hunspell.sugereaza(forme, dictionar=dictionar)
+        except _hunspell.EroareHunspell as e:
+            print(f"eroare: sugestiile nu au putut fi obținute: {e}",
+                  file=sys.stderr)
+            return 2
     for g in afisate:
         sufix = f" x{g['nr']}" if g["nr"] > 1 else ""
         print(f"important|cuvant_de_verificat|L{g['linie']}|{g['afisat']}{sufix}"
               f"|→ {DEXONLINE}{g['parte'].lower()}")
+        if cu_sugestii:
+            variante = sugestii.get(g["parte"], [])
+            print(f"sugestii|L{g['linie']}|{g['afisat']}|"
+                  + (" / ".join(variante) if variante else "fără sugestii"))
     if len(elemente) > len(afisate):
         print(f"mai_sunt|{len(elemente) - len(afisate)} forme neafișate (--tot)")
     print(f"---\ntotal={len(elemente)} forme de verificat | {cuvinte} cuvinte | "
           f"lexicon={len(lexicon)} forme")
-    print("nota: lipsa din lexicon nu e verdict. Verifică fiecare formă pe "
-          "dexonline; corectează doar la „nu este în dicționar”.")
+    print("nota: lipsa din lexicon nu e verdict. Verifică forma, lema și sensul "
+          "în sursele permise; nu aplica automat sugestiile — ele "
+          "nu confirmă nici existența, nici sensul.")
     return 1
 
 

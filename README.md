@@ -12,15 +12,56 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 
 - **Four modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits), `human-voice` (separate audit for mechanical voice reflexes, with a 30-point score and hard blockers)
 - **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
-- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words (the lexicon filter lists suspects, dexonline decides), syntactic calques, false friends, borrowed-word articulation, diacritic restoration
+- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words (the lexicon filter lists suspects; suspects require source/context verification with permitted access, manual lookup only, no automated extraction), syntactic calques, false friends, borrowed-word articulation, diacritic restoration
+- **Contextual revision** — a sentence-by-sentence pass over the final text (`references/limba/revizie-contextuala.md`): verb–object, expression sense, referent, transformation/comparison/causality coherence, reader role, jargon/register. Verdicts (`eroare susținută` / `suspiciune contextuală` / `preferință` / `neclar`) with evidence; at most 2 audit→edit→reverify cycles, then escalate
 - **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
 - **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
 - **Writing techniques** — rhythm, conciseness, structure, audience calibration
 - **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search
 - **Title craft and article flow** — titles with a concrete promise and a precision element, not labels or tabloid clickbait; openings that skip the warmup; section rhythm that isn't a five-H2 template
-- **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker, and a lexicon filter that lists words to look up on dexonline
+- **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker, and a suspect-word filter to verify in permitted sources, not DEX alone (manual lookup only)
 
 ## Installation
+
+### Optional Hunspell setup
+
+The skill itself needs only Python 3.9+ for its scripts and has no pip dependencies. Hunspell is needed only for the opt-in `check-cuvinte.py --sugestii` flag. `--dictionar` is optional and only selects a dictionary other than the default `ro_RO`. Nothing here is installed automatically; these are instructions for you to run.
+
+**Debian / Ubuntu**
+
+```bash
+sudo apt update
+sudo apt install hunspell hunspell-ro
+hunspell -v    # engine version
+hunspell -D    # lists installed dictionaries; ro_RO should appear
+```
+
+**macOS**
+
+```bash
+brew install hunspell
+```
+
+Homebrew installs the `hunspell` engine. I have not verified every resource in the formula, so do not assume what else it includes. A Romanian dictionary (`ro_RO.dic` + `ro_RO.aff`) is not guaranteed; check `hunspell -D` and, if `ro_RO` is missing, install a dictionary from your distribution's resources.
+
+**Other systems (Windows, other Linux, etc.)**
+
+- Put a Hunspell-compatible `hunspell` executable in `PATH`.
+- Install an authorised Romanian dictionary pair, `ro_RO.dic` and `ro_RO.aff`, with the same basename.
+- Pass the dictionary without extension: `--dictionar /path/to/ro_RO`. Without `--dictionar` the default name `ro_RO` is looked up by the engine.
+
+Official sources: <https://hunspell.github.io/>, plus the dictionary resources of your OS distribution. This setup has not been validated on Windows.
+
+**Diagnosis.** If `hunspell -D` does not list `ro_RO`, a `--sugestii` run that uses the default dictionary exits 2 when suspect forms are displayed. This does not apply to an explicit `--dictionar /path/prefix`, which works even when that dictionary is not on the search path. Without `--sugestii` the lexical checker runs as usual and nothing calls Hunspell.
+
+**Smoke tests** (from the skill folder; diacritics kept, UTF-8). Replace `/path/to/ro_RO` with your real dictionary prefix before running the second command:
+
+```bash
+printf 'Cerul era arămriu deasupra dealurilor.\n' | python3 scripts/check-cuvinte.py - --sugestii
+printf 'Cerul era arămriu deasupra dealurilor.\n' | python3 scripts/check-cuvinte.py - --sugestii --dictionar /path/to/ro_RO
+```
+
+Exit 1 is a normal result here: it means the form is listed to check, not that the command failed. `arămriu` may be suggested as `arămiu`; exact ordering varies by dictionary version, so this is not a guaranteed output. Suggestions are never applied automatically and do not confirm existence or meaning.
 
 ### Claude Code
 
@@ -171,6 +212,7 @@ scrie-romaneste/
 │   ├── limba/
 │   │   ├── anti-tipare-ai.md       # AI clichés with replacements + thresholds
 │   │   ├── exemple-voce.md         # Annotated before/after rewrites, by register
+│   │   ├── revizie-contextuala.md   # Sentence-by-sentence sense pass: verdict + evidence
 │   │   ├── human-voice-validator.md # Separate voice audit: A–J categories, score, blockers
 │   │   ├── flux-exemplu.md         # One complete run: request → contract → draft → report → delivery
 │   │   ├── tipare-ro.md            # Romanian-specific failure modes
@@ -198,7 +240,8 @@ scrie-romaneste/
 │   ├── check-tipare.py             # AI clichés, calques, generation artefacts, non-normative forms
 │   ├── check-human-voice.py        # Conversational filler, punchlines, promo voice, contamination
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
-│   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> dexonline lookup list
+│   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> suspect list for permitted sources
+│   ├── _hunspell.py                # Opt-in Hunspell suggestions helper (local engine + external dictionary)
 │   ├── construieste-lexicon.py     # Maintainer only: rebuild lexicon/ from Rospell (needs unmunch)
 │   ├── lexicon/                    # lexicon-ro.txt.gz (MPL/LGPL, not MIT) + completari.txt + licence texts
 │   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
@@ -226,10 +269,17 @@ python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
 python3 scripts/check-ritm.py <file>        # rhythm uniformity only
 python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon, to check on dexonline (exit 0 clean, 1 forms to check, 2 input/lexicon error)
 python3 scripts/check-cuvinte.py <file> --allow terms.txt --tot  # confirmed terms to skip; show all (default cap 10); --lexicon PATH overrides the bundled list
+python3 scripts/check-cuvinte.py <file|-> --sugestii [--dictionar ro_RO] [--allow terms.txt] [--tot]  # opt-in spelling suggestions via local Hunspell
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
 python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, empty claims
 ```
+
+### Spelling suggestions (opt-in Hunspell)
+
+Setup instructions: [Optional Hunspell setup](#optional-hunspell-setup).
+
+`check-cuvinte.py --sugestii` asks a locally installed Hunspell engine — native binary in `PATH` plus a separately installed dictionary — for suggestions on the unknown forms already displayed: at most 5 per form, never auto-applied, no new dependency without the flag. `--dictionar` takes a dictionary name or a path prefix without `.dic`/`.aff` and requires `--sugestii`; `--allow` and the protected completions stay untouched. Suggestion lines are opt-in only: `sugestii|L<n>|forma|v1 / v2`, or `sugestii|L<n>|forma|fără sugestii` when there are none. Exit 2 if the engine or dictionary is missing or fails while suspects await; the engine never starts without displayed suspects or when the list is suppressed by the mostly-non-Romanian heuristic. Score /13, `verifica.py`, and exits 0/1/2 are unchanged. Suggestions confirm neither existence nor sense, and dictionary versions differ — not a semantic corrector.
 
 Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.
 Where a pattern has a canonical fix, the report includes it inline after the
@@ -255,13 +305,27 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.11.0** — Optional Hunspell suggestions and contextual revision.
+  `check-cuvinte.py --sugestii [--dictionar NUME_OR_PREFIX]` asks a locally
+  installed `hunspell` (in `PATH`) with a separately installed Romanian dictionary
+  for at most 5 variants per displayed unknown form; nothing is applied
+  automatically, no network, no new dependency without the flag. Setup
+  instructions: [Optional Hunspell setup](#optional-hunspell-setup). Tested on
+  Linux with Hunspell 1.7.2 and LibreOffice `ro` dictionary 25.2.3 (20 cases,
+  5/5 typo targets ranked first; the 3 agreement and 4 context cases produced no detection). Contextual revision
+  (`references/limba/revizie-contextuala.md`): sentence-by-sentence pass with
+  verdicts and evidence, a maximum of two audit→edit→reverify cycles, absence
+  from the lexicon is not a verdict, and only permitted sources are used. A
+  60-case synthetic corpus (`tests/fixtures/evaluare-contextuala.json`) is a
+  draft, its labels are not validated by a human reader, and it is not a passed
+  benchmark. 249 tests. No LLM or semantic engine is included.
 - **v0.10.1** — Harder checks and a licence file. Adds the MIT `LICENSE` (the
   Rospell word list keeps MPL 1.1 / LGPL 2.1). A benchmark of plausible invented
   Romanian words and romgleză (`tests/fixtures/cuvinte-grele-*.md`, ground truth
   checked on dexonline) pins what `check-cuvinte.py` must list. The dexonline
-  procedure now covers a bodyless HTTP 404: retry once with a browser
-  user-agent, and if the body is still missing the form stays unclear, not
-  "nonexistent". 181 tests.
+  procedure covered a bodyless HTTP 404 (historical, now superseded: lookup is
+  manual-only, no automated fetching — live rule in `tipare-ro.md`
+  §cuvant_inexistent). 181 tests.
 - **v0.10.0** — A lexicon filter for words that may not exist. New
   `check-cuvinte.py` lists the forms missing from a bundled Rospell-derived
   lexicon (`scripts/lexicon/`, MPL 1.1 / LGPL 2.1, the rest of the repo stays

@@ -20,9 +20,10 @@ au dicționar. `scor_automat=0/13` și `AI_PATTERN_SCORE=0/30` nu dovedesc că
 vorbele există. `scripts/check-cuvinte.py` e separat: listează formele care
 lipsesc din lexiconul Rospell, cu adresa dexonline. E o listă de verificat,
 nu verdict: Rospell (2013) nu are neologisme și forme rare, iar un cuvânt
-inventat care coincide cu o formă reală trece. Cauți pe dexonline doar ce
-listează (și ce te îndoiești singur); forma pe care dexonline o declară
-inexistentă o corectezi pe sens, nu din raport. Nu băga mostrele de mai jos într-o listă de interdicții și nu
+inventat care coincide cu o formă reală trece. O formă absentă dintr-o sursă e
+neatestată în sursa aceea, nu inexistentă în limbă: verifici doar ce listează
+scriptul (și ce te îndoiești singur) — formă, lemă, sens și registru — în surse
+permise. Nu băga mostrele de mai jos într-o listă de interdicții și nu
 le adăuga în regex: prind un caz, nu clasa.
 
 | Formă | Ce e, ca formă | Nu face |
@@ -31,56 +32,61 @@ le adăuga în regex: prind un caz, nu clasa.
 | petechelui | desinență de genitiv pe un radical care nu e cuvânt | nu înlocui automat cu o vorbă care sună apropiat |
 
 Forma de căutat: rădăcină reală plus o desinență care nu se atașează, genitiv
-sau plural al unui cuvânt care nu e în limbă, verb conjugat după o clasă
+sau plural obținut prin analogie greșită, verb conjugat după o clasă
 greșită dar cu înfățișare regulată (`morfologie_flexiune`). Numele proprii,
 mărcile, codul, termenii tehnici confirmați de utilizator și împrumuturile cu
 politică stabilită (`articol_imprumuturi`) nu se caută în dicționar și nu se
 declară inexistente fiindcă lipsesc de acolo.
 
 Înainte de livrare, citește textul integral — titlu, excerpt, corp. La vorbele
-de care ești sigur, nu face nimic. La cele de care nu ești sigur, caută-le pe
-dexonline, **câte una**, nu textul întreg și nu în buclă:
+de care ești sigur, nu face nimic. La cele de care nu ești sigur, lookup-ul e
+manual, făcut de utilizator, **câte un cuvânt**, nu textul întreg și nu în buclă:
 
 `https://dexonline.ro/definitie/CUVÂNT`
 
 În locul lui `CUVÂNT` pui forma din text, cu diacritice, fără punctuația din
 jur. O cerere = un cuvânt. Nu trimite sintagme. Nu copia definiția în textul
 livrat: lookup-ul răspunde la „există forma asta?", nu strânge material.
-Dexonline interzice extragerea automată; nu parcurge articolul cuvânt cu
-cuvânt.
+Licența dexonline interzice accesul și extragerea automată fără acord, cu
+excepția seturilor oferite oficial: nu extrage automat, nu instrui ocoliri
+(„câte un cuvânt cu curl"), nu presupune un API. Lucrezi cu ce îți arată
+utilizatorul sau cu seturi autorizate; reguli complete în
+`revizie-contextuala.md`.
 
 Cum citești răspunsul:
 
-- există intrare sau paradigmă care conține forma — vorba e reală; flexiunea
+- există intrare sau paradigmă care conține forma — forma e atestată; flexiunea
   o verifici acolo, nu o presupui (o formă flexionată, „funcționale", își
-  găsește lema);
-- pagina spune „Cuvântul … nu este în dicționar" — forma nu există.
-  Sugestiile de sub frază nu sunt confirmare. O sugestie poate fi corecția
-  doar dacă sensul din text e același; altfel întreabă, nu lua prima
-  potrivire;
-- un cod HTTP sau o pagină goală nu e verdict. Semnalul e fraza „nu este în
-  dicționar", nu statusul;
-- pentru un cuvânt inexistent dexonline răspunde adesea cu HTTP 404, dar cu
-  pagina completă în corp. Dacă unealta ta arată doar „404" fără corp, repetă
-  o singură dată cu un user-agent de browser (ex. `curl -s -L -A "Mozilla/5.0"
-  <adresa>`) și citește fraza din corp. Rămas fără corp, 404-ul nu e verdict:
-  forma e **neclară**, nu „inexistentă" și nu „acceptată".
+  găsește lema). Atestarea nu spune și că sensul din text e cel bun;
+- pagina spune „Cuvântul … nu este în dicționar" sau „Niciun rezultat pentru …"
+  — forma e neatestată în sursa aceea, nu inexistentă. Sugestiile de sub frază
+  nu sunt confirmare. O sugestie poate fi varianta bună doar dacă sensul din
+  text e același; altfel întrebi, nu iei prima potrivire și nu judeci absența;
+- un cod HTTP sau o pagină goală nu e verdict. Dacă vezi doar un status fără
+  corpul paginii, nu poți judeca: forma e **neclară** — întrebi sau ceri dovada,
+  nu reîncerci automat.
 
 Nu înlocui din burtă și nu livra o formă pe care n-o poți susține.
 
 ### Ce faci după verdictul dexonline
 
-Lexiconul (`scripts/check-cuvinte.py`) doar ridică întrebarea. Răspunsul îl dă
-dexonline, sursa pentru „există în română". Un anglicism nu e greșit în sine:
-`review`, `smart` sau `living` au intrare pe dexonline și rămân. `gamutul`
-nu are, deci nu intră în text așa.
+Lexiconul (`scripts/check-cuvinte.py`) doar ridică întrebarea. Absența dintr-o
+sursă nu este inexistență și nu este romgleză: poate fi un termen valid absent
+(neologism, termen tehnic, derivat rar). Accepți lexical numai sensul confirmat:
+verifici forma și lema, citești sensurile relevante și registrul, iar termenii
+tehnici îi poți valida și în surse specializate, nu doar în dicționare generale.
+Un anglicism nu e greșit în sine: `review`, `smart` sau `living` au intrare pe
+dexonline și rămân. Pentru un termen ca `gamut`, absent din dicționarul general,
+alegerea (păstrare, adaptare sau echivalent) e o decizie terminologică cu sensul
+verificat, nu un verdict de inexistență — procedura e la „Înlocuirea" de mai jos.
 
-**Cum citești pagina.** Absența are două formulări: „Cuvântul … nu este în
-dicționar" și „Niciun rezultat pentru …". Fraza „Nu există informații despre
+**Cum citești pagina.** Pagina își descrie singură limitele: „Cuvântul … nu este în
+dicționar" și „Niciun rezultat pentru …" spun că forma nu e în sursa aceea,
+nu că nu există. Fraza „Nu există informații despre
 paradigma acestui cuvânt" apare și pe cuvinte existente: o ignori. Neclare,
 nu verdict: o intrare fără definiție (`next`, `goes`), o redirecționare spre
 alt cuvânt (`handheld` → *Handel*, `framerate` → *frumusețe*), o pagină goală.
-O intrare de trimitere (`inci`: „v. țol”) atestă lema.
+O intrare de trimitere (`inci`: „v. țol") atestă lema.
 
 **Formele flexionate.** Cauți lema, fără articol și desinență, și verifici în
 paradigmă. Paradigma nu listează formele articulate (`iPadul`): dacă lema e
@@ -90,7 +96,7 @@ se caută și lipiți (`second hand` → `secondhand`).
 | Ce găsești | Ce faci |
 |---|---|
 | Intrare sau paradigmă care conține forma (sau lema ei) | Acceptat. Nu o atingi. Dacă lexiconul o ratează de regulă (`dronele`, `inchi`), forma intră în `scripts/lexicon/completari.txt`, doar după ce dexonline a confirmat-o. |
-| Absentă, stem străin + desinență românească (`gamutul`, `reviewerul`, `livingul`, `spinoff-ul`) | Romgleză. Cauți lema: `living` există, deci `livingul` e forma lui articulată; `gamut` nu, deci `gamutul` se înlocuiește. |
+| Absentă, stem străin + desinență românească (`gamutul`, `reviewerul`, `livingul`, `spinoff-ul`) | Suspect de romgleză, nu verdict. Cauți lema: `living` e atestat, deci `livingul` e forma lui articulată; `gamut` e neatestat în dicționarul general, deci alegerea terminologică se face cu sensul verificat (vezi „Înlocuirea"), nu din absență. |
 | Absentă, termen englezesc pur, fără desinență (`upscaling`, `shooter`, `tracing`) | Termen străin neadaptat. Dexonline nu are glosar de domeniu: nu confirmă nici existența, nici echivalentul. Nu înlocuiești din burtă; întrebi utilizatorul dacă se tălmăcește sau se lasă (și, lăsat, intră în `--allow`). |
 | Absentă, formă românească sau derivat cu prefix (`subumflată`, `hiperrealist`, `ultraportabil`) | Nu o corectezi singur. Cauți baza și un sinonim atestat; dacă nu găsești unul cu același sens, întrebi. |
 | Nume de marcă, produs, standard sau domeniu (`webOS`, `eARC`, `nPerf`, `aisemnal`) | Dexonline nu poate confirma un nume propriu. Lași forma, dar o ceri confirmată de utilizator; confirmată, intră în `--allow`. |
@@ -98,24 +104,28 @@ se caută și lipiți (`second hand` → `secondhand`).
 | Forma există, dar cu alt sens decât în text (`interview`: jurnalistic în DEX, etapă tehnică în text) | Sensul din text decide: dacă nu se potrivește, tratezi forma ca neatestată și întrebi. |
 
 **Textul predominant neromânesc.** Dacă raportul are `info|cuvinte|text
-predominant neromânesc` (peste 30% din formele unice lipsesc), articolul e în
-engleză, cod sau mesaje de eroare. Nu parcurgi lista: întrebi utilizatorul
-dacă textul trebuie tradus. Pasajele de cod și de log se marchează oricum cu
-backticks, ca scriptul să le ignore.
+predominant neromânesc` (peste 30% din formele unice lipsesc), ai multe forme
+necunoscute, nu un diagnostic: poate fi engleză, cod sau mesaje de eroare, dar
+și un text românesc cu mulți termeni de specialitate. Nu parcurgi lista orbește:
+verifici contextul, folosești `--tot`, iar pasajele de cod și de log se marchează
+cu backticks, ca scriptul să le ignore. Nu presupui automat că textul trebuie
+tradus — întrebi utilizatorul ce e textul și cum procedați.
 
-**Înlocuirea.** Când forma nu există și trebuie înlocuită, **înlocuirea se
-verifică și ea** pe dexonline: cauți forma propusă, citești definiția și
-confirmi că sensul din text e **același**. Un sens doar apropiat nu
+**Înlocuirea.** Când alegi o înlocuire pentru o formă neatestată, **înlocuirea se
+verifică și ea**: cauți forma propusă, citești definiția și confirmi că sensul
+din text e **același**. Un sens doar apropiat nu
 ajunge (`ultrabook` nu e `laptop`; `reglementator` nu e `regulator`): atunci
 întrebi, cu propunerea alături. Pentru o sintagmă (`învățare automată`,
-`joc de tir`) verifici fiecare cuvânt, dar sensul sintagmei nu îl poți
-confirma pe dexonline: o propui ca variantă și întrebi, nu o livrezi singur.
-Dexonline dă sugestii sub „nu este în dicționar”; o sugestie nu e confirmare.
-Nu copia definiția în text.
+`joc de tir`) verifici cuvintele, dar sensul întregii sintagme îl confirmi în
+context și, unde se poate, în surse — altfel o propui ca variantă și întrebi,
+nu o livrezi singur. Sugestiile de sub „nu este în dicționar" nu sunt
+confirmare. Nu copia definiția în text.
 
-Exemplu: `gamutul` (L5, „spațiul de culori al ecranului") → dexonline: forma
-nu există → `gamut` nu există nici el → propui `gama de culori`, cauți
-`gamă` și `cromatic` pe dexonline, confirmi sensul → corectezi în text.
+Exemplu ipotetic de alegere terminologică, nu de verdict: `gamutul` (L5,
+„spațiul de culori al ecranului") → formă neatestată în dicționarul general →
+`gamut` neatestat și el → propui `gama de culori`, verifici `gamă` și
+`cromatic`, confirmi sensul → alegi varianta cu sensul verificat, eventual cu
+o întrebare către utilizator.
 
 ---
 
