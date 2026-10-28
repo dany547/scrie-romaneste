@@ -474,8 +474,8 @@ care conține o bară.
   (multe forme lipsă), nu diagnostic.
   Sugestii de corectare (opt-in, motor Hunspell local + dicționar instalat separat):
   `check-cuvinte.py <fișier|-> --sugestii [--dictionar ro_RO] [--allow termeni.txt]
-  [--tot]` — motor Hunspell nativ local în PATH + dicționar instalat separat;
-  fără flag, nicio dependență nouă. `--dictionar` acceptă nume sau prefix de cale
+  [--tot]` — motor Hunspell local în PATH + dicționar separat (setup:
+  `README.md#optional-hunspell-setup`); fără flag, nicio dependență nouă. `--dictionar` acceptă nume sau prefix de cale
   fără `.dic`/`.aff` și cere `--sugestii`. Doar formele necunoscute AFIȘATE primesc
   sugestii (max 5, fără înlocuire automată); `allow`/completări protejate; linii noi
   doar opt-in (`sugestii|L<n>|<forma>|<v1> / <v2>`, sau `fără sugestii`). Exit 2 dacă

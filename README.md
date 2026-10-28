@@ -23,6 +23,46 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 
 ## Installation
 
+### Optional Hunspell setup
+
+The skill itself needs only Python 3.9+ for its scripts and has no pip dependencies. Hunspell is needed only for the opt-in `check-cuvinte.py --sugestii` flag. `--dictionar` is optional and only selects a dictionary other than the default `ro_RO`. Nothing here is installed automatically; these are instructions for you to run.
+
+**Debian / Ubuntu**
+
+```bash
+sudo apt update
+sudo apt install hunspell hunspell-ro
+hunspell -v    # engine version
+hunspell -D    # lists installed dictionaries; ro_RO should appear
+```
+
+**macOS**
+
+```bash
+brew install hunspell
+```
+
+Homebrew installs the `hunspell` engine. I have not verified every resource in the formula, so do not assume what else it includes. A Romanian dictionary (`ro_RO.dic` + `ro_RO.aff`) is not guaranteed; check `hunspell -D` and, if `ro_RO` is missing, install a dictionary from your distribution's resources.
+
+**Other systems (Windows, other Linux, etc.)**
+
+- Put a Hunspell-compatible `hunspell` executable in `PATH`.
+- Install an authorised Romanian dictionary pair, `ro_RO.dic` and `ro_RO.aff`, with the same basename.
+- Pass the dictionary without extension: `--dictionar /path/to/ro_RO`. Without `--dictionar` the default name `ro_RO` is looked up by the engine.
+
+Official sources: <https://hunspell.github.io/>, plus the dictionary resources of your OS distribution. This setup has not been validated on Windows.
+
+**Diagnosis.** If `hunspell -D` does not list `ro_RO`, a `--sugestii` run that uses the default dictionary exits 2 when suspect forms are displayed. This does not apply to an explicit `--dictionar /path/prefix`, which works even when that dictionary is not on the search path. Without `--sugestii` the lexical checker runs as usual and nothing calls Hunspell.
+
+**Smoke tests** (from the skill folder; diacritics kept, UTF-8). Replace `/path/to/ro_RO` with your real dictionary prefix before running the second command:
+
+```bash
+printf 'Cerul era arămriu deasupra dealurilor.\n' | python3 scripts/check-cuvinte.py - --sugestii
+printf 'Cerul era arămriu deasupra dealurilor.\n' | python3 scripts/check-cuvinte.py - --sugestii --dictionar /path/to/ro_RO
+```
+
+Exit 1 is a normal result here: it means the form is listed to check, not that the command failed. `arămriu` may be suggested as `arămiu`; exact ordering varies by dictionary version, so this is not a guaranteed output. Suggestions are never applied automatically and do not confirm existence or meaning.
+
 ### Claude Code
 
 Copy the skill folder into your project:
@@ -237,6 +277,8 @@ python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, em
 
 ### Spelling suggestions (opt-in Hunspell)
 
+Setup instructions: [Optional Hunspell setup](#optional-hunspell-setup).
+
 `check-cuvinte.py --sugestii` asks a locally installed Hunspell engine — native binary in `PATH` plus a separately installed dictionary — for suggestions on the unknown forms already displayed: at most 5 per form, never auto-applied, no new dependency without the flag. `--dictionar` takes a dictionary name or a path prefix without `.dic`/`.aff` and requires `--sugestii`; `--allow` and the protected completions stay untouched. Suggestion lines are opt-in only: `sugestii|L<n>|forma|v1 / v2`, or `sugestii|L<n>|forma|fără sugestii` when there are none. Exit 2 if the engine or dictionary is missing or fails while suspects await; the engine never starts without displayed suspects or when the list is suppressed by the mostly-non-Romanian heuristic. Score /13, `verifica.py`, and exits 0/1/2 are unchanged. Suggestions confirm neither existence nor sense, and dictionary versions differ — not a semantic corrector.
 
 Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.
@@ -263,6 +305,20 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.11.0** — Optional Hunspell suggestions and contextual revision.
+  `check-cuvinte.py --sugestii [--dictionar NUME_OR_PREFIX]` asks a locally
+  installed `hunspell` (in `PATH`) with a separately installed Romanian dictionary
+  for at most 5 variants per displayed unknown form; nothing is applied
+  automatically, no network, no new dependency without the flag. Setup
+  instructions: [Optional Hunspell setup](#optional-hunspell-setup). Tested on
+  Linux with Hunspell 1.7.2 and LibreOffice `ro` dictionary 25.2.3 (20 cases,
+  5/5 typo targets ranked first; the 3 agreement and 4 context cases produced no detection). Contextual revision
+  (`references/limba/revizie-contextuala.md`): sentence-by-sentence pass with
+  verdicts and evidence, a maximum of two audit→edit→reverify cycles, absence
+  from the lexicon is not a verdict, and only permitted sources are used. A
+  60-case synthetic corpus (`tests/fixtures/evaluare-contextuala.json`) is a
+  draft, its labels are not validated by a human reader, and it is not a passed
+  benchmark. 249 tests. No LLM or semantic engine is included.
 - **v0.10.1** — Harder checks and a licence file. Adds the MIT `LICENSE` (the
   Rospell word list keeps MPL 1.1 / LGPL 2.1). A benchmark of plausible invented
   Romanian words and romgleză (`tests/fixtures/cuvinte-grele-*.md`, ground truth
