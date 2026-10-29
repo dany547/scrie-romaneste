@@ -550,6 +550,32 @@
       "source_status": "neconfirmat"
     },
     {
+      "id": "calc-ref-07",
+      "family": "frana-incarcare",
+      "split": "referinta",
+      "category": "calc",
+      "audience": "deținători de site-uri mici",
+      "context": "Recomandare de optimizare pentru un site de prezentare.",
+      "text": "Bannerele animate frânează încărcarea paginii de pornire.",
+      "expected_verdict": "suspiciune",
+      "rationale": "Verbul «a frâna» cu obiectul «încărcarea» seamănă a calc după «slows down loading»; fiecare cuvânt există, iar perechea se recitește în context înainte de orice rescriere. Reformularea neutră păstrează sensul (ceva întârzie procesul) fără să presupună viteză mică.",
+      "minimal_correction": null,
+      "source_status": "neconfirmat"
+    },
+    {
+      "id": "calc-ref-08",
+      "family": "frana-incarcare",
+      "split": "referinta",
+      "category": "calc",
+      "audience": "deținători de site-uri mici",
+      "context": "Același material, la pasul despre echipamentul de tractare.",
+      "text": "Sistemul de frânare al remorcii suportă sarcina maximă.",
+      "expected_verdict": "pastreaza",
+      "rationale": "Control: aceleași rădăcini într-o construcție legitimă (echipament + sarcină); perechea de cuvinte nu e delict — se judecă construcția în context, nu stem-urile.",
+      "minimal_correction": null,
+      "source_status": "neconfirmat"
+    },
+    {
       "id": "calc-hold-01",
       "family": "followup",
       "split": "holdout",

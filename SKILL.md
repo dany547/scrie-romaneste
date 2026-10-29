@@ -308,6 +308,7 @@ references/
 │   ├── gramatica-stil.md      # punctuație, ortografie, pleonasm — normă
 │   ├── scris-eficient.md      # tehnici de proces: draft/editare, ritm, concizie
 │   ├── modelisme.md           # pleonasme etimologice, anglicisme, paronimie
+│   ├── calcuri.json           # registry static de colocări de recitit (check-calcuri.py, opt-in)
 │   └── scoring-checklist.md   # criteriile de limbă, ca listă de citit
 └── seo/
     ├── core.md                # tehnic, on-page, conținut, specific română
@@ -396,6 +397,20 @@ Pe Windows/PowerShell, pune textul din conversație într-un fișier temporar, n
   1 = forme de verificat, 2 = eroare de input/lexicon; cu `--sugestii`, exit 2
   poate indica și motorul Hunspell sau dicționarul indisponibil/defect când
   există suspecți afișați. Vezi manualul CLI pentru condiția exactă.
+- `check-calcuri.py` e separat, opt-in (rulezi doar la cerere), nu intră în
+  `verifica.py` și nu are scor: semnalizează colocări de recitit din
+  `references/limba/calcuri.json` — deocamdată o singură regulă, forme de
+  «a frâna» lângă forme de «încărcare», pe aceeași propoziție, la cel mult
+  `--fereastra` cuvinte distanță (implicit 10; se acceptă și `--fereastra=N`).
+  Perechea e de recitit în context — calc, metaforă sau frânare fizică
+  legitimă («Camionul frânează la rampa de încărcare» e fals pozitiv
+  acceptat) —, nu un verdict: fereastra numără cuvinte, nu sintaxă, iar
+  semnalul trimite la revizia contextuală, nu la o corecție; un semnal nu e
+  automat o eroare. «încărcătura» (sarcina, nu procesul) e exclusă. Exit 0 =
+  nimic de recitit, 1 = cel puțin o colocare (caz normal), 2 = eroare de
+  input, registry lipsă/defect sau argument necunoscut; `--registry`
+  înlocuiește registry-ul. Limitele, formatul și creșterea manuală a
+  registry-ului: manualul CLI.
 - Dacă `python3` nu există, nu căuta alternative: sari peste pasul mecanic,
   spune-o pe scurt și fă verificarea pe listă, din
   `references/limba/anti-tipare-ai.md`.

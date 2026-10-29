@@ -94,7 +94,8 @@ Două mini-cazuri, ca principiu (nu ca listă de interdicții):
 
 ## exemple greșit → bun, cu control
 
-Patru familii frecvente, fiecare cu perechea greșit/bun și un control care
+Cinci familii frecvente, fiecare cu perechea greșit/bun (a cincea e alta:
+pereche suspectă de recitit, nu eroare demonstrabilă) și un control care
 *pare* din aceeași familie, dar stă în picioare — nu-l „corecta". Formulările
 sunt sintetice; le adaptezi genului, registrului și subiectului textului, nu
 le copiezi ca șabloane.
@@ -127,6 +128,25 @@ le copiezi ca șabloane.
    stabilită la CONTRACT. control: citatul unui client își păstrează propria
    adresare („Vă mulțumim pentru ajutor", scrie o clientă) — vocea altcuiva
    nu se uniformizează.
+5. **Colocare suspectă verb–obiect (întrebarea 1), nu eroare demonstrabilă.**
+   suspect: „Imaginile neoptimizate frânează încărcarea paginii." — verbul
+   «a frâna» cu obiectul «încărcarea» miroase a calc după «slows down
+   loading»; verdictul rămâne `suspiciune contextuală` până e verificat în
+   sursele permise — nu se corectează din burtă și nu se declară «calc
+   confirmat». Reformulare care păstrează sensul: „Imaginile neoptimizate
+   încetinesc încărcarea paginii." — același conținut (ceva întârzie
+   procesul), fără să presupună că pagina e lentă; întrebarea de recitire:
+   „Ce încetinește încărcarea?". controale: „Sistemul de frânare suportă
+   încărcarea maximă a remorcii." — aceleași rădăcini într-o construcție
+   legitimă (echipament + sarcină); „Camionul frânează la rampa de
+   încărcare." — frânare fizică legitimă, pe care scanerul o poate marca:
+   fals pozitiv acceptat și documentat, de aceea mesajul lui e neutru (de
+   recitit în context, fără calc sau site prezise). Se păstrează amândouă,
+   pentru că perechea de cuvinte nu e delict — construcția e cea judecată.
+   `scripts/check-calcuri.py`
+   (opt-in, `references/limba/calcuri.json`) marchează perechi din familia
+   asta pentru recitire, pe aceeași propoziție, într-o fereastră pe cuvinte;
+   semnalul e punct de plecare pentru trecerea asta, nu verdict.
 
 ## dovezi
 
