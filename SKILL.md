@@ -46,9 +46,8 @@ Alege modul din cerință. Dacă nu e clar, e **rescriere**.
   (`acord_numerale`: „acești milioane", „câțiva sute"); restul, inclusiv
   „doi/două" și „primii/primele", rămâne la recitirea manuală — ca și topica
   și alegerea lexicală. Nici `verifica.py`, nici `--human-voice` nu au
-  dicționar: un raport curat nu dovedește că vorbele există. Rulează separat
-  `scripts/check-cuvinte.py <fișier>`: listează formele care lipsesc din
-  lexiconul Rospell, de verificat în surse permise (nu e verdict). Recitește
+  dicționar: un raport curat nu dovedește că vorbele există — rulează separat
+  `scripts/check-cuvinte.py` (detalii la Obligatoriu). Recitește
   oricum textul integral, în special titlul și excerptul, pentru acord, forme
   verbale și cuvinte inexistente (`references/limba/tipare-ro.md`
   §cuvant_inexistent).
@@ -197,11 +196,9 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
 5. **AUTOCORECȚIE** — rulează `scripts/verifica.py <fișier>` (textul din conversație
    pe stdin — rețeta e în „Cum le rulezi"; `--fara-seo` pentru text literar).
-   Raportul acoperă clișee AI,
-   calcuri, pleonasme, paronime, ritm și SEO dintr-o singură trecere, cu
-   sugestia de corecție inline (`|→ …`) unde există una canonică. Aplică
-   sugestiile cu judecată — potrivirea e mecanică, corecția cere acord și
-   topică. Dacă textul are titlu sau excerpt separat de corp (TITLE_RO/EXCERPT_RO,
+   Raportul acoperă clișee, calcuri, pleonasme, paronime, ritm și SEO dintr-o
+   trecere; citește-l ca în „Cum citești raportul" — `→` e corecție canonică,
+   aplicată cu acord și topică. Dacă textul are titlu sau excerpt separat de corp (TITLE_RO/EXCERPT_RO,
    frontmatter), verifică-le ca text separat, lângă corp — nu le scoate din
    inputul verificat. Pentru problemele semnalate fără sugestie, sau ca să
    înțelegi o
@@ -211,9 +208,11 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    editarea: citește fiecare semnal în context, blochează doar garbage-ul,
    contaminarea și placeholder-ele, iar pentru restul editează minim.
    Apoi treci textul propoziție cu propoziție prin
-   `references/limba/revizie-contextuala.md` (context de paragraf și public,
-   inclusiv titlu/excerpt): scripturile nu prind construcții noi nefirești și
-   nu învață modelul.
+   `references/limba/revizie-contextuala.md` (context de paragraf și public;
+   titluri/excerpt/etichete de anunț citite și standalone; urmă internă
+   OK/RESCRIU/NECLAR pe fiecare propoziție; corecția se recitește și ea —
+   sens, repetiție, adresare, registru, fapte): scripturile nu prind
+   construcții noi nefirești și nu învață modelul.
    Dacă textul e anunț (fișier cu etichete H1:/D1:/Text:/Titlu:), rulează și
    `scripts/verifica.py <fișier> --reclame` — limitele de caractere, politicile
    platformei și afirmările goale structurale. Pe un fișier cu etichete de anunț,
@@ -229,9 +228,8 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
    uniformizat la curățenie. Pasul ăsta prinde ce a apărut la pasul 5. Pe FINAL,
    maxim 2 cicluri audit → editare minimă → reverificare; dacă rămâne dezacord
-   sau necunoscut, escaladează (întrebi), nu itera. Auditul nu editează: în modurile
-   audit/human-voice livrezi raportul fără să modifici textul; în rescriere și
-   editare, observațiile intermediare rămân interne și nu poluează livrarea.
+   sau necunoscut, escaladează (întrebi), nu itera. Auditul nu editează (vezi
+   Moduri); observațiile intermediare rămân interne, nu intră în livrare.
 7. **POARTA DE LIVRARE** — `scripts/verifica.py <fișier> --scor` dă partea
    deterministă (`scor_automat=X/13`, penalizări, nu notă). Restul se
    verifică pe listă, nu pe punctaj — treci textul doar dacă toate se
@@ -246,10 +244,10 @@ scripturilor și cu deciziile luate pe fiecare semnal.
      fără suport (neatestate în sursele permise), acordurile neprinse de script
      și formele verbale greșite sunt corectate sau escaladate. `scor_automat` și
      `--human-voice` nu fac controlul ăsta: `arămriu` și `petechelui` ies curate.
-     Rulează `scripts/check-cuvinte.py` pe text; formele listate (și vorbele
-     nesigure) se verifică formă/lemă/sens/registru în surse permise, ca în
-     `references/limba/revizie-contextuala.md` (procedură + dovezi + acces); ce rămâne neclar se
-     întreabă, nu se livrează ca sigur și nu se înlocuiește din burtă;
+     `scripts/check-cuvinte.py` pe text: formele listate se tratează ca la
+     regula „Nu livra un cuvânt pe care nu-l poți susține"; procedura de
+     verificare e în `references/limba/revizie-contextuala.md` — neclar se
+     întreabă, nu se înlocuiește din burtă;
    - semnalele stilistice (ritm, concluzie, paralelism, listă) au fost
      recitite în context și păstrate sau tăiate deliberat;
    - textul respectă contractul de la pasul 2 — gen, registru, cititor,
@@ -259,7 +257,8 @@ scripturilor și cu deciziile luate pe fiecare semnal.
      atestă corectitudinea/sensul;
    - revizia contextuală e trecută (`references/limba/revizie-contextuala.md`):
      citat exact + motiv concret + corecție minimă + verdict per problemă; pasajele
-     bune intacte; metaforele/registrul nu au fost „corectate" automat;
+     bune intacte; metaforele/registrul nu au fost „corectate" automat; fiecare
+     corecție recitită pentru sens, repetiție, adresare, registru, fapte;
    - dacă textul e de citit cap-coadă online: titlul promite ceva concret și
      corpul îl plătește; deschiderea nu e încălzire; subtitlurile citite în
      șir spun povestea articolului;
@@ -303,6 +302,7 @@ references/
 │   ├── exemple-voce.md        # transformări înainte/după, pe registre — modele pozitive
 │   ├── revizie-contextuala.md # propoziție cu propoziție, pe sens: verdict + dovadă
 │   ├── human-voice-validator.md # audit separat: A–J, scor, blocere, procedură
+│   ├── cli-verificare.md      # manual CLI detaliat — doar înainte de uz avansat/individual
 │   ├── flux-exemplu.md        # un traseu complet: cerere → contract → draft → raport → livrare
 │   ├── tipare-ro.md           # acord, prepoziții, flexiune, cuvinte inexistente, calc
 │   ├── gramatica-stil.md      # punctuație, ortografie, pleonasm — normă
@@ -351,150 +351,86 @@ o singură propoziție de rescris.
 
 ## scripts/
 
-### Cum le rulezi
+### Rețeta minimă și contracte critice
 
-Scripturile stau în directorul skill-ului, **nu** în proiectul utilizatorului.
-Calea e relativă la fișierul ăsta: dacă citești `SKILL.md` din
-`~/.claude/skills/scrie-romaneste/`, scripturile sunt în
-`~/.claude/skills/scrie-romaneste/scripts/`. Notează calea o dată, la primul
-apel, și refolosește-o.
-
-Textul de verificat e de obicei în conversație, nu într-un fișier. Dă-l pe
-stdin, cu `-` ca argument:
+Scripturile stau în directorul skill-ului, nu în proiectul utilizatorului; rezolvă
+calea relativ la `SKILL.md` o singură dată. Punctul de intrare recomandat este
+`verifica.py`:
 
 ```bash
 python3 <cale-skill>/scripts/verifica.py - <<'TEXT'
-Textul de verificat, integral, cu diacritice.
+Textul integral, cu diacritice.
 TEXT
 ```
 
-Dacă textul e deja într-un fișier al proiectului:
+sau, dacă textul e deja într-un fișier al proiectului:
 
 ```bash
 python3 <cale-skill>/scripts/verifica.py drafts/articol.md
 ```
 
-Pe Windows/PowerShell, unde heredoc-ul nu există, scrie textul într-un fișier
-temporar și dă-i calea. Nu încerca variante de escaping — pierzi diacriticele.
+Pe Windows/PowerShell, pune textul din conversație într-un fișier temporar, nu
+încerca escaping. Opțiunile uzuale: `--fara-seo`, `--scor`, `--json`, `--prag N`,
+`--human-voice`, `--reclame`, `--platform google|meta`, `--brand "Nume"`.
 
-Trei lucruri de știut înainte de primul apel:
-
-- **Exit 1 nu e eroare.** Înseamnă „am găsit semnale" și e rezultatul normal pe
-  un draft. Doar exit 2 e eroare (fișier lipsă, argument greșit, intrare
-  non-UTF-8 — convertește cu `iconv -f WINDOWS-1250 -t UTF-8`, nu reîncerca
-  variante de escaping). Nu raporta
-  utilizatorului că scriptul „a eșuat".
-- **`--fara-seo` pentru orice text fără destinație online** — literar, email,
-  document intern. Altfel primești semnale despre H1 și heading-uri pentru un
-  text care n-are așa ceva. Sedila se verifică oricând, inclusiv cu `--fara-seo` —
-  apare sub secțiunea `seo` a raportului (cheia `seo` în JSON): dacă filtrezi
-  „seo" la text literar, pierzi un semnal critic.
-- **Dacă `python3` nu există** în mediu, nu insista și nu căuta alternative:
-  sari peste pasul mecanic, spune-o pe scurt și fă verificarea pe listă, din
+- Exit 0 = curat, 1 = semnale (rezultat normal, nu eșec), 2 = eroare de input
+  (inclusiv non-UTF-8; convertește cu `iconv -f WINDOWS-1250 -t UTF-8`, nu
+  reîncerca escaping). Nu raporta exit 1 ca eroare.
+- Pentru text fără destinație online (literar, email, document intern), folosește
+  `--fara-seo`. Sedila se verifică oricum și rămâne în secțiunea `seo` (cheia
+  `seo` în JSON); nu elimina acea secțiune din filtrare.
+- `tipare` și `modelisme` folosesc liniile
+  `severitate|categorie|L<linie>|fragment[|→ sugestie]`. `ritm` emite linii
+  `metrici|...` și `<semnal>|incredere=...|detaliu`, fără `L<n>`; SEO are
+  schema `severitate|categorie|detaliu|context`. `human-voice` și `reclame` au
+  scheme proprii, cu `L<n>` și câmpuri specifice. Formatele detaliate sunt în
+  manualul CLI. `--json` oferă structură pentru procesare programatică, fiindcă
+  fragmentele din raportul text pot conține `|`.
+- `scor_automat=X/13` este doar penalizare deterministă, nu notă; SEO nu intră
+  în scor. `--human-voice` e audit separat, nu corectură lexicală; combinația
+  `--human-voice --json` adaugă `human_voice` fără să schimbe scorul /13.
+- `--reclame` se folosește pentru anunțuri cu etichetele H1:/D1:/Text:/Titlu:;
+  păstrează limitele platformei și afirmările goale în verificare.
+- `check-cuvinte.py` e separat, nu intră în `verifica.py` și nu are scor:
+  listele sunt suspecți de verificat, nu verdicte. Exit 0 = niciun suspect,
+  1 = forme de verificat, 2 = eroare de input/lexicon; cu `--sugestii`, exit 2
+  poate indica și motorul Hunspell sau dicționarul indisponibil/defect când
+  există suspecți afișați. Vezi manualul CLI pentru condiția exactă.
+- Dacă `python3` nu există, nu căuta alternative: sari peste pasul mecanic,
+  spune-o pe scurt și fă verificarea pe listă, din
   `references/limba/anti-tipare-ai.md`.
+
+### Manual CLI — încărcare condiționată
+
+Agentul care folosește un script individual cu opțiuni sau comportament care
+nu sunt rezumate aici, un flag în afara rețetei minime, automatizează/filtrează
+rapoarte, depanează un apel sau rulează evaluatorul contextual citește
+`references/limba/cli-verificare.md` **înainte** de comandă sau de interpretarea
+rezultatului. Acolo sunt contractele detaliate de
+intrare/ieșire, limitele și opțiunile scripturilor. Nu încărca manualul pentru
+o sarcină simplă care folosește doar comenzile și contractele critice de mai sus.
+
+`evaluare-contextuala.py` nu verifică text și nu rulează modele: numără
+predicții deja furnizate față de corpusul draft
+`tests/fixtures/evaluare-contextuala.json` (`draft_nevalidat_uman`), deci nu
+produce benchmark. `--split referinta|holdout` limitează validarea și numărarea
+la splitul ales; trebuie acoperite toate ID-urile lui. Exit 0 evaluare completă,
+1 predicții incomplete/invalide, 2 eroare de fișier/JSON/corpus. Nu face parte
+din fluxul de scriere.
 
 ### Cum citești raportul
 
-```
-severitate|categorie|linie|fragmentul găsit|→ corecția canonică
-minor|copula_evitata|L3|…centrale termice reprezintă o decizie…|→ «este», sau …
-prag_depasit|copula_evitata|3 aparitii|densitate
-```
+- `critic` se corectează; `important` se verifică în fragment; `minor` e semnal
+  de recitire, nu corecție automată. `prag_depasit` explică densitatea, nu o
+  eroare izolată.
+- `→` e o corecție canonică posibilă: adapteaz-o la acord și topică, nu o
+  aplica mecanic.
 
-- `critic` — eroare. Se corectează, fără discuție: artefact de chat,
-  placeholder, calc din engleză, introducere formulaică.
-- `important` — aproape sigur de corectat, dar citește fragmentul întâi.
-- `minor` — semnal de recitire. Îl păstrezi dacă genul îl cere; îl tai dacă nu
-  adaugă nimic. Nu-l corecta automat.
-- `→` apare doar unde există o corecție canonică. Aplic-o adaptând acordul și
-  topica — potrivirea e mecanică, corecția nu.
-- `prag_depasit` spune de ce s-a raportat o categorie care singură ar fi fost
-  acceptabilă: prea multe apariții, prea aproape una de alta.
+Manualul detaliat de format al raportului, praguri, ieșiri și comportamentul
+fiecărui script este în `references/limba/cli-verificare.md`. Înainte de uz
+individual/avansat, urmează instrucțiunea de încărcare condiționată de mai sus.
 
-Doar secțiunea `seo` are format propriu de linie, fără `L<n>`
-(`severitate|categorie|detaliu|context`); `ritm`, `human-voice` (ex.
-`minor|A|filler|L1|…`) și `reclame` (ex. `critic|limita_caractere|H1|L3|…`) au
-`L<n>` ca tiparele — pentru procesare programatică folosește `--json`.
-
-`scor_automat=X/13` numără penalizări deterministe, nu calitate. 0/13 nu
-înseamnă text bun și nu înseamnă că vorbele există: înseamnă doar că n-a
-călcat pe nicio mină automată.
-
-Secțiunea `seo` din raport are și ea severitate (`critic`/`important`/`minor`),
-ca ghid de citire. Nu intră în `scor_automat` — `/13` rămâne neschimbat.
-
-Dacă iei decizii pe baza raportului în loc să-l citești (filtrezi pe severitate,
-numeri categorii, iterezi până la un prag), folosește `--json`. E același
-conținut, structurat — parsarea liniilor cu `|` se strică la primul fragment
-care conține o bară.
-
-### Ce face fiecare
-
-- **`verifica.py` — punctul de intrare recomandat.** Rulează toate verificările
-  dintr-un singur apel și calculează scorul combinat
-  (`scor_automat=X/13`). Flags: `--fara-seo` (text literar), `--scor` (doar
-  scorurile), `--json` (output structurat), `--prag N`, `--human-voice`
-  (audit separat, cu `AI_PATTERN_SCORE/30`, `STATUS` și blocere). Combinația
-  `--human-voice --json` adaugă obiectul `human_voice` fără să modifice scorul
-  existent /13. Celelalte scripturi sunt
-  utile doar pentru verificări punctuale — implicit rulezi `verifica.py`.
-- `check-tipare.py` — clișee, calcuri, artefacte de generare. Potrivirea ignoră
-  diacriticele, deci merge și pe text scris fără ele sau cu sedilă. Raportează
-  severitate și praguri de densitate. Categoriile `copula_evitata`,
-  `referinta_vaga` și `simetrie_de_acoperire` se numără pe familie, nu pe
-  expresie, și nu intră în scor — sunt semnale de recitire.
-- `check-human-voice.py` — semnale mecanice prudente pentru filler conversațional,
-  punchline, slogan/promo, metafore de copywriter, autobiografie fără context,
-  CAPS și contaminare. Nu detectează cuvinte inexistente: `arămriu` iese
-  curat. Citește `human-voice-validator.md`; nu îl folosi pentru a decide
-  automat că un text este AI, că e corect lexical, sau pentru a rescrie
-  voce legitimă.
-- `check-reclame.py` — doar pentru fișiere de anunț (cu etichete H1:/D1:/
-  Text:/Titlu:; fără ele, tace). Limitele de caractere Google/Meta, politicile
-  editoriale ale platformei („!", CAPS, emoji, duplicate) și semnăturile
-  afirmărilor goale: perechea temporală fără cauză și tautologia de beneficiu
-  (acțiune + rezultat fără produs în propoziție). Limitele oficiale și formatul:
-  `references/reclame/platforme.md`. Flags: `--platform google|meta`,
-  `--brand "Nume"`.
-- `check-cuvinte.py` — formele care lipsesc din lexiconul Rospell
-  (`scripts/lexicon/`, MPL/LGPL, nu MIT), cu adresa dexonline pentru fiecare.
-  Nu intră în `verifica.py` și nu are scor. Lipsa din lexicon nu e verdict:
-  Rospell (2013) nu are tot vocabularul, iar un cuvânt inventat care
-  coincide cu o formă reală trece. Plafon 10 forme afișate (`--tot` le dă pe
-  toate), `--allow fișier` pentru termeni confirmați, `--lexicon cale` pentru
-  altă listă. `scripts/lexicon/completari.txt` are formele românești confirmate
-  pe dexonline și lipsă din Rospell. Peste 30% forme lipsă (text englezesc,
-  cod, log) raportul are în loc de listă linia `info|cuvinte|text predominant
-  neromânesc`, apoi `---` și `total=…` (fără `nota:`) (exit 1 și aici, sub 40 de forme unice nu se aplică).
-  Ieșirea: liniile `important|cuvant_de_verificat|L<linie>|<formă> xN|→ <url>`,
-  `mai_sunt|N forme neafișate (--tot)` când e depășit plafonul, apoi `---`,
-  `total=…` și o linie `nota:`; citește și de pe stdin (`-`). Exit: 0 nimic de
-  verificat, 1 forme de verificat (caz normal, nu eșec), 2 eroare de input sau
-  lexicon indisponibil. Linia `text predominant neromânesc` e doar euristică
-  (multe forme lipsă), nu diagnostic.
-  Sugestii de corectare (opt-in, motor Hunspell local + dicționar instalat separat):
-  `check-cuvinte.py <fișier|-> --sugestii [--dictionar ro_RO] [--allow termeni.txt]
-  [--tot]` — motor Hunspell local în PATH + dicționar separat (setup:
-  `README.md#optional-hunspell-setup`); fără flag, nicio dependență nouă. `--dictionar` acceptă nume sau prefix de cale
-  fără `.dic`/`.aff` și cere `--sugestii`. Doar formele necunoscute AFIȘATE primesc
-  sugestii (max 5, fără înlocuire automată); `allow`/completări protejate; linii noi
-  doar opt-in (`sugestii|L<n>|<forma>|<v1> / <v2>`, sau `fără sugestii`). Exit 2 dacă
-  motorul/dicționarul lipsește sau eșuează și există suspecți; fără suspecți sau cu
-  lista suprimată, motorul nu pornește. Scor /13, `verifica.py`, exituri 0/1/2,
-  neschimbate. Variantele nu confirmă existența/sensul; versiuni diferite dau
-  sugestii diferite — nu e corector semantic.
-- `check-ritm.py` — uniformitatea frazelor și a paragrafelor, structura excesivă,
-  capcana concluziei.
-- `check-modelisme.py` — pleonasme etimologice (prefixe, sufixe, diminutive),
-  anglicisme, paronime. Paronimele sunt informative: scriptul vede coapariția a
-  două cuvinte în aceeași frază, nu confuzia dintre ele.
-- `check-seo.py` — heading-uri (H1 unic, fără sărituri), keyword stuffing,
-  secțiuni prea lungi între heading-uri, diacritice în URL-uri, sedilă,
-  plus registrul titlului (clickbait, șablon, etichetă, lungime, subtitluri
-  plate). Raportează severitate ca restul scripturilor, dar nu contribuie
-  la `scor_automat`.
-
-Sunt instrumente de sprijin, nu verdicte. Skill-ul e instrucțiune: limitele
-reale de execuție le impune harness-ul, nu le garantează textul. `check-ritm.py` mai ales: pragurile lui
-vin din corpusuri englezești și dau fals pozitiv pe registru formal. Nu înlocuiesc
-judecata asupra ritmului, naturaleții sau relevanței conținutului.
+Instrumentele sunt sprijin, nu verdicte; limitele reale de execuție le impune
+harness-ul. `check-ritm.py` are praguri provenite din corpusuri englezești și
+poate da fals pozitive pe registru formal. Judecata asupra ritmului,
+naturaleții și relevanței rămâne manuală.

@@ -642,6 +642,21 @@ class TestRitm(unittest.TestCase):
         self.assertIn("ritm_uniform", iesire)
         self.assertIn("fraze_egale", iesire)
 
+    def test_raportul_ritm_nu_are_indici_de_linie(self):
+        for script, flags in (("check-ritm.py", ()),
+                              ("verifica.py", ("--fara-seo",))):
+            cod, iesire = ruleaza(script, str(FIXTURES / "pereche-inainte.md"),
+                                  *flags)
+            self.assertEqual(cod, 1, f"{script}: {iesire}")
+            metrici = [l for l in iesire.splitlines()
+                       if l.startswith("metrici|")]
+            semnale = [l for l in iesire.splitlines()
+                       if "|incredere=" in l]
+            self.assertTrue(metrici, f"{script}: lipsesc liniile metrici")
+            self.assertTrue(semnale, f"{script}: lipsesc liniile de semnal")
+            self.assertTrue(all("|L" not in l for l in metrici + semnale),
+                            f"{script}: formatul ritmului nu folosește L<n>\n{iesire}")
+
     def test_text_variat_nu_e_semnalat(self):
         cod, iesire = ruleaza("check-ritm.py", str(FIXTURES / "bun-articol.md"))
         self.assertEqual(cod, 0, f"proza umana semnalata gresit:\n{iesire}")
@@ -1215,6 +1230,87 @@ class TestTrimiteriDocumentatie(unittest.TestCase):
                   if f.name not in skill]
         self.assertEqual(orfane, [], f"fisiere nereferite in SKILL.md: {orfane}")
 
+    def test_manualul_cli_are_rutare_conditionata(self):
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        scripts = skill.split("## scripts/", 1)[1]
+        rutare = scripts.split("### Manual CLI — încărcare condiționată", 1)[1]
+        rutare = " ".join(rutare.split("`evaluare-contextuala.py`", 1)[0].split())
+        self.assertIn("references/limba/cli-verificare.md", rutare)
+        self.assertIn("Agentul", rutare)
+        self.assertIn("înainte", rutare)
+        self.assertIn("Nu încărca manualul pentru o sarcină simplă", rutare)
+
+    def test_modurile_ruteaza_referintele_inainte_de_folosire(self):
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        moduri = skill.split("## Moduri", 1)[1].split("## Profil de voce", 1)[0]
+        audit = moduri.split("- **audit**", 1)[1].split("- **editare**", 1)[0]
+        self.assertLess(audit.index("scripts/verifica.py"),
+                        audit.index("references/"))
+        self.assertIn("încarcă din `references/` doar ce-ți trebuie", audit)
+        human_voice = moduri.split("- **human-voice**", 1)[1]
+        self.assertIn("references/limba/human-voice-validator.md", human_voice)
+        self.assertIn("Nu rescrie", human_voice)
+
+    def test_scrierea_conditioneaza_referintele_si_sare_seo_la_literar(self):
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        flux = skill.split("## Fluxul de lucru", 1)[1]
+        load = flux.split("1. **LOAD**", 1)[1].split("2. **CONTRACT**", 1)[0]
+        self.assertIn("references/limba/anti-tipare-ai.md", load)
+        self.assertIn("references/limba/exemple-voce.md", load)
+        self.assertIn("text pur literar", load)
+        self.assertIn("sari peste partea SEO", load)
+        self.assertIn("references/limba/revizie-contextuala.md", flux)
+        self.assertLess(flux.index("references/limba/revizie-contextuala.md"),
+                        flux.index("7. **POARTA DE LIVRARE**"))
+
+    def test_rutarea_seo_ramane_specifica_taskului(self):
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        seo = skill.split("Rutare SEO", 1)[1].split("Încarcă doar fișierele relevante", 1)[0]
+        self.assertIn("articol de blog | `core.md`, `blog-keyword.md`", seo)
+        self.assertIn("text de reclamă Google/Meta", seo)
+        self.assertIn("grounding.md", seo)
+        self.assertIn("nu e nevoie să citești tot `references/`", skill)
+
+    def test_formatul_ritmului_documenteaza_lipsa_liniilor(self):
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        manual = (RADACINA / "references/limba/cli-verificare.md").read_text(
+            encoding="utf-8")
+        self.assertIn("`ritm` emite linii\n  `metrici|...` și `<semnal>|incredere=...|detaliu`, fără `L<n>`",
+                      skill)
+        self.assertIn("`ritm`: `metrici|...` și `<semnal>|incredere=<nivel>|<detaliu>`, fără `L<n>`.",
+                      manual)
+
+    def test_manualul_distinge_verdictele_evaluatorului_de_bucketuri(self):
+        manual = (RADACINA / "references/limba/cli-verificare.md").read_text(
+            encoding="utf-8")
+        for valoare in ("eroare", "suspiciune", "pastreaza", "neclar"):
+            self.assertIn(f"`{valoare}`", manual)
+        for bucket in ("potrivit", "semnal_acceptabil", "escaladat", "ratat",
+                       "neclar_ratat", "fals_pozitiv"):
+            self.assertIn(f"`{bucket}`", manual)
+        self.assertIn("Acestea sunt etichete de intrare, nu bucket-uri.", manual)
+
+    def test_exit2_hunspell_documentat_la_check_cuvinte(self):
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        sectiune = skill.split("### Rețeta minimă și contracte critice", 1)[1]
+        sectiune = sectiune.split("### Manual CLI", 1)[0]
+        self.assertIn("`--sugestii`, exit 2", sectiune)
+        self.assertIn("Hunspell sau dicționarul indisponibil/defect", sectiune)
+
+    def test_exemplele_stdin_si_fisier_sunt_alternative_in_blocuri_separate(self):
+        import re
+        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        reteta = skill.split("### Rețeta minimă și contracte critice", 1)[1]
+        reteta = reteta.split("### Manual CLI", 1)[0]
+        manual = (RADACINA / "references/limba/cli-verificare.md").read_text(
+            encoding="utf-8")
+        exemple = manual.split("## Cum le rulezi", 1)[1]
+        exemple = exemple.split("## Cum citești raportul", 1)[0]
+        tipar = r"(?s)```bash\s+.*?verifica\.py - <<'TEXT'.*?```\s+sau,.*?```bash\s+.*?verifica\.py drafts/articol\.md.*?```"
+        self.assertRegex(reteta, tipar)
+        self.assertRegex(exemple, tipar)
+        self.assertIn("\n\n### Cum citești raportul", skill)
+
 
 class TestSeo(unittest.TestCase):
 
@@ -1423,7 +1519,8 @@ class TestParitateFlaguri(unittest.TestCase):
     """
 
     SCRIPTURI = ("verifica", "check-tipare", "check-ritm", "check-modelisme",
-                 "check-seo", "check-human-voice", "check-reclame", "check-cuvinte")
+                 "check-seo", "check-human-voice", "check-reclame", "check-cuvinte",
+                 "evaluare-contextuala")  # evaluatorul: contract de exit propriu, nu e în TOATE
 
     def _flaguri_help(self):
         import re
@@ -1449,6 +1546,10 @@ class TestParitateFlaguri(unittest.TestCase):
             text = m.group(1)
         return set(re.findall(r"--[a-z][a-z-]*", text))
 
+    def _flaguri_doc_cli_complet(self):
+        return (self._flaguri_doc(RADACINA / "SKILL.md")
+                | self._flaguri_doc(RADACINA / "references/limba/cli-verificare.md"))
+
     def test_flagurile_din_help_sunt_in_skill(self):
         lipsa = sorted(self._flaguri_help() - {"--help"}
                        - self._flaguri_doc(RADACINA / "SKILL.md"))
@@ -1472,6 +1573,19 @@ class TestParitateFlaguri(unittest.TestCase):
                          - self._flaguri_toate_scripturile())
         self.assertEqual(in_plus, [],
                          f"flag-uri din README.md inexistente în --help: {in_plus}")
+
+    def test_flagurile_scripturilor_sunt_documentate_in_skill_sau_manual(self):
+        lipsa = sorted(self._flaguri_toate_scripturile() - {"--help"}
+                       - self._flaguri_doc_cli_complet())
+        self.assertEqual(lipsa, [],
+                         f"flag-uri CLI nedocumentate: {lipsa}")
+
+    def test_manualul_cli_nu_promite_flaguri_inexistente(self):
+        in_plus = sorted(self._flaguri_doc(
+            RADACINA / "references/limba/cli-verificare.md")
+            - self._flaguri_toate_scripturile())
+        self.assertEqual(in_plus, [],
+                         f"flag-uri CLI inexistente în manual: {in_plus}")
 
 
 def ruleaza_stdin(script, text):

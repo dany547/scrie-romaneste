@@ -10,7 +10,11 @@ existent AUTOCORECȚIE → PASUL DOI → POARTĂ; nu e un flux nou.
 ## procedura
 
 Parcurgi textul FINAL (nu draftul) cap-coadă, inclusiv titlul și excerptul ca
-texte separate, lângă corp. La fiecare propoziție întrebi, în ordine:
+texte separate, lângă corp. Titlul, excerptul și headline-urile de anunț se
+citesc și **standalone**: ajung la cititor fără corp (rezultat de căutare,
+inbox, anunț), deci au nevoie de referenții lor proprii — un adjectiv sau un
+pronume pe care corpul l-ar dezambigua rămâne rupt în titlu. La fiecare
+propoziție întrebi, în ordine:
 
 1. **Verb–obiect:** cine face ce, cui? Verbul cere un obiect de tipul potrivit
    (o decizie se „ia", o cerere se „trimite", o întrebare se „pune")?
@@ -43,12 +47,29 @@ minimă** (schimbi doar ce repară sensul) și **verdictul**:
   departe.
 - `neclar` — sensul nu se poate reconstrui; întrebi utilizatorul.
 
+Pe lângă verdict, ții o **urmă internă** pe fiecare propoziție, nedelivrată în
+orice mod: `OK` (nicio problemă — propoziția rămâne neatinsă), `RESCRIU`
+(problemă constatată — citat, motiv, verdict în raport; în rescriere/editare
+primește și corecția minimă), `NECLAR` (sensul nu se poate reconstrui —
+întrebare). La final nicio propoziție nemarcată: titlul, excerptul și
+etichetele de anunț se marchează ca unități proprii, nu o dată cu corpul.
+Întrebările `NECLAR` se strâng pe parcurs și se pun o singură dată, grupat.
+
 Nu rescrie pasaje bune: o propoziție fără problemă rămâne neatinsă, chiar dacă
 s-ar putea formula și altfel. Auditul nu editează: în modurile audit/human-voice
 livrezi raportul fără să modifici textul; în rescriere și editare, observațiile
 intermediare rămân interne și nu poluează livrarea. Pe FINAL, maxim 2 cicluri
 audit → editare minimă → reverificare; dacă rămâne dezacord sau necunoscut,
 escaladezi (întrebi), nu iterezi a treia oară.
+
+Corecția aplicată se recitește și ea — o reparare poate introduce probleme noi.
+Fiecare corecție se verifică pe cinci planuri: **sens** (promisiunea, negațiile
+și intenția rămân aceleași), **repetiție** (înlocuirea nu aduce un cuvânt deja
+folosit în propozițiile vecine), **adresare** (nu comută `tu`↔`dumneavoastră`),
+**registru** (nu mută textul în alt registru decât cel stabilit la CONTRACT)
+și **fapte** (nu inventează cifre, mecanisme sau surse neconfirmate). Dacă
+singura îmbunătățire care merge la subiect cere un fapt pe care nu-l ai,
+propoziția rămâne `NECLAR` și întrebi — nu aproximezi.
 
 Ce nu sunt erori: **metaforele și intonația** nu se „corectează" automat —
 într-un text literar redundanța poate fi stil, iar o metaforă legitimă rămâne
@@ -70,6 +91,42 @@ Două mini-cazuri, ca principiu (nu ca listă de interdicții):
   explicit că distribuitorul și-a schimbat directorul, corectezi minim cu
   substantivul; altfel întrebi înainte să alegi — o rescriere care alege singură
   poate inversa sensul.
+
+## exemple greșit → bun, cu control
+
+Patru familii frecvente, fiecare cu perechea greșit/bun și un control care
+*pare* din aceeași familie, dar stă în picioare — nu-l „corecta". Formulările
+sunt sintetice; le adaptezi genului, registrului și subiectului textului, nu
+le copiezi ca șabloane.
+
+1. **Referent lipsă (întrebarea 3), titlu standalone.** greșit: „Ce câștigi
+   când e rapidă" — rapidă *ce*? Titlul e standalone: corpul nu-l poate
+   dezambigua. bun: „Ce câștigi cu un site rapid". control: „Ce câștigi când
+   e rapidă pagina?" — referentul e în titlu, se păstrează.
+2. **Formulare abstractă, nefirească pentru public (întrebările 2 și 6).**
+   greșit: „Viteza bună se vede în confortul fiecărei vizite" — formulare
+   abstractă, pe care publicul căruia îi e adresată n-ar rosti-o; nu e eroare
+   gramaticală și nu ține de un actor lipsă, ci de formulare. bun: „O pagină
+   care se încarcă rapid face navigarea mai plăcută" — aceeași idee, în
+   vorbirea firească pentru același public. Corecție greșită: „pagina se
+   încarcă în 1,8 secunde" fabrică o cifră neconfirmată — faptele nu se
+   inventează în timpul corecției. control: „Clienții revin pentru că nu mai
+   așteaptă la plată" — tot generală la prima citire, dar firească pentru
+   public; se păstrează.
+3. **Repetiție fără informație nouă.** greșit: „Site-ul e rapid. Găsești repede ce
+   cauți. Plătești repede. Repede, la fiecare pas." — aceeași idee, de patru
+   ori; corecția păstrează un singur „repede" și dă fapte concrete pentru
+   restul. Repetiția pe cuvinte nu e interzisă în sine: anafora, refrenul sau
+   lanțul de idei rămân când aduc claritate sau efect. control: un singur
+   „repede" cu un detaliu concret lângă el („Se încarcă repede, fără scripturi
+   care blochează ecranul") nu e eroare — repetiția se judecă pe densitate și
+   pe idee repetată, nu pe apariția cuvântului.
+4. **Adresare mixtă.** greșit: „Îți salvăm timpul. Vă oferim suport 24/7." —
+   comutarea `tu`↔`dumneavoastră` rupe relația; alegerea e a contractului
+   (pasul 2 din flux), nu a corectorului. bun: uniformizezi la persoana
+   stabilită la CONTRACT. control: citatul unui client își păstrează propria
+   adresare („Vă mulțumim pentru ajutor", scrie o clientă) — vocea altcuiva
+   nu se uniformizează.
 
 ## dovezi
 
@@ -115,7 +172,8 @@ printr-o singură intrare.
 ## evaluare — propunere, nu rezultat
 
 Corpusul de pilot există la `tests/fixtures/evaluare-contextuala.json`:
-60 de cazuri sintetice draft, etichete nevalidate uman, cu split pe familie.
+cazuri sintetice draft, etichete nevalidate uman, cu split pe familie;
+`referinta` crește cu familii noi, `holdout` rămâne înghețat.
 Câtă vreme etichetele nu sunt validate uman, **nu pretinde benchmark trecut
 sau câștig măsurat** — e material de lucru, nu dovadă.
 
@@ -127,3 +185,16 @@ pe minimum 20 de cazuri cu surse atașate, cu etichete validate uman **înainte*
 de rulări și fără leakage din holdout. Proba anterioară cu Hunspell și cu
 LanguageTool, pe 20 de cazuri, nu certifică performanță generală — e doar pilot,
 nu garanție. LanguageTool nu se adaugă ca dependență acum.
+
+Pentru numărări pe predicții **deja furnizate** (fișier cu `id` + `verdict`
+per caz, rezultat al unei rulări anterioare), `scripts/evaluare-contextuala.py`
+le compară cu etichetele corpusului și raportează potriviri, ratări,
+fals-pozitive și escaladări, per split. Predicțiile trebuie să acopere toate
+cazurile; `--split referinta|holdout` limitează validarea și numărarea la
+splitul ales. Scriptul nu rulează niciun model și nu
+evaluează texte — doar numără; ieșirea poartă statusul draft al corpusului.
+Igiene holdout: se iterează pe `referinta`, holdout-ul se măsoară o dată, la
+final, iar exemplele din ghid (de mai sus inclusiv) nu se copiază în corpus.
+Testele verifică doar suprapunerea literală de câte 6 cuvinte cu ghidul — nu
+dovedesc absența leak-ului semantic; apropierea tematică dintre cazurile noi
+și exemplele ghidului rămâne decizia celui care le adaugă.

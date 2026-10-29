@@ -7,8 +7,9 @@ cu spațiile normalizate:
 - absența dintr-o sursă tratată ca inexistență sau respingere;
 - comanda veche de retry `curl -s -L -A`.
 
-Plus două prezențe pozitive: raportul de audit are câmpurile lui, iar regula de
-acces (fără scraping) e scrisă. Propozițiile de interdicție („nu autoriza
+Plus prezențe de structură: urmă internă pe propoziții (OK/RESCRIU/NECLAR),
+citirea standalone a titlurilor, verificarea corecției pe cinci planuri și
+exemplele greșit/bun cu control. Propozițiile de interdicție („nu autoriza
 scraping") nu sunt penalizate: detectorul caută doar formulările vechi, exacte.
 
 Rulează: python3 -m unittest discover -s tests -p test_revizie_contextuala.py -v
@@ -109,6 +110,28 @@ class TestReferintaRevizie(unittest.TestCase):
 
     def test_regula_de_acces_fara_scraping(self):
         self.assertIn(REGULA_ACCES, self.plat)
+
+    def test_urma_interna_pe_fiecare_propozitie(self):
+        """Fiecare propoziție primește o urmă internă, cu cele trei stări."""
+        for camp in ["urmă internă", "OK", "RESCRIU", "NECLAR"]:
+            self.assertIn(camp, self.plat, camp)
+
+    def test_titluri_citite_standalone(self):
+        self.assertIn("standalone", self.plat)
+
+    def test_corectia_se_verifica_pe_cinci_planuri(self):
+        """Corecția aplicată se recitește: sens, repetiție, adresare, registru, fapte."""
+        for camp in ["se recitește și ea", "pe cinci planuri", "sens",
+                     "repetiție", "adresare", "registru", "fapte"]:
+            self.assertIn(camp, self.plat, camp)
+
+    def test_exemple_gresit_bun_cu_control(self):
+        """Perechile greșit/bun și controalele lor sunt în ghid."""
+        for frag in ["Ce câștigi când e rapidă", "Ce câștigi cu un site rapid",
+                     "Viteza bună se vede în confortul fiecărei vizite",
+                     "O pagină care se încarcă rapid face navigarea mai plăcută",
+                     "control:"]:
+            self.assertIn(frag, self.plat, frag)
 
 
 if __name__ == "__main__":

@@ -247,6 +247,7 @@ scrie-romaneste/
 │   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
 │   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing
+│   ├── evaluare-contextuala.py     # Offline pilot: counts supplied predictions vs the draft corpus (no models)
 │   └── _comun.py                   # Shared scanning engine (not a CLI)
 ├── LICENSE                         # MIT (the lexicon word list keeps its own licence)
 └── tests/                          # Fixtures + unittest suite (stdlib only)
@@ -289,6 +290,35 @@ files first.
 Matching ignores diacritics, so text written without them — or with the legacy
 cedilla `ş/ţ` instead of the correct comma-below `ș/ț` — is scanned correctly.
 Patterns cover inflected forms, not just dictionary forms.
+
+### Offline evaluation (contextual-revision pilot)
+
+`scripts/evaluare-contextuala.py` does not check text and runs no models: it
+counts matches, misses and false positives in a predictions file **already
+supplied** (one `{"id", "verdict"}` object per case — the output of an earlier
+run) against the draft corpus `tests/fixtures/evaluare-contextuala.json`
+(`draft_nevalidat_uman`: labels not human-validated, so counts are working
+numbers, never a benchmark).
+
+```bash
+python3 scripts/evaluare-contextuala.py predictii.json [--split referinta|holdout] [--detaliu] [--json]
+```
+
+- Predictions must cover every corpus id; with `--split`, every id of the
+  chosen split — ids from the other split are rejected as unknown. Missing,
+  unknown or duplicate ids, or an invalid verdict, stop the run (exit 1)
+  without counts.
+- Buckets, each case in exactly one: `potrivit`, `semnal_acceptabil`
+  (error↔suspicion swap), `escaladat` (asked instead of correcting), `ratat`,
+  `neclar_ratat`, `fals_pozitiv`. Output lines: `status|`, `acoperire|`,
+  `<split>|k=v`, `total|`, `nota|`; with `--split`, only the chosen split is
+  shown; `--detaliu` lists the non-`potrivit` cases.
+- Exit codes differ from the verification scripts above: 0 = complete
+  evaluation, 1 = incomplete or invalid predictions, 2 = file, JSON or corpus
+  error.
+- Stdlib only, offline, deterministic. Iterate on `referinta`; measure
+  `holdout` once, at the end. The structure tests only check literal 6-word
+  overlap with the guide — they do not prove absence of semantic leakage.
 
 **On `check-ritm.py`**: its thresholds derive from English-language corpora and
 over-flag formal registers. Published false-positive rates for this class of
