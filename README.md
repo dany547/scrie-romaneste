@@ -219,6 +219,7 @@ scrie-romaneste/
 │   │   ├── gramatica-stil.md       # Agreement, punctuation, spelling, pleonasms
 │   │   ├── scris-eficient.md       # Process techniques: draft/edit, rhythm, concision
 │   │   ├── modelisme.md            # Etymological pleonasms, anglicisms, paronyms
+│   │   ├── calcuri.json            # Static registry of collocations to review (check-calcuri.py, opt-in)
 │   │   └── scoring-checklist.md    # Pre-delivery language checklist
 │   └── seo/                        # Split by topic so agents load only what a task needs
 │       ├── core.md                 # Technical, on-page, content, Romanian-specific
@@ -241,6 +242,7 @@ scrie-romaneste/
 │   ├── check-human-voice.py        # Conversational filler, punchlines, promo voice, contamination
 │   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
 │   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> suspect list for permitted sources
+│   ├── check-calcuri.py            # Opt-in flagger for verb+object collocations to review (static registry)
 │   ├── _hunspell.py                # Opt-in Hunspell suggestions helper (local engine + external dictionary)
 │   ├── construieste-lexicon.py     # Maintainer only: rebuild lexicon/ from Rospell (needs unmunch)
 │   ├── lexicon/                    # lexicon-ro.txt.gz (MPL/LGPL, not MIT) + completari.txt + licence texts
@@ -271,6 +273,8 @@ python3 scripts/check-ritm.py <file>        # rhythm uniformity only
 python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon, to check on dexonline (exit 0 clean, 1 forms to check, 2 input/lexicon error)
 python3 scripts/check-cuvinte.py <file> --allow terms.txt --tot  # confirmed terms to skip; show all (default cap 10); --lexicon PATH overrides the bundled list
 python3 scripts/check-cuvinte.py <file|-> --sugestii [--dictionar ro_RO] [--allow terms.txt] [--tot]  # opt-in spelling suggestions via local Hunspell
+python3 scripts/check-calcuri.py <file>     # suspicious verb+object collocations to review (opt-in)
+python3 scripts/check-calcuri.py <file|-> --fereastra N --registry PATH  # word window (default 10) and an alternative registry
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
 python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, empty claims
@@ -290,6 +294,34 @@ files first.
 Matching ignores diacritics, so text written without them — or with the legacy
 cedilla `ş/ţ` instead of the correct comma-below `ș/ț` — is scanned correctly.
 Patterns cover inflected forms, not just dictionary forms.
+
+### Collocation review (opt-in)
+
+`check-calcuri.py` flags verb–object pairs from a small static registry
+(`references/limba/calcuri.json`; currently one rule: forms of "a frâna" near
+forms of "încărcare", in the same sentence, within a bounded word window —
+`--fereastra N` or `--fereastra=N`, default 10; `--registry PATH` or
+`--registry=PATH` swaps the registry). Matching ignores diacritics and case.
+The ambiguous form "frâna" counts as a verb only with an infinitive/future/modal
+marker right before it ("a frâna", "pot frâna"); the noun and the markerless
+imperfect stay silent, as do legitimate registry exceptions (braking-system
+compounds, the charger noun) and "încărcătură" (the cargo, not the process).
+Physical braking near "încărcare" ("Camionul frânează la rampa de încărcare")
+is a documented false positive: it gets flagged with a neutral message — review
+prompt only, no calque or website presumed. The object stem also matches the participial adjective "încărcat", so a
+legitimate sentence such as "Camionul încărcat frânează greu în curte" may be
+flagged too; this is another accepted false positive, for recitire only and
+not a verdict. Unknown arguments are refused with
+exit 2, never silently ignored. Report lines look like
+`minor|colocare_de_verificat|L<line>|fragment|→ suggestion`, followed by a
+`total=` line and a `nota:` line; fragments can contain `|`, so read them as
+text. A signal is a review prompt, not a confirmed calque and not an error:
+the window counts words, it does not parse syntax, and the decision belongs to
+the contextual-revision pass. The registry grows only with manually verified
+collocations (permitted sources, no client data) — never automatically from a
+corpus. It never runs as part of `verifica.py` and contributes nothing to the
+/13 score. Exit 0 = nothing to review, 1 = at least one pair to review (a
+normal result), 2 = input, registry or unknown-argument error.
 
 ### Offline evaluation (contextual-revision pilot)
 
@@ -335,6 +367,18 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.13.0** — Adds the optional `check-calcuri.py`
+  collocation-review detector for registered verb–object pairs, currently
+  frânare + încărcare. It has no score and is not part of `verifica.py`; its
+  neutral signals are prompts for contextual review, not verdicts. The documented
+  examples include infinitives (`a frâna`, `pot frâna`) and legitimate physical
+  braking near loading; the stem also catches participles, so
+  “Camionul încărcat frânează greu în curte” may be flagged. Noun forms such as
+  `frânarea`, `frânare` and `frânări` are excluded from the contextual infinitive
+  path. The offline contextual-evaluation cases remain an unvalidated draft,
+  not a benchmark. The detector uses a small static registry, a word window
+  rather than syntax, and can produce false positives; every signal needs human
+  review.
 - **v0.12.0** — Skill routing and the offline evaluation pilot. `SKILL.md` now
   opens with the minimal recipe and the contracts that actually break agents
   (line schema per section, `|`-separated fields, exit 0/1/2, score capped at

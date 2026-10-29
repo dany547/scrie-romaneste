@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "draft_nevalidat_uman",
+  "descriere": "Registry static de colocări suspecte de calc, de recitit în context — nu verdicte. Fiecare regulă leagă forme ale unui verb de forme ale obiectului lui: scanarea marchează perechi pe aceeași propoziție, într-o fereastră pe cuvinte (scripts/check-calcuri.py), iar decizia o dă revizia contextuală (revizie-contextuala.md). Formele și pattern-urile se scriu pliat (minuscule, fără diacritice — validarea refuză altfel): stems se potrivesc ca prefix la început de cuvânt; excepțiile sunt regex-uri pliate, suprimate la suprapunere cu forma prinsă; verb_contexte cere o marcă de infinitiv/viitor/modal imediat în fața unei forme ambigue. Sugestia e neutră: marchează perechea pentru recitire, fără să prezinte calc sau un site (frânare fizică legitimă — ex. la rampa de încărcare — e fals pozitiv acceptat, documentat). Registry-ul crește doar cu colocări verificate manual, în surse permise, nu automat din corpus; fără date de client. Etichetele sunt provizorii până la validare umană.",
+  "reguli": [
+    {
+      "id": "frana-incarcare",
+      "descriere": "«a frâna» lângă «încărcare» — pereche de recitit: poate fi calc, metaforă legitimă sau frânare fizică; nu e verdict",
+      "verb_stem": ["franeaz", "franez", "franand", "franam", "franai", "franau", "franat"],
+      "verb_contexte": [
+        {
+          "stem": "frana",
+          "contexte": ["a", "sa", "(?:pot|poti|putem|puteti)", "(?:voi|vei|va|vom|veti|vor)", "trebuie(?:\\s+sa)?", "ar(?:\\s+trebui)?(?:\\s+sa)?", "merita(?:\\s+sa)?", "poate(?:\\s+sa)?"]
+        }
+      ],
+      "obiect_stem": ["incarc"],
+      "exceptii_verb": ["sistem\\w* de franare"],
+      "exceptii_obiect": ["incarcator", "incarcatur\\w*"],
+      "sugestie": "de recitit în context: poate fi calc, metaforă legitimă sau frânare fizică legitimă (ex. la rampa de încărcare); nu e verdict"
+    }
+  ]
+}

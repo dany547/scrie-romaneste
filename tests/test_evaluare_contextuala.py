@@ -32,7 +32,8 @@ SPLITURI = ("referinta", "holdout")
 HOLDOUT = 24  # split de referință, înghețat: nu primește familii noi
 PREFIXE_ID = {"lexic": "lex"}  # prefixul din id-uri e abreviat doar la lexic
 FAMILII_NOI = {"referent-montaj", "colocare-activare", "repetitie-raport",
-               "adresare-showroom"}  # doar în referinta, câte un control per familie
+               "adresare-showroom", "frana-incarcare"}  # doar în referinta,
+               # câte un control per familie
 GHID = RADACINA / "references" / "limba" / "revizie-contextuala.md"
 MIN_CITAT = 15  # lungimea minimă a unui citat-exemplu din ghid
 VERDICTE = {"eroare", "suspiciune", "pastreaza", "neclar"}
@@ -201,8 +202,9 @@ class TestCorpusEvaluare(unittest.TestCase):
         self.assertEqual(atinse, [])
 
     def test_familii_noi_referinta_cu_control(self):
-        """Familiile noi (referent, colocare, repetiție, adresare) sunt doar în
-        referinta, fiecare cu control pastreaza + caz de semnalat, categorie unică."""
+        """Familiile noi (referent, colocare, repetiție, adresare, frânare/încărcare)
+        sunt doar în referinta, fiecare cu control pastreaza + caz de semnalat,
+        categorie unică."""
         grupe = defaultdict(list)
         for c in self.cazuri:
             if c["family"] in FAMILII_NOI:

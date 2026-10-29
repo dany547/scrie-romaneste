@@ -1493,7 +1493,7 @@ class TestContractCLI(unittest.TestCase):
 
     TOATE = ("check-tipare.py", "check-ritm.py", "check-seo.py",
              "check-modelisme.py", "check-human-voice.py", "check-reclame.py",
-             "verifica.py")
+             "verifica.py", "check-calcuri.py")
 
     def test_help_pe_toate(self):
         for script in self.TOATE:
@@ -1520,7 +1520,8 @@ class TestParitateFlaguri(unittest.TestCase):
 
     SCRIPTURI = ("verifica", "check-tipare", "check-ritm", "check-modelisme",
                  "check-seo", "check-human-voice", "check-reclame", "check-cuvinte",
-                 "evaluare-contextuala")  # evaluatorul: contract de exit propriu, nu e în TOATE
+                 "check-calcuri", "evaluare-contextuala")  # evaluatorul:
+                 # contract de exit propriu, nu e în TOATE; check-calcuri e opt-in
 
     def _flaguri_help(self):
         import re
@@ -1606,7 +1607,8 @@ class TestMatriceFixtureuri(unittest.TestCase):
     """
 
     SCRIPTURI = ["check-tipare.py", "check-ritm.py", "check-modelisme.py",
-                 "check-seo.py", "check-human-voice.py", "check-reclame.py"]
+                 "check-seo.py", "check-human-voice.py", "check-reclame.py",
+                 "check-calcuri.py"]
 
     def test_orice_script_ruleaza_pe_orice_fixture(self):
         erori = []
