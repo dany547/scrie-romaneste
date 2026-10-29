@@ -30,10 +30,23 @@ def main(argv=None):
         return 0 if argv and argv[0] in ("-h", "--help") else 2
     dic, aff = argv[0], argv[1]
     unmunch, out = "unmunch", IMPLICIT
-    if "--unmunch" in argv:
-        unmunch = argv[argv.index("--unmunch") + 1]
-    if "--out" in argv:
-        out = Path(argv[argv.index("--out") + 1])
+
+    def valoare(flag):
+        if flag not in argv:
+            return None
+        i = argv.index(flag)
+        if i + 1 >= len(argv) or argv[i + 1].startswith("--"):
+            raise ValueError(f"{flag} cere o valoare")
+        return argv[i + 1]
+
+    try:
+        if (v := valoare("--unmunch")) is not None:
+            unmunch = v
+        if (v := valoare("--out")) is not None:
+            out = Path(v)
+    except ValueError as e:
+        print(f"eroare: {e}", file=sys.stderr)
+        return 2
     try:
         r = subprocess.run([unmunch, dic, aff], capture_output=True, check=True)
     except (OSError, subprocess.CalledProcessError) as e:

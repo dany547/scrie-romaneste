@@ -1506,6 +1506,17 @@ class TestContractCLI(unittest.TestCase):
             cod, _ = ruleaza(script, "/nu/exista.md")
             self.assertEqual(cod, 2, script)
 
+    def test_construieste_lexicon_flag_fara_valoare_da_exit_2(self):
+        """Regresie issue #3: `--out`/`--unmunch` fara valoare dadeau
+        IndexError + traceback (exit 1); contractul cere `eroare:` + exit 2."""
+        for flag in ("--out", "--unmunch"):
+            cod, stdout, stderr = ruleaza_tot(
+                "construieste-lexicon.py", "a.dic", "b.aff", flag)
+            self.assertEqual(
+                cod, 2, f"{flag}: iesire stdout:{stdout} stderr:{stderr}")
+            self.assertIn("eroare", stderr, flag)
+            self.assertNotIn("Traceback", stdout + stderr, flag)
+
 
 class TestParitateFlaguri(unittest.TestCase):
     """Flag-urile din `verifica.py --help` trebuie documentate în SKILL.md
