@@ -335,6 +335,21 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.12.0** — Skill routing and the offline evaluation pilot. `SKILL.md` now
+  opens with the minimal recipe and the contracts that actually break agents
+  (line schema per section, `|`-separated fields, exit 0/1/2, score capped at
+  /13) and routes references before they are used; the detailed CLI manual
+  moved to `references/limba/cli-verificare.md` and is read only before advanced
+  or per-script use. The contextual-revision guide adds worked wrong → good
+  examples with a control step (the correction itself is reread for sense,
+  repetition, address, register, facts). New
+  `scripts/evaluare-contextuala.py`: it does not check text and runs no models —
+  it counts matches, acceptable signals, escalations, misses and false
+  positives in predictions already supplied as `id` + `verdict` against the
+  68-case draft corpus (`referinta` 44 / `holdout` 24, labels still not
+  human-validated), with its own exit codes (0 complete, 1 incomplete or
+  invalid predictions, 2 file or corpus error). `verifica.py`, its output
+  sections and the /13 score are unchanged. 294 tests.
 - **v0.11.0** — Optional Hunspell suggestions and contextual revision.
   `check-cuvinte.py --sugestii [--dictionar NUME_OR_PREFIX]` asks a locally
   installed `hunspell` (in `PATH`) with a separately installed Romanian dictionary
