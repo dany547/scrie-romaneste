@@ -24,7 +24,8 @@ Punct de intrare: `scripts/verifica.py`; documentația de contract: `SKILL.md` +
 - `.github/workflows/tests.yml` (push/PR pe `main`): testele unittest + verificări de contract pe fixture-uri
   (fixture curate rămân curate, fixture rele sunt prinse, textul pe stdin e acceptat).
 - `.github/workflows/release.yml`: după CI reușit pe `main` **publică automat tag + GitHub Release**.
-  Consecință: un merge pe `main` nu e „doar cod", e o versiune publică. Tag-urile/releases nu se ating manual.
+  Consecință: un merge pe `main` nu e „doar cod", e o versiune publică. Tag-urile/releases nu se ating
+  manual — singura cale normală e un commit cu subiect `vX.Y.Z: …` pe `main` (vezi excepția de mai jos).
 
 ## Ce înseamnă „gata"
 - `python -m unittest discover -s tests -v` verde.
@@ -37,8 +38,22 @@ Punct de intrare: `scripts/verifica.py`; documentația de contract: `SKILL.md` +
 - Scripturile trebuie să rămână diacritic-insensibile și deterministe (testele verifică).
 - Fără date reale de client în repo public sau în exemple.
 
-## Ce nu se atinge (regulă pentru orice agent)
+## Ce nu se atinge fără instrucțiune explicită
 Secrete, `.github/workflows/*`, releases/tags, `main`, Administration. Fix-urile: branch + PR; merge = Dan.
+
+**Excepție — instrucțiune explicită a owner-ului.** Dacă Dan cere explicit o acțiune anume, agentul o poate
+executa, inclusiv dacă atinge `main` sau un release. „Explicit" înseamnă toate trei:
+
+1. **numește acțiunea** — merge, tag, release, push pe `main`, nu „ocupă-te tu";
+2. **numește ținta** — numărul PR-ului, branch-ul, versiunea;
+3. **e dată pentru acțiunea aceea**, nu e o aprobare generală pentru restul sesiunii.
+
+Un „fă-o" vag, o întrebare („poți face?") sau o intenție generală nu califică. Înainte de executare, agentul
+spune ce anume urmează să se întâmple (inclusiv efectele publice, ex. un release nou) și așteaptă confirmarea.
+
+Rămân în afara excepției, fără nicio variantă de interpretare: secrete în repo public, force-push /
+rewrite de istorie, ștergerea unui tag sau release deja publicat, și modificarea `.github/workflows/*`
+direct pe `main` (acelea rămân branch + PR).
 
 ## Severitate
 - `BLOCK`: date reale/personale în repo public · schimbare de format fără test + fără update în `SKILL.md` ·
