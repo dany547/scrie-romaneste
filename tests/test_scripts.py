@@ -5,7 +5,10 @@ Fără dependențe externe — doar stdlib, ca scripturile.
 """
 import subprocess
 import sys
+import re
 import unittest
+import warnings
+from datetime import date, timedelta
 from pathlib import Path
 
 RADACINA = Path(__file__).resolve().parent.parent
@@ -1237,6 +1240,28 @@ class TestGenuriLegitime(unittest.TestCase):
         grave = [l for l in iesire.splitlines()
                  if l.startswith(("critic|", "important|"))]
         self.assertEqual(grave, [], f"proza literara semnalata grav:\n{iesire}")
+
+
+class TestVechimeLimitePlatforme(unittest.TestCase):
+    """Limitele platformelor se schimbă: data verificării din `platforme.md` trebuie
+    să existe, iar peste 6 luni primim avertisment (nu eșec: nu blocăm CI pentru
+    trecerea timpului)."""
+
+    def test_data_verificarii_exista_si_nu_e_in_viitor(self):
+        text = (RADACINA / "references" / "reclame" / "platforme.md").read_text(
+            encoding="utf-8")
+        antet = " ".join(text.splitlines()[:8])
+        date_gasite = [date.fromisoformat(d)
+                       for d in re.findall(r"\b(\d{4}-\d{2}-\d{2})\b", antet)]
+        self.assertTrue(date_gasite, "platforme.md: lipsește data verificării în antet")
+        self.assertLessEqual(max(date_gasite), date.today() + timedelta(days=1),
+                             "data verificării e în viitor")
+        cea_mai_veche = min(date_gasite)
+        if date.today() - cea_mai_veche > timedelta(days=183):
+            warnings.warn(
+                f"platforme.md: limitele au fost verificate ultima oară la {cea_mai_veche}; "
+                "reverifică sursele oficiale și actualizează data",
+                stacklevel=1)
 
 
 class TestTrimiteriDocumentatie(unittest.TestCase):

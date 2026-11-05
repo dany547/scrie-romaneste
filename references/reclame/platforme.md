@@ -2,7 +2,7 @@
 
 Sursele de mai jos și data verificării. Când platformele își schimbă limitele,
 actualizează aici și constantele din capul `scripts/check-reclame.py` (un singur
-loc). Verificat: 2026-09-07.
+loc). Verificat: Google RSA 2026-09-07; Meta, Performance Max și TikTok 2026-11-05.
 
 - Google Ads — „About responsive search ads":
   https://support.google.com/google-ads/answer/7684791
