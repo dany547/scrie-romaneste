@@ -194,6 +194,11 @@ scripturilor și cu deciziile luate pe fiecare semnal.
    sari peste pas.
 4. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
    propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
+   Pe text lung sau pe un set de formate, scrie pe bucăți: după fiecare bucată
+   rulează `scripts/verifica.py`, apoi treci la următoarea. Modelele mici
+   degenerează spre final (cuvinte inventate, imagini fără referent) și
+   scripturile nu prind asta dacă verifici abia la sfârșit. Dacă lungimea cerută
+   nu mai poate fi onorată coerent, livrează mai puțin.
 5. **AUTOCORECȚIE** — rulează `scripts/verifica.py <fișier>` (textul din conversație
    pe stdin — rețeta e în „Cum le rulezi"; `--fara-seo` pentru text literar).
    Raportul acoperă clișee, calcuri, pleonasme, paronime, ritm și SEO dintr-o

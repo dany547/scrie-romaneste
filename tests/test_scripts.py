@@ -48,9 +48,12 @@ class TestTipare(unittest.TestCase):
         cod, fara = ruleaza("check-tipare.py",
                             str(FIXTURES / "rau-fara-diacritice.md"))
         self.assertEqual(cod, 1, "textul fara diacritice nu a fost semnalat")
-        total_cu = [l for l in cu.splitlines() if l.startswith("total=")]
-        total_fara = [l for l in fara.splitlines() if l.startswith("total=")]
-        self.assertEqual(total_cu, total_fara,
+        # `diacritice_lipsa` apare, prin definiție, doar pe varianta fără diacritice.
+        def semnale(iesire):
+            return [l.split("|")[1] for l in iesire.splitlines()
+                    if l.startswith(("critic|", "important|", "minor|"))
+                    and "|diacritice_lipsa|" not in l]
+        self.assertEqual(sorted(semnale(cu)), sorted(semnale(fara)),
                          "acelasi text da rezultate diferite dupa diacritice")
 
     def test_sedila_e_tratata_ca_virgula(self):
@@ -84,15 +87,67 @@ class TestTipare(unittest.TestCase):
         self.assertIn("artefact_chatbot", iesire)
         self.assertIn("amprenta_unealta", iesire)
 
+    def test_introducere_si_incheiere_de_chat(self):
+        """Modele mici: "Perfect!", "Iată setul…", "Dacă vrei, pot extinde…"."""
+        for text in (
+                "Perfect! Hai să-ți scriu mostre din fiecare categorie.\n\nCafeaua s-a răcit.",
+                "Iată setul de texte, scrise direct.\n\nCafeaua s-a răcit.",
+                "Cafeaua s-a răcit.\n\nDacă vrei, pot extinde orice categorie.",
+                "Notă scurtă: cifrele sunt orientative.\n\nCafeaua s-a răcit."):
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertIn("artefact_chatbot", iesire, text)
+
+    def test_fraza_umana_cu_perfect_nu_e_artefact(self):
+        text = "Cafeaua era perfect fierbinte. Perfect, a zis ea, și a plecat."
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("artefact_chatbot", iesire)
+
+    def test_rest_de_cod_in_proza(self):
+        cod, iesire = ruleaza_stdin(
+            "check-tipare.py", "Restul zilelor, mâncare de.BigDecimal facturi, sandwich.")
+        self.assertIn("rest_cod", iesire)
+
+    def test_text_cu_punct_si_majuscula_nu_e_rest_de_cod(self):
+        cod, iesire = ruleaza_stdin(
+            "check-tipare.py", "A venit la ora trei.Apoi a plecat. Site-ul e Node.js.")
+        self.assertNotIn("rest_cod", iesire)
+
+    def test_fixture_modele_slabe_prinde_artefactele(self):
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "modele-slabe" / "glm.txt"))
+        self.assertIn("artefact_chatbot", iesire)
+        self.assertIn("rest_cod", iesire)
+
+    def test_diacritice_lipsa_pe_paragraf(self):
+        cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "modele-slabe" / "glm.txt"))
+        self.assertIn("critic|diacritice_lipsa", iesire)
+
+    def test_text_cu_diacritice_nu_e_semnalat_ca_fara(self):
+        for f in ("mimo.txt", "deepseek-1-poezie-proza.txt", "deepseek-2-formate.txt"):
+            cod, iesire = ruleaza("check-tipare.py", str(FIXTURES / "modele-slabe" / f))
+            self.assertNotIn("diacritice_lipsa", iesire, f)
+
+    def test_un_cuvant_fara_diacritice_nu_e_semnal(self):
+        """Un singur "si" scăpat nu face paragraful „fără diacritice”."""
+        text = "Am plecat devreme, dar ea a rămas acasă și a gătit pentru toți si n-a spus nimic."
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("diacritice_lipsa", iesire)
+
+    def test_testat_pe_mine_nu_e_scutit_de_context(self):
+        cod, iesire = ruleaza_stdin(
+            "check-human-voice.py",
+            "Trei schimbări simple, testate pe mine timp de o lună, au făcut diferența.")
+        self.assertIn("testat_pe_mine", iesire)
+        self.assertIn("FABRICATED_EXPERIENCE=YES", iesire)
+
     def test_lista_scurta_normala_nu_e_semnalata(self):
         """O lista de 3 puncte intr-un articol scurt e continut SEO normal,
         nu abuz — nu trebuie semnalata doar pentru ca atinge 50% din linii."""
-        text = ("Cafeaua de specialitate a devenit populara in ultimii ani. "
-                "Diferenta vine din boabele selectate manual.\n\n"
-                "Cateva criterii merita atentie:\n\n"
-                "- originea boabelor\n- data prajirii\n- metoda de preparare\n\n"
-                "Pretul variaza intre 35 si 60 de lei. Cafeaua proaspat prajita "
-                "pastreaza arome pe care cea de supermarket le pierde.")
+        text = ("Cafeaua de specialitate a devenit populară în ultimii ani. "
+                "Diferența vine din boabele selectate manual.\n\n"
+                "Câteva criterii merită atenție:\n\n"
+                "- originea boabelor\n- data prăjirii\n- metoda de preparare\n\n"
+                "Prețul variază între 35 și 60 de lei. Cafeaua proaspăt prăjită "
+                "păstrează arome pe care cea de supermarket le pierde.")
         cod, iesire = ruleaza_stdin("check-tipare.py", text)
         self.assertNotIn("simboluri_excesive", iesire,
                          f"lista scurta normala semnalata gresit:\n{iesire}")
@@ -1508,14 +1563,10 @@ class TestContractCLI(unittest.TestCase):
 
 
 class TestParitateFlaguri(unittest.TestCase):
-    """Flag-urile din `verifica.py --help` trebuie documentate în SKILL.md
-    și README.md, iar doc-urile nu trebuie să promită flag-uri inexistente.
+    """Flag-urile CLI sunt consecvente în SKILL și în ambele README-uri.
 
-    Direcțiile (cerința criticului): (1) orice flag din SKILL/README trebuie să
-    existe în `--help`-ul unui script din skill; (2) toate flagurile din
-    `verifica.py --help` trebuie să apară în SKILL și în blocul „Verification
-    scripts" din README. README se extrage doar din acel bloc, fiindcă restul
-    documentului conține flaguri ale altor unelte (ex. `--read` la Aider).
+    Pentru README-uri, comparația se limitează la secțiunea dedicată scripturilor:
+    restul documentului conține flaguri ale altor unelte (de ex. `--read` la Aider).
     """
 
     SCRIPTURI = ("verifica", "check-tipare", "check-ritm", "check-modelisme",
@@ -1542,8 +1593,11 @@ class TestParitateFlaguri(unittest.TestCase):
         import re
         text = cale.read_text(encoding="utf-8")
         if doar_bloc:
-            m = re.search(r"## Verification scripts\n(.*?)(?=\n## )", text, re.S)
-            self.assertIsNotNone(m, "README: lipsește secțiunea Verification scripts")
+            m = re.search(
+                r"(?:<a id=\"verification-scripts\"></a>\n)?"
+                r"## (?:Verification scripts|Scripturi de verificare)\n"
+                r"(.*?)(?=\n## )", text, re.S)
+            self.assertIsNotNone(m, f"{cale.name}: lipsește secțiunea scripturilor")
             text = m.group(1)
         return set(re.findall(r"--[a-z][a-z-]*", text))
 
@@ -1557,11 +1611,11 @@ class TestParitateFlaguri(unittest.TestCase):
         self.assertEqual(lipsa, [],
                          f"flag-uri nedocumentate în SKILL.md: {lipsa}")
 
-    def test_flagurile_din_help_sunt_in_readme(self):
-        lipsa = sorted(self._flaguri_help() - {"--help"}
-                       - self._flaguri_doc(RADACINA / "README.md", doar_bloc=True))
-        self.assertEqual(lipsa, [],
-                         f"flag-uri nedocumentate în README.md: {lipsa}")
+    def test_flagurile_din_help_sunt_in_ambele_readme(self):
+        for nume in ("README.md", "README.en.md"):
+            lipsa = sorted(self._flaguri_help() - {"--help"}
+                           - self._flaguri_doc(RADACINA / nume, doar_bloc=True))
+            self.assertEqual(lipsa, [], f"flag-uri nedocumentate în {nume}: {lipsa}")
 
     def test_flagurile_din_skill_exista_in_help(self):
         in_plus = sorted(self._flaguri_doc(RADACINA / "SKILL.md")
@@ -1569,11 +1623,17 @@ class TestParitateFlaguri(unittest.TestCase):
         self.assertEqual(in_plus, [],
                          f"flag-uri din SKILL.md inexistente în --help: {in_plus}")
 
-    def test_flagurile_din_readme_exista_in_help(self):
-        in_plus = sorted(self._flaguri_doc(RADACINA / "README.md", doar_bloc=True)
-                         - self._flaguri_toate_scripturile())
-        self.assertEqual(in_plus, [],
-                         f"flag-uri din README.md inexistente în --help: {in_plus}")
+    def test_flagurile_din_ambele_readme_exista_in_help(self):
+        for nume in ("README.md", "README.en.md"):
+            in_plus = sorted(self._flaguri_doc(RADACINA / nume, doar_bloc=True)
+                             - self._flaguri_toate_scripturile())
+            self.assertEqual(in_plus, [],
+                             f"flag-uri din {nume} inexistente în --help: {in_plus}")
+
+    def test_flagurile_documentate_sunt_in_paritate_intre_readme(self):
+        ro = self._flaguri_doc(RADACINA / "README.md", doar_bloc=True)
+        en = self._flaguri_doc(RADACINA / "README.en.md", doar_bloc=True)
+        self.assertEqual(ro, en)
 
     def test_flagurile_scripturilor_sunt_documentate_in_skill_sau_manual(self):
         lipsa = sorted(self._flaguri_toate_scripturile() - {"--help"}
@@ -1587,6 +1647,49 @@ class TestParitateFlaguri(unittest.TestCase):
             - self._flaguri_toate_scripturile())
         self.assertEqual(in_plus, [],
                          f"flag-uri CLI inexistente în manual: {in_plus}")
+
+    def test_readme_uri_trimit_unul_la_altul_si_au_ancorele_vechi(self):
+        import re
+        ro = (RADACINA / "README.md").read_text(encoding="utf-8")
+        en = (RADACINA / "README.en.md").read_text(encoding="utf-8")
+        self.assertIn("[English](README.en.md)", ro)
+        self.assertIn("[Română](README.md)", en)
+        # Ancorele englezești istorice rămân stabile și în titlurile traduse.
+        ancore = {
+            "what-it-does", "key-features", "installation",
+            "optional-hunspell-setup", "file-structure", "verification-scripts",
+            "spelling-suggestions-opt-in-hunspell", "collocation-review-opt-in",
+            "offline-evaluation-contextual-revision-pilot", "releasing", "version",
+            "license",
+        }
+        for doc, nume in ((ro, "README.md"), (en, "README.en.md")):
+            ids = set(re.findall(r'<a id="([^"]+)"></a>', doc))
+            self.assertTrue(ancore <= ids, f"ancore lipsă în {nume}: {sorted(ancore - ids)}")
+            for ancora in re.findall(r"\]\(#([^)]+)\)", doc):
+                self.assertIn(ancora, ids, f"ancoră ruptă în {nume}: #{ancora}")
+
+    def test_legaturile_locale_din_readme_uri_rezolvate(self):
+        import re
+        for nume in ("README.md", "README.en.md"):
+            text = (RADACINA / nume).read_text(encoding="utf-8")
+            for href in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text):
+                tinta = href.split("#", 1)[0]
+                if not tinta or "://" in tinta or tinta.startswith("mailto:"):
+                    continue
+                self.assertTrue((RADACINA / tinta).exists(),
+                                f"legătură locală ruptă în {nume}: {href}")
+
+    def test_referintele_catre_fisiere_din_readme_uri_exista(self):
+        import glob
+        import re
+        for nume in ("README.md", "README.en.md"):
+            text = (RADACINA / nume).read_text(encoding="utf-8")
+            paths = set(re.findall(
+                r"`((?:references|scripts|tests)/[A-Za-z0-9_./*+-]+)`", text))
+            for path in paths:
+                potriviri = glob.glob(str(RADACINA / path))
+                self.assertTrue(potriviri or (RADACINA / path).exists(),
+                                f"referință locală inexistentă în {nume}: {path}")
 
 
 def ruleaza_stdin(script, text):

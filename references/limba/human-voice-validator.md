@@ -35,6 +35,10 @@ spune că vorbele există; controlul lexical e `scripts/check-cuvinte.py` plus
 | J | garbage/contamination | CAPS, text corupt, `answear`, `fashiondays`, prompt/JSON/chat/placeholder | **blocer** pentru corupție, contaminare și placeholder |
 
 
+Subcategoria `testat_pe_mine` (D) prinde „testate pe mine”, „inclusiv pe-a mea”,
+„am testat personal” și nu are scutire de context: o cifră sau „luna” în vecinătate
+nu o fac verificabilă. Autorul real o confirmă și adaugă rezultatul, sau o taie.
+
 Detectorul de la D verifică doar contextul local: acceptă o experiență când
 există date, timp, episod sau consecință. El nu poate valida adevărul unei
 biografii; acesta rămâne un control uman și de surse.

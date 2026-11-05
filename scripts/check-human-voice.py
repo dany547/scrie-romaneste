@@ -28,6 +28,10 @@ REGULI = (
     ("A", "filler", "minor", 2, r"\b(adev[aă]rul e c[aă]|hai s[aă](?: fim sinceri)?|s[aă] l[aă]murim|merit[aă] men[țt]ionat|s[aă] fim serio[sș]i|pe bune|ghici ce|[țt]ine minte)\b", "intră direct în idee"),
     ("B", "punchline", "important", 3, r"\b(asta e tot ce conteaz[aă]|at[aâ]t\.\s*$|f[aă]r[aă] doar [sș]i poate|regretele devin scumpe)\b", "păstrează doar dacă finalul adaugă sens"),
     ("C", "metafora_copywriter", "minor", 3, r"\b(busola (?:ta|noastr[aă])|puntea c[aă]tre succes|motorul (?:cre[șs]terii|succesului)|aprinde sc[aâ]nteia|piatra de temelie a succesului|farul (?:care|t[aă]u)|superputerea)\b", "păstrează metafora numai dacă e susținută de sens concret"),
+    # Mărturie de testare personală, inventată de model în text persuasiv/blog
+    # („testate pe mine timp de o lună"). Fără scutire de context: „luna" sau o
+    # cifră în vecinătate nu o fac verificabilă; autorul real o confirmă sau o taie.
+    ("D", "testat_pe_mine", "important", 3, r"\b(?:testat[eăi]?|verificat[eăi]?|[îi]ncercat[eăi]?|probat[eăi]?) (?:pe mine|personal|pe pielea mea)\b|\binclusiv pe-a mea\b|\bam testat (?:personal|eu(?: [îi]nsumi| [îi]nsumi)?)\b", "confirmă că e experiența autorului și adaugă un rezultat concret, sau scoate afirmația"),
     ("D", "autobiografie_nesustinuta", "important", 3, r"\b(din experien[țt]a mea|am [îi]nv[aă][țt]at (?:c[aă]|s[aă])|pot s[aă] spun din proprie experien[țt][aă])\b", "adaugă un episod, o dată sau o consecință verificabilă"),
     ("E", "structura_repetitiva", "minor", 3, r"\b([îi]n primul r[aâ]nd).{0,180}\b([îi]n al doilea r[aâ]nd).{0,180}\b([îi]n al treilea r[aâ]nd)\b", "renunță la scheletul repetitiv dacă ordinea nu contează"),
     ("F", "concluzie_redundanta", "minor", 3, r"\b(pe scurt|[îi]n esen[țt][aă]|r[aă]spunsul se vede singur|concluzia este clar[aă])\b", "încheie cu o idee nouă, nu cu rezumatul evident"),

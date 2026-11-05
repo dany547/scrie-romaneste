@@ -492,6 +492,8 @@ asum-o. Păstrează rezerva doar unde incertitudinea e reală, nu ca politețe.
 Reziduuri de conversație în text livrat: „Sigur!", „Desigur!", „Excelentă
 întrebare!", „Sper că te ajută!", „Anunță-mă dacă mai ai nevoie", „Hai să analizăm
 pas cu pas", „Iată textul rescris". Se taie integral — nu fac parte din text.
+Se prind și introducerea („Perfect!”, „Iată setul de texte”, „Notă scurtă:”) și
+încheierea („Dacă vrei, pot extinde…”, „Vrei să dezvolt…”) de chat.
 
 ## amprenta_unealta
 
@@ -499,3 +501,17 @@ Urme mecanice care trădează generarea, independent de limbă: placeholdere
 necompletate (`[Numele tău]`, `[X]`, `2026-XX-XX`), markup de citare
 (`oai_citation`, `citeturn0search0`), parametri de urmărire în linkuri
 (`utm_source=chatgpt.com`). Verifică-le la final, mereu.
+
+## rest_cod
+
+Resturi de cod sau de șablon în proză: un token scăpat din alt context
+(„mâncare de.BigDecimal facturi”), tag-uri HTML rămase, variabile `{{…}}`
+necompletate. `critic`: propoziția nu se repară, se rescrie.
+
+## diacritice_lipsa
+
+Paragraf scris fără diacritice (`tarziu`, `ramas`, `ciorba`). Lexiconul e pliat,
+deci semnalul vine din proporția cuvintelor cu diacritice pe paragraf (sub 8%
+la cel puțin 18 cuvinte) sau din cel puțin două forme care nu există fără ele
+(`si`, `fara`, `dupa`, `cand`…). De la două paragrafe e `critic`. Hashtag-urile,
+URL-urile, titlurile și listele nu se numără.

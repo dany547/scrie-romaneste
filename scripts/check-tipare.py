@@ -233,6 +233,15 @@ CATEGORII = {
         (r"\biata (textul|articolul|varianta) (rescris|rescrisa|final)", "mereu",
          "elimină metacomentariul; livrează doar textul"),
         (r"\bin speranta ca\b", "mereu", "elimină formula de asistent"),
+        # Introducere și încheiere de chat (observate la modele mici: "Perfect!",
+        # "Iată setul…", "Dacă vrei, pot extinde…", "Notă scurtă:").
+        (r"\A\s*(perfect|minunat|bineinteles)[!,.]", "mereu", "elimină formula de asistent"),
+        (r"^\s*(iata|uite) (setul|textele|mostrele|cateva (texte|mostre|variante))\b", "mereu",
+         "elimină metacomentariul; livrează doar textul"),
+        (r"\bdaca vrei, pot (sa )?(extind|adapt|salv|mai scriu|dezvolt|face)", "mereu",
+         "elimină oferta de asistent"),
+        (r"\bvrei sa (dezvolt|adaptez|extind|mai scriu)\b", "mereu", "elimină oferta de asistent"),
+        (r"^\s*nota scurta\s*:", "mereu", "elimină metacomentariul; livrează doar textul"),
     ]),
     "amprenta_unealta": ("critic", [
         (r"\[numele (tau|dvs|companiei)\]", "mereu", "completează cu date reale sau [DE COMPLETAT: …]"),
@@ -248,6 +257,14 @@ CATEGORII = {
 # Tipare care depind de caracterele originale (ghilimele, diacritice, cifre) și
 # de aceea se aplică pe textul nepliat.
 CATEGORII_ORIGINAL = {
+    # Resturi de cod sau de șablon scăpate în proză (ex. "mâncare de.BigDecimal facturi").
+    "rest_cod": ("critic", [
+        (r"(?<=[a-zăâîșț])(?-i:\.[A-Z][a-z]+[A-Z][A-Za-z]*)\b", "mereu",
+         "rest de cod în proză — șterge sau rescrie propoziția"),
+        (r"</?(div|span|script|br|p|h[1-6])\b[^>\n]*>", "mereu", "tag HTML rezidual — șterge"),
+        (r"\{\{[^{}\n]{1,60}\}\}|\{%[^%\n]{1,60}%\}", "mereu",
+         "variabilă de șablon nerezolvată — completează"),
+    ]),
     "tipografie_anglicizata": ("minor", [
         (r'"[^"\n]{3,}"', "la_aglomerare", "ghilimele românești: „…”"),
         (r"\b\d+\.\d+\s*(%|la suta|lei|euro)", "mereu", "virgulă zecimală: 3,5"),
@@ -444,6 +461,72 @@ def detecteaza_numerale_fara_de(text):
     return gasituri, None
 
 
+# Diacritice lipsă. Lexiconul e pliat, deci nu poate spune dacă „tarziu” e scris
+# greșit; două semnale care nu cer lexicon: (1) cuvinte care nu există fără
+# diacritice, (2) proporția cuvintelor cu diacritice pe paragraf (proza
+# românească are ~25-30%; sub PRAG_DIACRITICE e aproape sigur text fără ele).
+LITERE_RO = "a-zăâîșțşţ"
+FARA_DIACRITICE = {
+    "si", "fara", "dupa", "cand", "inca", "atata", "asa", "tarziu", "intre",
+    "incat", "mancare", "ciorba", "saptamana", "saptamani", "dimineata",
+    "ramas", "gand", "gandul", "stiu", "acasa", "oras", "orasul", "masina",
+    "liniste", "linistit", "raspuns", "frumoasa", "romana", "romania",
+    "pentru-ca", "intr-o", "intr-un", "cateva", "cativa", "multumesc",
+    "fiindca", "mamaliga", "perisoare",
+}
+DIACRITICE_RE = re.compile("[ăâîșțşţĂÂÎȘȚŞŢ]")
+TOKEN_RE = re.compile(rf"[{LITERE_RO}]+(?:-[{LITERE_RO}]+)?", re.IGNORECASE)
+MIN_CUVINTE_PARAGRAF = 18
+PRAG_DIACRITICE = 0.08
+
+
+def detecteaza_diacritice_lipsa(text):
+    """Detector extra pentru `_comun.scaneaza` — vezi contractul acolo.
+
+    Un paragraf e semnalat dacă are ≥ MIN_CUVINTE_PARAGRAF cuvinte și sub 8%
+    cu diacritice, sau dacă are ≥ 10 cuvinte și ≥ 2 cuvinte distincte din
+    FARA_DIACRITICE scrise fără ele. Două paragrafe semnalate sau mai multe urcă severitatea la
+    `critic`. Titlurile, listele, tabelele, URL-urile și hashtag-urile nu se numără.
+    """
+    probleme = []
+    for start, end in _comun.indici_paragrafe(text):
+        bucata = text[start:end]
+        linii = [l for l in bucata.split("\n")
+                 if l.strip() and not l.lstrip().startswith(("#", "|", "-", "*", ">"))]
+        proza = re.sub(r"https?://\S+|#\w+|@\w+|`[^`]*`", " ", "\n".join(linii))
+        cuvinte = TOKEN_RE.findall(proza)
+        if not cuvinte:
+            continue
+        cu_dia = sum(1 for c in cuvinte if DIACRITICE_RE.search(c))
+        distincte = {c.lower() for c in cuvinte
+                     if not DIACRITICE_RE.search(c)} & FARA_DIACRITICE
+        raport = cu_dia / len(cuvinte)
+        if (len(cuvinte) >= MIN_CUVINTE_PARAGRAF and raport < PRAG_DIACRITICE) \
+                or (len(cuvinte) >= 10 and len(distincte) >= 2):
+            probleme.append((start, end, len(cuvinte), raport, sorted(distincte)))
+    if not probleme:
+        return [], None
+    severitate = "critic" if len(probleme) >= 2 else "important"
+    gasituri = []
+    for start, end, n, raport, exemple in probleme:
+        ex = ", ".join(exemple[:3])
+        gasituri.append({
+            "categorie": "diacritice_lipsa",
+            "severitate": severitate,
+            "prag": "paragraf",
+            "tipar": "diacritice_lipsa",
+            "sugestie": (f"{raport:.0%} cuvinte cu diacritice"
+                         + (f" (ex.: {ex})" if ex else "")
+                         + " — restabilește ă â î ș ț"),
+            "offset": start,
+            "sfarsit": end,
+            "linie": text.count("\n", 0, start) + 1,
+            "fragment": " ".join(text[start:end].split())[:90],
+        })
+    return gasituri, ("diacritice_lipsa", "diacritice_lipsa", len(gasituri),
+                      f"{len(probleme)} paragrafe")
+
+
 def _detector_familie(categorie):
     tipare, sugestie = FAMILII[categorie]
     combinat = re.compile(
@@ -488,7 +571,8 @@ def _detector_familie(categorie):
     return detecteaza
 
 
-DETECTOARE_EXTRA = [detecteaza_liste_abuzate, detecteaza_numerale_fara_de] + [
+DETECTOARE_EXTRA = [detecteaza_liste_abuzate, detecteaza_numerale_fara_de,
+                    detecteaza_diacritice_lipsa] + [
     _detector_familie(c) for c in FAMILII]
 
 
@@ -517,7 +601,7 @@ def calculeaza_scor(raportate, depasiri):
                 ("vocabular_corporatist", "abstractiuni", "cuantificari_vagi"))
     if lexic >= 3:
         semnale.append(("lexic_corporatist", 1))
-    if categorii & {"artefact_chatbot", "amprenta_unealta"}:
+    if categorii & {"artefact_chatbot", "amprenta_unealta", "rest_cod", "diacritice_lipsa"}:
         semnale.append(("artefact_de_generare", 2))
     return semnale, sum(p for _, p in semnale)
 

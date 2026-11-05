@@ -1,0 +1,600 @@
+# Scrie Românește
+
+> Skill pentru generarea și revizuirea de text în limba română care sună natural și uman, nu ca text produs de un model lingvistic.
+
+**Author:** Dan Mutu — [adcelerum.ro](https://adcelerum.ro)
+
+[Română](README.md) | **English**
+
+<a id="what-it-does"></a>
+
+## What it does
+
+Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO optimization — so one doesn't break the other. Use it whenever you need to write, rewrite, edit, or review text in Romanian: articles, product descriptions, web pages, blog content, social posts.
+
+<a id="key-features"></a>
+
+### Key features
+
+- **Four modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits), `human-voice` (separate audit for mechanical voice reflexes, with a 30-point score and hard blockers)
+- **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
+- **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words (the lexicon filter lists suspects; suspects require source/context verification with permitted access, manual lookup only, no automated extraction), syntactic calques, false friends, borrowed-word articulation, diacritic restoration
+- **Contextual revision** — a sentence-by-sentence pass over the final text (`references/limba/revizie-contextuala.md`): verb–object, expression sense, referent, transformation/comparison/causality coherence, reader role, jargon/register. Verdicts (`eroare susținută` / `suspiciune contextuală` / `preferință` / `neclar`) with evidence; at most 2 audit→edit→reverify cycles, then escalate
+- **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
+- **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
+- **Writing techniques** — rhythm, conciseness, structure, audience calibration
+- **SEO/GEO** — on-page, technical, e-commerce, local, keyword research, structured data, AI optimization for generative search
+- **Title craft and article flow** — titles with a concrete promise and a precision element, not labels or tabloid clickbait; openings that skip the warmup; section rhythm that isn't a five-H2 template
+- **Verification scripts** — pattern scanner (diacritic-insensitive, morphology-aware), stylometric rhythm analyser, SEO structure checker, and a suspect-word filter to verify in permitted sources, not DEX alone (manual lookup only)
+
+<a id="installation"></a>
+
+## Installation
+
+<a id="optional-hunspell-setup"></a>
+
+### Optional Hunspell setup
+
+The skill itself needs only Python 3.9+ for its scripts and has no pip dependencies. Hunspell is needed only for the opt-in `check-cuvinte.py --sugestii` flag. `--dictionar` is optional and only selects a dictionary other than the default `ro_RO`. Nothing here is installed automatically; these are instructions for you to run.
+
+**Debian / Ubuntu**
+
+```bash
+sudo apt update
+sudo apt install hunspell hunspell-ro
+hunspell -v    # engine version
+hunspell -D    # lists installed dictionaries; ro_RO should appear
+```
+
+**macOS**
+
+```bash
+brew install hunspell
+```
+
+Homebrew installs the `hunspell` engine. I have not verified every resource in the formula, so do not assume what else it includes. A Romanian dictionary (`ro_RO.dic` + `ro_RO.aff`) is not guaranteed; check `hunspell -D` and, if `ro_RO` is missing, install a dictionary from your distribution's resources.
+
+**Other systems (Windows, other Linux, etc.)**
+
+- Put a Hunspell-compatible `hunspell` executable in `PATH`.
+- Install an authorised Romanian dictionary pair, `ro_RO.dic` and `ro_RO.aff`, with the same basename.
+- Pass the dictionary without extension: `--dictionar /path/to/ro_RO`. Without `--dictionar` the default name `ro_RO` is looked up by the engine.
+
+Official sources: <https://hunspell.github.io/>, plus the dictionary resources of your OS distribution. This setup has not been validated on Windows.
+
+**Diagnosis.** If `hunspell -D` does not list `ro_RO`, a `--sugestii` run that uses the default dictionary exits 2 when suspect forms are displayed. This does not apply to an explicit `--dictionar /path/prefix`, which works even when that dictionary is not on the search path. Without `--sugestii` the lexical checker runs as usual and nothing calls Hunspell.
+
+**Smoke tests** (from the skill folder; diacritics kept, UTF-8). Replace `/path/to/ro_RO` with your real dictionary prefix before running the second command:
+
+```bash
+printf 'Cerul era arămriu deasupra dealurilor.\n' | python3 scripts/check-cuvinte.py - --sugestii
+printf 'Cerul era arămriu deasupra dealurilor.\n' | python3 scripts/check-cuvinte.py - --sugestii --dictionar /path/to/ro_RO
+```
+
+Exit 1 is a normal result only when Hunspell runs successfully with the required dictionary: it means the form is listed for checking, not that the command failed. If suspect forms are present but the Hunspell engine or dictionary is missing or fails, the command exits 2. `arămriu` may be suggested as `arămiu`; exact ordering varies by dictionary version, so this is not a guaranteed output. Suggestions are never applied automatically and do not confirm existence or meaning.
+
+### Claude Code
+
+Copy the skill folder into your project:
+
+```bash
+# In your project root
+mkdir -p .claude/skills
+cp -r /path/to/scrie-romaneste .claude/skills/scrie-romaneste
+```
+
+Or install globally:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r /path/to/scrie-romaneste ~/.claude/skills/scrie-romaneste
+```
+
+The skill activates automatically when you mention writing Romanian text.
+
+### OpenAI Codex CLI
+
+```bash
+# In your project root
+mkdir -p .agents/skills
+cp -r /path/to/scrie-romaneste .agents/skills/scrie-romaneste
+```
+
+Or install globally:
+
+```bash
+mkdir -p ~/.agents/skills
+cp -r /path/to/scrie-romaneste ~/.agents/skills/scrie-romaneste
+```
+
+### Kilo CLI
+
+```bash
+# In your project root
+mkdir -p .claude/skills
+cp -r /path/to/scrie-romaneste .claude/skills/scrie-romaneste
+```
+
+Kilo reuses the `.claude/skills/` directory structure. The skill loads via the `skill` tool.
+
+### Cursor
+
+```bash
+# In your project root
+mkdir -p .cursor/rules
+```
+
+Then create `.cursor/rules/scrie-romaneste.md` containing:
+
+```markdown
+---
+globs: "*.md,*.txt,*.html"
+alwaysApply: false
+description: "Romanian text generation and review skill"
+---
+```
+
+Copy the contents of `SKILL.md` into that file, or reference it:
+
+```bash
+cp /path/to/scrie-romaneste/SKILL.md .cursor/rules/scrie-romaneste.md
+```
+
+### Windsurf / Devin Desktop
+
+```bash
+# In your project root
+mkdir -p .windsurf/rules
+cp /path/to/scrie-romaneste/SKILL.md .windsurf/rules/scrie-romaneste.md
+```
+
+Or for Devin:
+
+```bash
+mkdir -p .devin/rules
+cp /path/to/scrie-romaneste/SKILL.md .devin/rules/scrie-romaneste.md
+```
+
+### Cline
+
+Cline reads multiple skill formats natively:
+
+```bash
+# As a skill (recommended)
+mkdir -p .cline/skills
+cp -r /path/to/scrie-romaneste .cline/skills/scrie-romaneste
+
+# Or as rules
+mkdir -p .clinerules
+cp /path/to/scrie-romaneste/SKILL.md .clinerules/scrie-romaneste.md
+```
+
+Cline also reads `.claude/skills/` and `.cursorrules`, so if you already have it installed for another tool, Cline will pick it up.
+
+### Continue.dev
+
+```bash
+mkdir -p .continue/rules
+cp /path/to/scrie-romaneste/SKILL.md .continue/rules/scrie-romaneste.md
+```
+
+### Aider
+
+```bash
+# Copy the skill contents to your project
+cp -r /path/to/scrie-romaneste ./CONVENTIONS.md
+
+# Or reference it in .aider.conf.yml:
+# read: [scrie-romaneste/SKILL.md]
+```
+
+Aider loads conventions via `--read` or `.aider.conf.yml`.
+
+### GitHub Copilot
+
+```bash
+mkdir -p .github
+cp /path/to/scrie-romaneste/SKILL.md .github/copilot-instructions.md
+```
+
+For path-specific instructions:
+
+```bash
+mkdir -p .github/instructions
+cp /path/to/scrie-romaneste/SKILL.md .github/instructions/romanian-text.instructions.md
+```
+
+Add `applyTo: "*.md"` to the frontmatter to scope it.
+
+### Hermes Agent
+
+```bash
+mkdir -p ~/.config/hermes/docs
+cp -r /path/to/scrie-romaneste ~/.config/hermes/docs/scrie-romaneste
+```
+
+<a id="file-structure"></a>
+
+## File structure
+
+```
+scrie-romaneste/
+├── SKILL.md                        # Main skill definition (load this)
+├── references/
+│   ├── limba/
+│   │   ├── anti-tipare-ai.md       # AI clichés with replacements + thresholds
+│   │   ├── exemple-voce.md         # Annotated before/after rewrites, by register
+│   │   ├── revizie-contextuala.md   # Sentence-by-sentence sense pass: verdict + evidence
+│   │   ├── human-voice-validator.md # Separate voice audit: A–J categories, score, blockers
+│   │   ├── cli-verificare.md        # Detailed CLI manual; load before advanced or per-script use
+│   │   ├── flux-exemplu.md         # One complete run: request → contract → draft → report → delivery
+│   │   ├── tipare-ro.md            # Romanian-specific failure modes
+│   │   ├── gramatica-stil.md       # Agreement, punctuation, spelling, pleonasms
+│   │   ├── scris-eficient.md       # Process techniques: draft/edit, rhythm, concision
+│   │   ├── modelisme.md            # Etymological pleonasms, anglicisms, paronyms
+│   │   ├── calcuri.json            # Static registry of collocations to review (check-calcuri.py, opt-in)
+│   │   └── scoring-checklist.md    # Pre-delivery language checklist
+│   └── seo/                        # Split by topic so agents load only what a task needs
+│       ├── core.md                 # Technical, on-page, content, Romanian-specific
+│       ├── grounding.md            # Business data that must never be invented
+│       ├── titluri.md              # Titles, H1, subheads, meta — not labels
+│       ├── flux-articol.md         # Opening, section rhythm, ending, original perspective
+│       ├── geo.md                  # Generative Engine Optimization (AI search)
+│       ├── schema.md               # JSON-LD / structured data
+│       ├── ecommerce.md            # Product and category pages
+│       ├── blog-keyword.md         # Blog content + keyword research
+│       ├── local.md                # NAP, Google Business Profile
+│       ├── avansat.md              # Link building, advanced technical, audits
+│       └── scoring-checklist.md    # Pre-delivery SEO/information-density checklist
+│   └── reclame/                    # Paid ads — thin layer over the general rules
+│       ├── platforme.md            # Google/Meta character limits, policies, file format
+│       └── voce.md                 # Promise→proof→CTA, positive models, pointers
+├── scripts/
+│   ├── verifica.py                 # Orchestrator: all checks, one call, combined score
+│   ├── check-tipare.py             # AI clichés, calques, generation artefacts, non-normative forms
+│   ├── check-human-voice.py        # Conversational filler, punchlines, promo voice, contamination
+│   ├── check-ritm.py               # Sentence/paragraph uniformity (stylometry)
+│   ├── check-cuvinte.py            # Forms missing from the Rospell lexicon -> suspect list for permitted sources
+│   ├── check-calcuri.py            # Opt-in flagger for verb+object collocations to review (static registry)
+│   ├── _hunspell.py                # Opt-in Hunspell suggestions helper (local engine + external dictionary)
+│   ├── construieste-lexicon.py     # Maintainer only: rebuild lexicon/ from Rospell (needs unmunch)
+│   ├── lexicon/                    # lexicon-ro.txt.gz (MPL/LGPL, not MIT) + completari.txt + licence texts
+│   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
+│   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
+│   ├── check-seo.py                # Headings and keyword stuffing
+│   ├── evaluare-contextuala.py     # Offline pilot: counts supplied predictions vs the draft corpus (no models)
+│   └── _comun.py                   # Shared scanning engine (not a CLI)
+├── LICENSE                         # MIT (the lexicon word list keeps its own licence)
+└── tests/                          # Fixtures + unittest suite (stdlib only)
+```
+
+<a id="verification-scripts"></a>
+
+## Verification scripts
+
+```bash
+python3 scripts/verifica.py <file>          # all checks in one pass + combined score
+python3 scripts/verifica.py <file> --json   # structured output for programmatic use
+python3 scripts/verifica.py <file> --scor   # scores only
+python3 scripts/verifica.py <file> --prag N   # density threshold (appearances/1000 words)
+python3 scripts/verifica.py <file> --fara-seo  # skip SEO checks (literary text)
+python3 scripts/verifica.py <file> --human-voice  # separate voice audit: AI_PATTERN_SCORE/30, STATUS, blockers
+python3 scripts/verifica.py <file> --reclame [--platform google|meta] [--brand "Nume"]  # ad-copy audit (labeled files only)
+
+python3 scripts/check-tipare.py <file>      # AI clichés and calques only
+python3 scripts/check-tipare.py <file> --tot  # also show sub-threshold matches
+python3 scripts/check-human-voice.py <file> # mechanical voice reflexes only
+python3 scripts/check-ritm.py <file>        # rhythm uniformity only
+python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon, to check on dexonline (exit 0 clean, 1 forms to check, 2 input/lexicon error)
+python3 scripts/check-cuvinte.py <file> --allow terms.txt --tot  # confirmed terms to skip; show all (default cap 10); --lexicon PATH overrides the bundled list
+python3 scripts/check-cuvinte.py <file|-> --sugestii [--dictionar ro_RO] [--allow terms.txt] [--tot]  # opt-in spelling suggestions via local Hunspell
+python3 scripts/check-calcuri.py <file>     # suspicious verb+object collocations to review (opt-in)
+python3 scripts/check-calcuri.py <file|-> --fereastra N --registry PATH  # word window (default 10) and an alternative registry
+python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
+python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
+python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, empty claims
+```
+
+<a id="spelling-suggestions-opt-in-hunspell"></a>
+
+### Spelling suggestions (opt-in Hunspell)
+
+Setup instructions: [Optional Hunspell setup](#optional-hunspell-setup).
+
+`check-cuvinte.py --sugestii` asks a locally installed Hunspell engine — native binary in `PATH` plus a separately installed dictionary — for suggestions on the unknown forms already displayed: at most 5 per form, never auto-applied, no new dependency without the flag. `--dictionar` takes a dictionary name or a path prefix without `.dic`/`.aff` and requires `--sugestii`; `--allow` and the protected completions stay untouched. Suggestion lines are opt-in only: `sugestii|L<n>|forma|v1 / v2`, or `sugestii|L<n>|forma|fără sugestii` when there are none. Exit 2 if the engine or dictionary is missing or fails while suspects await; the engine never starts without displayed suspects or when the list is suppressed by the mostly-non-Romanian heuristic. Score /13, `verifica.py`, and exits 0/1/2 are unchanged. Suggestions confirm neither existence nor sense, and dictionary versions differ — not a semantic corrector.
+
+Exit 0 = clean, 1 = issues found, 2 = input error. Use `--help` for details.
+Where a pattern has a canonical fix, the report includes it inline after the
+quote (`|→ are sens`), so an agent can correct without loading the reference
+files first.
+
+Matching ignores diacritics, so text written without them — or with the legacy
+cedilla `ş/ţ` instead of the correct comma-below `ș/ț` — is scanned correctly.
+Patterns cover inflected forms, not just dictionary forms.
+
+<a id="collocation-review-opt-in"></a>
+
+### Collocation review (opt-in)
+
+`check-calcuri.py` flags verb–object pairs from a small static registry
+(`references/limba/calcuri.json`; currently one rule: forms of "a frâna" near
+forms of "încărcare", in the same sentence, within a bounded word window —
+`--fereastra N` or `--fereastra=N`, default 10; `--registry PATH` or
+`--registry=PATH` swaps the registry). Matching ignores diacritics and case.
+The ambiguous form "frâna" counts as a verb only with an infinitive/future/modal
+marker right before it ("a frâna", "pot frâna"); the noun and the markerless
+imperfect stay silent, as do legitimate registry exceptions (braking-system
+compounds, the charger noun) and "încărcătură" (the cargo, not the process).
+Physical braking near "încărcare" ("Camionul frânează la rampa de încărcare")
+is a documented false positive: it gets flagged with a neutral message — review
+prompt only, no calque or website presumed. The object stem also matches the participial adjective "încărcat", so a
+legitimate sentence such as "Camionul încărcat frânează greu în curte" may be
+flagged too; this is another accepted false positive, for recitire only and
+not a verdict. Unknown arguments are refused with
+exit 2, never silently ignored. Report lines look like
+`minor|colocare_de_verificat|L<line>|fragment|→ suggestion`, followed by a
+`total=` line and a `nota:` line; fragments can contain `|`, so read them as
+text. A signal is a review prompt, not a confirmed calque and not an error:
+the window counts words, it does not parse syntax, and the decision belongs to
+the contextual-revision pass. The registry grows only with manually verified
+collocations (permitted sources, no client data) — never automatically from a
+corpus. It never runs as part of `verifica.py` and contributes nothing to the
+/13 score. Exit 0 = nothing to review, 1 = at least one pair to review (a
+normal result), 2 = input, registry or unknown-argument error.
+
+<a id="offline-evaluation-contextual-revision-pilot"></a>
+
+### Offline evaluation (contextual-revision pilot)
+
+`scripts/evaluare-contextuala.py` does not check text and runs no models: it
+counts matches, misses and false positives in a predictions file **already
+supplied** (one `{"id", "verdict"}` object per case — the output of an earlier
+run) against the draft corpus `tests/fixtures/evaluare-contextuala.json`
+(`draft_nevalidat_uman`: labels not human-validated, so counts are working
+numbers, never a benchmark).
+
+```bash
+python3 scripts/evaluare-contextuala.py predictii.json [--split referinta|holdout] [--detaliu] [--json]
+```
+
+- Predictions must cover every corpus id; with `--split`, every id of the
+  chosen split — ids from the other split are rejected as unknown. Missing,
+  unknown or duplicate ids, or an invalid verdict, stop the run (exit 1)
+  without counts.
+- Buckets, each case in exactly one: `potrivit`, `semnal_acceptabil`
+  (error↔suspicion swap), `escaladat` (asked instead of correcting), `ratat`,
+  `neclar_ratat`, `fals_pozitiv`. Output lines: `status|`, `acoperire|`,
+  `<split>|k=v`, `total|`, `nota|`; with `--split`, only the chosen split is
+  shown; `--detaliu` lists the non-`potrivit` cases.
+- Exit codes differ from the verification scripts above: 0 = complete
+  evaluation, 1 = incomplete or invalid predictions, 2 = file, JSON or corpus
+  error.
+- Stdlib only, offline, deterministic. Iterate on `referinta`; measure
+  `holdout` once, at the end. The structure tests only check literal 6-word
+  overlap with the guide — they do not prove absence of semantic leakage.
+
+**On `check-ritm.py`**: its thresholds derive from English-language corpora and
+over-flag formal registers. Published false-positive rates for this class of
+detector exceed 60% on non-native writers. Treat a bad score as "worth
+rereading", never as proof of machine authorship.
+
+```bash
+python3 -m unittest discover tests
+```
+
+<a id="releasing"></a>
+
+## Releasing
+
+A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-release suffix is allowed (`vX.Y.Z-alpha:`). After the `tests` workflow passes, the `release` workflow creates the annotated tag if you did not push one, then publishes a GitHub Release from the commit message. An existing tag is never moved. To publish a tag that is already on the repo, run the `release` workflow manually and set `tag` to `vX.Y.Z`.
+
+<a id="version"></a>
+
+## Version
+
+- **v0.13.0** — Adds the optional `check-calcuri.py`
+  collocation-review detector for registered verb–object pairs, currently
+  frânare + încărcare. It has no score and is not part of `verifica.py`; its
+  neutral signals are prompts for contextual review, not verdicts. The documented
+  examples include infinitives (`a frâna`, `pot frâna`) and legitimate physical
+  braking near loading; the stem also catches participles, so
+  “Camionul încărcat frânează greu în curte” may be flagged. Noun forms such as
+  `frânarea`, `frânare` and `frânări` are excluded from the contextual infinitive
+  path. The offline contextual-evaluation cases remain an unvalidated draft,
+  not a benchmark. The detector uses a small static registry, a word window
+  rather than syntax, and can produce false positives; every signal needs human
+  review.
+- **v0.12.0** — Skill routing and the offline evaluation pilot. `SKILL.md` now
+  opens with the minimal recipe and the contracts that actually break agents
+  (line schema per section, `|`-separated fields, exit 0/1/2, score capped at
+  /13) and routes references before they are used; the detailed CLI manual
+  moved to `references/limba/cli-verificare.md` and is read only before advanced
+  or per-script use. The contextual-revision guide adds worked wrong → good
+  examples with a control step (the correction itself is reread for sense,
+  repetition, address, register, facts). New
+  `scripts/evaluare-contextuala.py`: it does not check text and runs no models —
+  it counts matches, acceptable signals, escalations, misses and false
+  positives in predictions already supplied as `id` + `verdict` against the
+  68-case draft corpus (`referinta` 44 / `holdout` 24, labels still not
+  human-validated), with its own exit codes (0 complete, 1 incomplete or
+  invalid predictions, 2 file or corpus error). `verifica.py`, its output
+  sections and the /13 score are unchanged. 294 tests.
+- **v0.11.0** — Optional Hunspell suggestions and contextual revision.
+  `check-cuvinte.py --sugestii [--dictionar NUME_OR_PREFIX]` asks a locally
+  installed `hunspell` (in `PATH`) with a separately installed Romanian dictionary
+  for at most 5 variants per displayed unknown form; nothing is applied
+  automatically, no network, no new dependency without the flag. Setup
+  instructions: [Optional Hunspell setup](#optional-hunspell-setup). Tested on
+  Linux with Hunspell 1.7.2 and LibreOffice `ro` dictionary 25.2.3 (20 cases,
+  5/5 typo targets ranked first; the 3 agreement and 4 context cases produced no detection). Contextual revision
+  (`references/limba/revizie-contextuala.md`): sentence-by-sentence pass with
+  verdicts and evidence, a maximum of two audit→edit→reverify cycles, absence
+  from the lexicon is not a verdict, and only permitted sources are used. A
+  60-case synthetic corpus (`tests/fixtures/evaluare-contextuala.json`) is a
+  draft, its labels are not validated by a human reader, and it is not a passed
+  benchmark. 249 tests. No LLM or semantic engine is included.
+- **v0.10.1** — Harder checks and a licence file. Adds the MIT `LICENSE` (the
+  Rospell word list keeps MPL 1.1 / LGPL 2.1). A benchmark of plausible invented
+  Romanian words and romgleză (`tests/fixtures/cuvinte-grele-*.md`, ground truth
+  checked on dexonline) pins what `check-cuvinte.py` must list. The dexonline
+  procedure covered a bodyless HTTP 404 (historical, now superseded: lookup is
+  manual-only, no automated fetching — live rule in `tipare-ro.md`
+  §cuvant_inexistent). 181 tests.
+- **v0.10.0** — A lexicon filter for words that may not exist. New
+  `check-cuvinte.py` lists the forms missing from a bundled Rospell-derived
+  lexicon (`scripts/lexicon/`, MPL 1.1 / LGPL 2.1, the rest of the repo stays
+  MIT), each with its dexonline address. It is a list to check, not a verdict:
+  no score, not part of `verifica.py`. Capped at 10 forms (`--tot` shows all),
+  `--allow` for confirmed terms, `--lexicon` for another list, one info line
+  instead of a list when the text is mostly not Romanian. Sentence-initial words
+  are checked; mid-sentence proper names are not. `lexicon/completari.txt` holds
+  dexonline-confirmed forms that Rospell lacks. The dexonline procedure
+  (`tipare-ro.md`) now says how to read the page, what to do with inflected
+  forms and anglicisms, and that a replacement must carry the same sense and be
+  looked up too. 180 tests.
+- **v0.9.0** — Invented words, and a definition of done. The scripts, including
+  `--human-voice`, have no dictionary: a clean report does not prove the words
+  exist. Before delivery, read the whole text for invented words, agreement and
+  verb forms. Look up only the words you are not sure of, one at a time, at
+  `https://dexonline.ro/definitie/CUVÂNT`. "Nu este în dicționar" means the
+  form does not exist; suggestions are not confirmation, and an HTTP status is
+  not the verdict. Writing a file is not done: the mode's deliverable has to be
+  in the reply, and an edit lands in the file the user named, not in a side
+  copy. Same cut, on the tools: cedilla is checked even with `--fara-seo`; a
+  real ad file under `--reclame` no longer takes article-title SEO signals from
+  its markdown heading; non-UTF-8 input is exit 2, not a traceback with exit 1.
+  151 tests.
+- **v0.8.0** — DOOM forms in the general checkers (non-normative verbs, numeral
+  agreement, lexical pleonasms) and a thin ad layer: `verifica.py --reclame`
+  for Google/Meta length, policy and empty-claim signals.
+- **v0.7.1** — En-dash banned outright; chat symbols. `–` (U+2013) moves out of
+  the frequency-based `punctuatie_carja` into its own category `liniuta_engleza`,
+  flagged at every single occurrence: Romanian has no use for it — compounds and
+  ranges take a hyphen ("10-12 zile"), asides take the em-dash. It is the one
+  absolute rule in the punctuation area, `important` severity, still outside
+  `scor_automat` /13. `—` and `-` keep their density threshold, since both have
+  legitimate uses. Also new in `simboluri_excesive`: the Unicode bullet as a list
+  marker (`• ▪ ◆ ‣ ·` — Markdown wants `-`), counted by the `liste_abuzate`
+  proportion detector too, and ornamental reference symbols (`§ ¶ † ‡ № ™ ‰`) on
+  a density threshold, so an isolated legal citation stays silent. Math notation
+  (`×`, `°`, `±`) is deliberately excluded. Eleven new tests; legal, academic and
+  literary fixtures are blocking cases.
+
+- **v0.7.0** — Dash-as-crutch detector. New category `punctuatie_carja` in
+  `check-tipare.py` for the single most common model tic: `—`, `–` or `-` used as
+  the only sentence connector, clause after clause, instead of a comma or a full
+  stop. All three characters count together — the en-dash `–` was previously
+  absent from every pattern — and the old pair-only detector moved into the same
+  category, so the same span is never reported twice. Dialogue lines, list
+  markers (indented ones too), numeric ranges and hyphenated compounds are
+  excluded by construction, not by an exception list; a line-wrapped dash is
+  still caught. The pattern carries its own density threshold (4/1000 words),
+  calibrated so `pereche-dupa.md` — the repo's own model rewrite, two dashes in
+  293 words — stays silent; `_comun.scaneaza` now accepts a numeric threshold per
+  pattern alongside the string ones. The signal is `minor` and stays out of
+  `scor_automat` /13. New fixture `rau-liniuta.md`, eight new tests (dialogue and
+  the model rewrite are blocking cases).
+
+- **v0.6.0** — Title craft and organic article flow. New `titluri.md` (anatomy of
+  a title that earns the click: subject, promise, precision, angle — not a label
+  and not tabloid clickbait) and `flux-articol.md` (opening without warmup,
+  uneven section rhythm, original perspective asked at CONTEXT, ending that is
+  not a summary). Both load globally for online content, not only on the blog
+  row. `check-seo.py` now reports severity like the other checkers (still no
+  contribution to `scor_automat` /13) and flags title register: clickbait,
+  agency template ("Ghidul suprem", "Tot ce trebuie să știi"), label titles,
+  overlong titles, flat H2s. New fixture `rau-titlu.md`; SKILL.md gained two
+  critical-rule bullets, a delivery-gate item, and routing for the new files.
+
+- **v0.5.3** — Human voice validator. New separate audit (`verifica.py <file>
+  --human-voice`, or `check-human-voice.py` standalone) for mechanical voice
+  reflexes the language checks don't see: conversational filler, punchlines,
+  copywriter metaphors, unsupported autobiography, promotional promises, CAPS,
+  and chat/prompt contamination as hard blockers. Reports
+  `AI_PATTERN_SCORE/30` and a `PASS`/`EDITED`/`REWRITE` status; signals are
+  editorial decisions, not automatic corrections — literary metaphor, colloquial
+  tone and brand slogans are legitimate choices. Rules and procedure in
+  `references/limba/human-voice-validator.md`. Five fixtures and full test
+  coverage; SKILL.md gained a dedicated mode plus a delivery-gate item. On a
+  fully clean result the orchestrator now still prints the voice summary, so an
+  agent running the audit has something to report. Flag order in `verifica.py`
+  no longer matters (`verifica.py --fara-seo file.md` used to fail); missing
+  file is a proper exit-2 error. CI now runs every script against every fixture
+  (exit ≥ 2 fails), asserts clean fixtures stay clean and bad fixtures are
+  caught, plus a stdin smoke test — mirrored by two new test classes in the
+  suite.
+
+- **v0.5.0** — Naturalness over checklist compliance.
+
+  *Workflow.* New `CONTRACT` step: genre, reader, channel, register and address
+  form are fixed before the draft, not inferred after it. The global **8/10 score
+  gate is gone** — it mixed a manual rubric with `verifica.py`'s deterministic
+  penalty count and was unreachable for any text that skips SEO; both scoring
+  checklists became pre-delivery reading lists with explicit blockers.
+
+  *Matching engine.* Fixed a silent bug: any multi-word pattern falling across a
+  line break was missed entirely. A literal space in a pattern now also matches a
+  single line break that does not start a new paragraph, while spaces inside
+  character classes stay untouched (the dash pattern deliberately excludes `\n`
+  so it never matches list markers). Measured on wrapped Romanian prose: at 80
+  columns the old engine missed ~1 in 6 detections, at 40 columns half of them.
+
+  *New detections.* `copula_evitata`, `referinta_vaga` and
+  `simetrie_de_acoperire` count *per family* rather than per pattern — that is
+  what catches nominal register ("reprezintă" twice plus "constituie" once) and
+  the sentence that addresses everyone so it ranks for every query. None of them
+  feeds the score. Symbol abuse (decorative emoji, prose turned into dashed
+  lists, em dash as improvised parenthesis, dense bold/italic) gained its own
+  category with abuse thresholds rather than flat bans.
+
+  *False positives removed.* Paronyms are now informative (`minor`, unscored):
+  the detector sees co-occurrence, not meaning, and flagged sentences using both
+  words correctly. Pleonasm matching window narrowed 80 → 25 chars so it stops
+  crossing clause boundaries. The planned `sablon_seo` category was dropped —
+  three of its phrases belong in the existing `structura` table and a bare
+  `fie că… fie că` is an ordinary correlative conjunction.
+
+  *New material.* `references/limba/exemple-voce.md` — annotated before/after
+  rewrites in neutral and colloquial variants. `references/limba/flux-exemplu.md`
+  — one complete run from request to delivery with the scripts' real output,
+  including the four problems the scripts do not catch. `scris-eficient.md` cut
+  from 237 to ~110 lines: the blogger-habit material is gone and its
+  contradictions with the anti-pattern rules are resolved. New `core.md` section
+  on the Romanian agency-content register. SEO section numbering fixed (`core.md`
+  jumped 3 → 13, leftovers from the `seo-geo.md` split).
+
+  *Agent ergonomics.* `SKILL.md` now states where the scripts live, how to pipe
+  text in via stdin, that exit 1 is a normal result rather than a failure, how to
+  read the report by severity, what to do when `python3` is missing, when to use
+  `--json`, how to handle a request asking for audit and rewrite at once — and
+  explicit permission to write without loading a reference file rather than
+  guessing its contents.
+
+  *Tests 39 → 65.* Including a documentation guard (every `file.md` and `§N`
+  referenced must resolve; every reference file must be routed from `SKILL.md`)
+  and three fixtures for the genres the checkers can damage — legal, academic and
+  literary text that deliberately contains the constructions we detect.
+- **v0.4.0** — Agent-efficiency release. New `verifica.py` orchestrator runs all
+  checks in one call with a combined deterministic score (`X/13`), `--json`
+  output and `--fara-seo`. Reports now include the canonical fix inline
+  (`|→ are sens`; paronyms get sense explanations), so audits no longer require
+  loading the reference files. `seo-geo.md` (43KB) split into 8 topic files with
+  a routing table in SKILL.md — a blog task loads ~23KB instead of 43KB. Shared
+  scanning engine extracted to `_comun.py` (~150 duplicated lines removed). New
+  `check-modelisme.py` for etymological pleonasms/anglicisms/paronyms, with dead
+  diacritic branches and guaranteed false positives ("caut să adopt", "de aceea")
+  fixed. Test suite 24 → 39: modelisme coverage, orchestrator tests, a pattern
+  hygiene test (no diacritics in folded regexes) and a SKILL↔script drift guard.
+- **v0.3.1** — Grounding discovery is now format-agnostic: the skill looks for business data by content across any file type, published page or prior message, rather than matching a fixed list of filenames. Adds handling for contradictory sources, and a flow for saving confirmed data back into the project's own format. No blank brief template ships on purpose — a half-filled one produces plausible-but-false data.
+- **v0.3.0** — SEO/GEO refresh for 2026. Corrected deprecated structured data guidance (FAQ rich results retired May 2026, `HowTo` since 2023) and documented schema's new role as a trust/entity signal for AI Mode. Added evidence-backed GEO tactics from the Princeton/KDD 2024 study and large-corpus analyses, kept distinct from Google's official position. New Romanian-specific SEO section: diacritics in queries vs. body text vs. slugs, romgleză in keyword research, `ro-RO`/`ro-MD` targeting. New §0 on business data that must be sourced or asked for, never invented, wired into the workflow as a CONTEXT step. `check-seo.py` gained cedilla, URL-diacritic and section-length checks, and its first tests. CI on Python 3.9/3.11/3.13.
+- **v0.2.0** — Three modes (rewrite/audit/edit), two-pass self-correction, voice profiles. Diacritic-insensitive and morphology-aware pattern matching (previously, text without diacritics went entirely undetected). Severity levels and density thresholds instead of binary bans. New `tipare-ro.md` covering Romanian-specific failure modes. New stylometric rhythm analyser. Test suite added.
+- **v0.1.0-alpha** — Initial release. Grammar/style from 7 Romanian school manuals, writing techniques from efficiency methodology, SEO/GEO from current Google documentation.
+
+<a id="license"></a>
+
+## License
+
+MIT (see `LICENSE`), except `scripts/lexicon/lexicon-ro.txt.gz`: a word list derived from the
+Rospell Romanian dictionary (2005-2013 Rospell Team), used under MPL 1.1 /
+LGPL 2.1. The full texts (`MPL-1.1.txt`, `LGPL-2.1.txt`) and the attribution
+note (`LICENTA-ROSPELL.txt`) are in `scripts/lexicon/`.

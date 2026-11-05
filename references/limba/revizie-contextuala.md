@@ -14,7 +14,8 @@ texte separate, lângă corp. Titlul, excerptul și headline-urile de anunț se
 citesc și **standalone**: ajung la cititor fără corp (rezultat de căutare,
 inbox, anunț), deci au nevoie de referenții lor proprii — un adjectiv sau un
 pronume pe care corpul l-ar dezambigua rămâne rupt în titlu. La fiecare
-propoziție întrebi, în ordine:
+propoziție întrebi, în ordine (întâi, la text literar: „ce imagine sau acțiune
+concretă e aici?”; dacă nu există, taie propoziția, nu o rescrie):
 
 1. **Verb–obiect:** cine face ce, cui? Verbul cere un obiect de tipul potrivit
    (o decizie se „ia", o cerere se „trimite", o întrebare se „pune")?

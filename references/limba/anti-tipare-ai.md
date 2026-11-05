@@ -251,6 +251,30 @@ prinde determinist formele cele mai des întâlnite: perechea temporală fără
 cauză („seara X, dimineața Y") și acțiunea de rutină + rezultat pozitiv fără
 niciun token de produs în propoziție.
 
+## K. Text literar și narativ, reflexe de model
+
+Observate la modele mici (Deepseek, Mimo, GLM) scriind poezie, proză scurtă și
+povestiri. Niciunul nu e greșit singur: refrenul, o comparație sau o propoziție
+scurtă sunt unelte literare. Semnalul e **repetiția mecanică**, aceeași mișcare
+la fiecare final de strofă, de paragraf sau de text. Se recitește în context,
+nu se taie automat (regula de decizie 4).
+
+| Reflex | Exemplu | De ce sună a model | Ce faci |
+|---|---|---|---|
+| Aforismul de final | „…iar asta a fost de ajuns.” / „Se întoarce tot, la altcineva.” | fiecare text se încheie cu o frază-sentință; aceeași frază reapare în mai multe formate | încheie pe o imagine sau pe o acțiune; o singură sentință pe set |
+| „Nu X, ci Y” ca ritm de bază | „Nu e vina ta. Creierul tău nu e defect.” / „Omul nu bea cafea. Omul ținea o gardă.” | negația inventată (nimeni nu spusese X) pregătește o revelație | spune Y direct; păstrează negația doar dacă X chiar a fost afirmat |
+| Comparația la capăt de strofă | „…ca un chiriaș care n-a plătit întreținerea.” | fiecare strofă primește un „ca un X care…” | cel mult una pe poem, acolo unde plătește |
+| Tricolon și enumerare în trei | „Ce am învățat, în ordine:” + trei puncte | ritm de prezentare, nu de proză | variază numărul; transformă lista în narațiune |
+| Propoziția-sentință | „Atât.” / „Nimeni nu m-a întrebat dacă am reușit.” la sfârșit de paragraf | punch repetat, pauză dramatică în loc de informație | păstrează-o dacă adaugă sens; nu la fiecare paragraf |
+| Inventarul de nostalgie | tata cu telefonul, bunica cu cuțitul, mușcate, cartierul la 6 dimineața | decorul standard „autentic”, ales pentru efect | un detaliu specific, ciudat, verificabil în loc de trei tipice |
+| Mărturie personală inventată | „testate pe mine timp de o lună”, „inclusiv pe-a mea” | model care vorbește despre o experiență pe care nu a avut-o | taie, sau confirmă cu autorul și adaugă rezultatul concret (`testat_pe_mine`, §D din `human-voice-validator.md`) |
+| Cerere de engagement | „Salută-mă în comentarii cu ce bei azi”, „Prietenii tăi deja vin. Tu?” | formulă de platformă, fără legătură cu textul | cere un singur lucru concret, dacă îl cere |
+| Același fapt, mai multe formate | citatul și cifra reapar în știre, blog, caption, forum | un fapt reciclat, nu șapte voci | un fapt, o voce per format; cifrele rămân identice, formularea nu |
+
+Pe text literar, regula e invers față de cel comercial: protejează repetiția
+intenționată (refrenul, anafora asumată), dialogul și oralitatea. Cere-ți de
+fiecare dată: „ce imagine sau acțiune concretă e aici?”. Dacă nu există, taie.
+
 ## Verificare rapidă înainte de livrare
 
 1. Caută tranzițiile din tabelul A. Numără-le. Peste trei într-un text scurt,

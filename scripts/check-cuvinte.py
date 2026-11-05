@@ -66,7 +66,7 @@ LUNGIME_MINIMA = 4
 DEXONLINE = "https://dexonline.ro/definitie/"
 
 _COD = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.S)
-_URL = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+")
+_URL = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+|(?<!\w)#[\wăâîșțĂÂÎȘȚ]+")
 _CUVANT = re.compile(r"[^\W\d_]+(?:-[^\W\d_]+)*")
 # Ce precede un cuvânt la început de propoziție: punct, două puncte, început de
 # rând, eventual cu marcator markdown (#, *, -, >, 1.) sau ghilimea deschisă.
