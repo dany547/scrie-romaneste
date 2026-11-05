@@ -149,6 +149,43 @@ class TestTipare(unittest.TestCase):
         cod, iesire = ruleaza_stdin("check-tipare.py", text)
         self.assertNotIn("diacritice_lipsa", iesire)
 
+    def test_bloc_de_cod_cu_linie_goala_nu_e_fara_diacritice(self):
+        """Issue #12: fence-ul cu linie goală nu se numără ca proză."""
+        text = (
+            "Uneltele se instalează local și rulează fără rețea, ceea ce le face potrivite "
+            "pentru proiectele mici și pentru echipele care vor rezultate reproductibile pe "
+            "orice mașină, fără să depindă de servicii externe sau de conturi plătite.\n"
+            "\n"
+            "```bash\n"
+            "python3 scripts/verifica.py <file>          # all checks in one pass + combined score\n"
+            "python3 scripts/verifica.py <file> --json   # structured output for programmatic use\n"
+            "\n"
+            "python3 scripts/check-tipare.py <file>      # AI cliches and calques only\n"
+            "python3 scripts/check-cuvinte.py <file>     # forms missing from the lexicon\n"
+            "```\n"
+            "\n"
+            "Rezultatul se citește în câteva secunde și nu cere instalarea niciunei dependențe.\n")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertNotIn("diacritice_lipsa", iesire,
+                         f"fence semnalat ca proză fără diacritice:\n{iesire}")
+
+    def test_proza_fara_diacritice_cu_fence_tot_e_semnalata(self):
+        """Excluderea fence-ului nu maschează proza reală fără diacritice."""
+        text = (
+            "Uneltele se instaleaza local si ruleaza fara retea, ceea ce le face potrivite "
+            "pentru proiectele mici si pentru echipele care vor rezultate reproductibile, "
+            "fara sa depinda de servicii externe sau de conturi platite.\n"
+            "\n"
+            "```bash\n"
+            "python3 scripts/verifica.py fisier\n"
+            "```\n"
+            "\n"
+            "Dupa aceea se citeste rezultatul in cateva secunde si nu cere instalarea niciunei "
+            "dependinte, pentru ca totul e local si rapid si simplu de verificat manual.\n")
+        cod, iesire = ruleaza_stdin("check-tipare.py", text)
+        self.assertIn("diacritice_lipsa", iesire,
+                      f"proza fără diacritice mascată de fence:\n{iesire}")
+
     def test_testat_pe_mine_nu_e_scutit_de_context(self):
         cod, iesire = ruleaza_stdin(
             "check-human-voice.py",
