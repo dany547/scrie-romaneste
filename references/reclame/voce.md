@@ -55,13 +55,23 @@ cuvânt cu cuvânt (7 uleiuri, lot mic, data fabricației), cifrele sunt
 verificabile, nu există promisiuni fără mecanism și niciun caracter nu e
 decorativ.
 
-Set Meta (text principal ≤ 125, titlu ≤ 40, descriere ≤ 25):
+Set Meta (text principal ≤ 150, titlu ≤ 27; descrierea scurtă):
 
 ```markdown
 Text: Șapte uleiuri cold-pressed, zero parfum sintetic. Data fabricației, pe cutie.
 Titlu: Hidratare 24 de ore
 Descriere: Lot mic, livrare în 24 h
 ```
+
+## Reclame native pe platforme sociale (Meta Reels, TikTok)
+
+Sfaturi, nu reguli de platformă (fără dovadă cantitativă confirmată în sesiunea de cercetare):
+- Prima propoziție e problema sau beneficiul verificabil, nu numele brandului.
+- Scrie ca un caption, nu ca un spot citit: voce directă, un detaliu concret, un singur CTA.
+- Textul trebuie să stea singur dacă restul se trunchiază: ideea-cheie în primele cuvinte.
+- Nu cere interacțiune artificială („dă share dacă…", „comentează cu un emoji"):
+  `check-tipare.py` o semnalează ca `engagement_bait`.
+- Nu promite un rezultat sigur și nu ascunde că e reclamă.
 
 ## Exemple înainte/după
 

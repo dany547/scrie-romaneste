@@ -224,6 +224,24 @@ CATEGORII = {
          "spune care sunt, concret"),
         (r"\bdepinde de context\b", "la_aglomerare", "spune de ce anume depinde"),
     ]),
+    # Cerere artificială de interacțiune, fără legătură cu conținutul. Doar formule
+    # fixe; „spune-mi în comentarii ce crezi" e o întrebare reală și NU se prinde.
+    # `minor`: semnal de recitit (un concurs legitim sau o cerere de ajutor real
+    # poate conține formula; Meta restricționează cererile de tip „comentează/
+    # distribuie ca să câștigi", nu întrebările autentice).
+    "engagement_bait": ("minor", [
+        (r"\bsaluta-ma in comentarii\b", "mereu", "cere interacțiunea doar dacă legătura cu textul e reală"),
+        (r"\b(taguieste|taguiti|tagueaza) (un|o|pe|doi|trei|doua)\b", "mereu",
+         "cerere artificială de tag"),
+        (r"\bda(ti)? (un )?(share|like|distribuire)\b[^.!?\n]{0,25}\b(daca|ca)\b", "mereu",
+         "cerere artificială de share/like"),
+        (r"\bdistribuie(ti)?,? te rog\b|\bdistribuie(ti)? (postarea )?(daca|ca sa)\b", "mereu",
+         "cerere artificială de distribuire"),
+        (r"\bsalveaza (postarea )?daca\b", "mereu", "cerere artificială de salvare"),
+        (r"\bcomenteaza cu (un )?(emoji|da\b|nu\b|cuvantul)", "mereu",
+         "cerere artificială de comentariu"),
+        (r"\bda (\"|„)?trimite(\"|”)? cuiva\b", "mereu", "cerere artificială de trimitere"),
+    ]),
     "artefact_chatbot": ("critic", [
         (r"^\s*(sigur|desigur|cu placere)[!,.]", "mereu", "elimină formula de asistent"),
         (r"\bexcelenta intrebare\b", "mereu", "elimină formula de asistent"),
@@ -492,7 +510,7 @@ def detecteaza_diacritice_lipsa(text):
     for start, end in _comun.indici_paragrafe(text):
         bucata = text[start:end]
         linii = [l for l in bucata.split("\n")
-                 if l.strip() and not l.lstrip().startswith(("#", "|", "-", "*", ">"))]
+                 if l.strip() and not re.match(r"\s*(#{1,6}\s|[|\-*>])", l)]
         proza = re.sub(r"https?://\S+|#\w+|@\w+|`[^`]*`", " ", "\n".join(linii))
         cuvinte = TOKEN_RE.findall(proza)
         if not cuvinte:

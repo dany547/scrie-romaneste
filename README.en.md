@@ -246,9 +246,13 @@ scrie-romaneste/
 │       ├── local.md                # NAP, Google Business Profile
 │       ├── avansat.md              # Link building, advanced technical, audits
 │       └── scoring-checklist.md    # Pre-delivery SEO/information-density checklist
-│   └── reclame/                    # Paid ads — thin layer over the general rules
-│       ├── platforme.md            # Google/Meta character limits, policies, file format
-│       └── voce.md                 # Promise→proof→CTA, positive models, pointers
+│   ├── reclame/                    # Paid ads — thin layer over the general rules
+│   │   ├── platforme.md            # Google/Meta/PMax limits, TikTok (unverified), file format
+│   │   └── voce.md                 # Promise→proof→CTA, positive models, native ads
+│   └── social/                     # Organic posts and personal blog (not SEO articles)
+│       ├── README.md               # Index by genre + "numbers only with a source"
+│       ├── organic.md              # Instagram, Facebook, LinkedIn, TikTok, forum
+│       └── blog-personal.md        # Personal/lifestyle blog voice
 ├── scripts/
 │   ├── verifica.py                 # Orchestrator: all checks, one call, combined score
 │   ├── check-tipare.py             # AI clichés, calques, generation artefacts, non-normative forms
@@ -392,6 +396,7 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.14.0** — Audit on small-model text and a new social-media layer. The audit showed that text from three cheap models passed with `PASS` despite missing diacritics, code leftovers and chat reflexes. New detectors in `check-tipare.py`: `diacritice_lipsa` (per paragraph, no lexicon: share of words with diacritics and forms that do not exist without them), `rest_cod` (code, HTML and template variables in prose), `engagement_bait` (artificial interaction requests, `minor`), and an extended `artefact_chatbot` for chat openers and closers. `check-human-voice.py` gains `testat_pe_mine` (unconfirmed personal-testing claim, no context exemption). `check-cuvinte.py` no longer checks hashtags as words. Meta correction: primary text 150 and headline 27 characters per the official guide read on 2026-11-05; the 125/40/25 figures have no current official source and the description has no recommendation. The `check-reclame.py` parser no longer treats a hashtag line as a heading and checks `Description:` under a Meta heading. New references: `references/social/` (`README.md`, `organic.md`, `blog-personal.md`) with limits from official sources only and the rest marked "unverified"; `platforme.md` adds Performance Max and TikTok (official CTAs, text limits unverified); `voce.md` adds native ads. `anti-tipare-ai.md` §K covers literary reflexes of small models; the DRAFT step now asks for chunked writing. `docs/audit-modele/` keeps findings, plans and reviews. 354 tests. A TikTok mode in `check-reclame.py` and a hashtag-diacritics detector were deliberately deferred (no official limits; false positives on `#romania`).
 - **v0.13.0** — Adds the optional `check-calcuri.py`
   collocation-review detector for registered verb–object pairs, currently
   frânare + încărcare. It has no score and is not part of `verifica.py`; its

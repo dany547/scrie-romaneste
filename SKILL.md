@@ -335,8 +335,18 @@ referă regulile generale, nu le duplică:
 ```
 references/
 └── reclame/
-    ├── platforme.md           # limite Google/Meta, politici, format de fișier
-    └── voce.md                # promisiune→dovadă→CTA, modele pozitive, trimiteri
+    ├── platforme.md           # limite Google/Meta/PMax, TikTok (neverificat), format de fișier
+    └── voce.md                # promisiune→dovadă→CTA, modele pozitive, reclame native
+```
+
+Plus `references/social/` pentru postări organice și blog personal (nu articol SEO):
+
+```
+references/
+└── social/
+    ├── README.md              # index pe gen + regula „cifre doar cu sursă"
+    ├── organic.md             # Instagram, Facebook, LinkedIn, TikTok, forum
+    └── blog-personal.md       # voce de blog personal/lifestyle
 ```
 
 Rutare SEO — încarcă doar ce cere task-ul (plus `grounding.md` la orice conținut
@@ -347,7 +357,9 @@ la orice text de citit cap-coadă):
 |---|---|
 | articol de blog | `core.md`, `blog-keyword.md`, `geo.md`, `titluri.md`, `flux-articol.md` |
 | pagină de produs/categorie | `core.md`, `ecommerce.md`, `titluri.md`, `flux-articol.md` |
-| text de reclamă Google/Meta | `../reclame/platforme.md`, `../reclame/voce.md`, `../limba/anti-tipare-ai.md` §J, `grounding.md` |
+| text de reclamă Google/Meta/TikTok | `../reclame/platforme.md`, `../reclame/voce.md`, `../limba/anti-tipare-ai.md` §J, `grounding.md` |
+| postare organică (Instagram, Facebook, LinkedIn, TikTok, forum) | `../social/README.md`, `../social/organic.md`, `../limba/anti-tipare-ai.md` §K, `grounding.md` |
+| blog personal, lifestyle | `../social/README.md`, `../social/blog-personal.md`, `../limba/anti-tipare-ai.md` §K |
 | afacere locală / pagină de contact | `core.md`, `local.md` |
 | schema / date structurate | `schema.md` |
 | audit SEO complet, link building | `core.md`, `avansat.md` |

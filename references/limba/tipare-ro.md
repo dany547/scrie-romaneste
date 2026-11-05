@@ -502,6 +502,13 @@ necompletate (`[Numele tău]`, `[X]`, `2026-XX-XX`), markup de citare
 (`oai_citation`, `citeturn0search0`), parametri de urmărire în linkuri
 (`utm_source=chatgpt.com`). Verifică-le la final, mereu.
 
+## engagement_bait
+
+Cerere artificială de interacțiune, fără legătură cu textul: „Salută-mă în comentarii cu…", „Distribuie,
+te rog", „Dă share dacă…", „Taguiește un prieten", „Salvează postarea dacă…", „Dă «Trimite» cuiva".
+`minor`, de recitit în context: o întrebare reală („ce hotel recomandați?") sau un concurs legitim nu
+sunt greșeli. Detalii în `../social/organic.md`.
+
 ## rest_cod
 
 Resturi de cod sau de șablon în proză: un token scăpat din alt context

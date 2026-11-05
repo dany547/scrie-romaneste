@@ -32,11 +32,50 @@ loc). Verificat: 2026-09-07.
 
 | Câmp | Recomandat | Maxim hard |
 |---|---|---|
-| Text principal (Primary text) | 125 caractere — vizibil înainte de „Vezi mai mult" | 2200 |
-| Titlu (Headline) | 40 caractere — trunchiat vizual | 255 |
-| Descriere (Description) | 25 caractere — apare doar pe unele plasamente | 255 |
+| Text principal (Primary text) | 50–150 caractere (ghid oficial Meta, 2026-11-05) | 2200 (neverificat oficial) |
+| Titlu (Headline) | 27 caractere (ghid oficial Meta, 2026-11-05) | 255 (neverificat oficial) |
+| Descriere (Description) | fără recomandare oficială actuală; apare doar pe unele plasamente | 255 (neverificat oficial) |
+
+Sursă pentru recomandările de mai sus: ghidul de reclame Meta pentru feed
+(`https://www.facebook.com/business/ads-guide/image/facebook-feed/traffic`), citit la 2026-11-05.
+Pagina „Creative best practices for text in ads" citată mai sus nu mai arată cifre.
+Valorile 125 / 40 / 25, des citate în ghiduri terțe, nu au sursă oficială actuală (pot veni dintr-o
+versiune mai veche sau din specificațiile Lead Ads). Pragul în care „Vezi mai mult" taie textul depinde
+de plasament și nu e confirmat oficial: pune ideea-cheie la început, fără să te bazezi pe o cifră.
+Înainte de producție, verifică limitele în Ads Manager.
 
 Hashtag-uri: maximum trei; restul sufocă mesajul și scad credibilitatea.
+
+### Google Performance Max (text assets) — limite oficiale
+
+Sursă: https://support.google.com/google-ads/answer/17091269 (citită 2026-11-05, fără dată pe pagină).
+
+| Câmp | Limită | Observații |
+|---|---|---|
+| Titlu | 30 caractere, 3–15 (recomandat 11+) | cel puțin unul de maximum 15 caractere |
+| Titlu lung | 90 caractere, 1–5 (recomandat 2+) | |
+| Descriere | 90 caractere, 2–5 (recomandat 4+) | una poate fi scurtă |
+| Nume firmă | 25 caractere | să corespundă domeniului sau firmei verificate, fără text promoțional |
+| CTA | 1, automat sau din listă | |
+
+Activele se combină în orice ordine: fără trimiteri de tipul „vezi mai jos". `check-reclame.py` nu
+verifică PMax; limitele sunt de aici, pentru redactare.
+
+### TikTok Ads — doar ce e confirmat oficial
+
+**Neverificat oficial:** limita de caractere a textului reclamei (surse vechi dau „maximum 100", cu
+„4–60 recomandat", dar fără confirmare actuală), limita numelui de brand afișat și politicile detaliate
+(paginile oficiale nu au putut fi citite integral). Nu scrie cifre pentru TikTok ca fapt; verifică în
+Ads Manager înainte de producție. `check-reclame.py` **nu** are modul TikTok: un `Text:` fără
+`--platform` primește limitele Meta, deci nu rula scriptul pe reclame TikTok.
+
+Confirmat (pagina de configurare a reclamei, actualizată iunie 2026,
+https://ads.tiktok.com/resources/help/article/ad-set-up): numele afișat trebuie să corespundă brandului,
+produsului sau firmei. CTA-urile standard sunt în engleză în interfață (Learn More, Shop Now, Sign Up,
+Order Now, Contact Us, Book Now etc.); lista exactă depinde de obiectiv și format.
+
+**Sfat, nu regulă:** textul reclamei TikTok se scrie scurt și nativ, ca un caption; fără promisiuni
+de rezultat și fără ascunderea caracterului comercial (vezi `voce.md`).
 
 ## Formatul fișierului de anunț
 

@@ -45,11 +45,11 @@ GOOGLE_CALE = 15
 GOOGLE_H_MAX = 15
 GOOGLE_D_MAX = 4
 # Meta (Facebook/Instagram)
-META_TEXT_REC = 125
+META_TEXT_REC = 150   # ads-guide Meta: „50-150 de caractere" (verificat 2026-11-05)
 META_TEXT_MAX = 2200
-META_TITLU_REC = 40
+META_TITLU_REC = 27   # ads-guide Meta: „27 de caractere" (verificat 2026-11-05)
 META_TITLU_MAX = 255
-META_DESCRIERE_REC = 25
+META_DESCRIERE_REC = None  # recomandare fără sursă oficială actuală: nu se semnalează
 META_DESCRIERE_MAX = 255
 
 # ---- Parserul de etichete --------------------------------------------------
@@ -146,7 +146,7 @@ def parseaza(text, platform_forta=None):
     elemente = []
     platforma_curenta = None
     for i, linie in enumerate(text.splitlines(), 1):
-        if linie.lstrip().startswith("#"):
+        if re.match(r"\s*#{1,6}\s", linie):
             cap = pliaza(linie)
             platforma_curenta = None
             for platforma, chei in HEADINGS_PLATFORMA.items():
@@ -167,10 +167,13 @@ def parseaza(text, platform_forta=None):
                 eticheta = f"Cale{prefix or ''}"
             elif tip == "headline" and not prefix.isdigit():
                 eticheta = f"H{len([e for e in elemente if e['tip'] == 'headline']) + 1}"
+            platforma_finala = (platform_forta or platforma_curenta
+                                or platforma_implicita)
+            if platforma_finala == "meta" and tip == "descriere_g":
+                tip = "descriere_meta"  # „Description:" sub un heading Meta
             elemente.append({
                 "tip": tip,
-                "platforma": platform_forta or platforma_curenta
-                             or platforma_implicita,
+                "platforma": platforma_finala,
                 "valoare": valoare,
                 "linie": i,
                 "eticheta": eticheta,
@@ -237,7 +240,7 @@ def verifica_limite(element):
             if n > META_DESCRIERE_MAX:
                 peste("limita_caractere", META_DESCRIERE_MAX, "critic",
                       f"maximul Meta este {META_DESCRIERE_MAX}")
-            elif n > META_DESCRIERE_REC:
+            elif META_DESCRIERE_REC and n > META_DESCRIERE_REC:
                 peste("descriere_peste_recomandat", META_DESCRIERE_REC,
                       "minor", "descrierea apare doar pe unele plasamente, "
                       "ține-o scurtă")

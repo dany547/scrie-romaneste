@@ -97,6 +97,23 @@ class TestTipare(unittest.TestCase):
             cod, iesire = ruleaza_stdin("check-tipare.py", text)
             self.assertIn("artefact_chatbot", iesire, text)
 
+    def test_engagement_bait_e_semnalat_minor(self):
+        for text in ("Salută-mă în comentarii cu ce bei azi.",
+                     "Distribuie, te rog. Poate ajunge la cineva.",
+                     "Salvează postarea dacă ai unelte care stau degeaba.",
+                     "Dă „Trimite\" cuiva care are nevoie de o seară liniștită.",
+                     "Taguiește un prieten care întârzie mereu.",
+                     "Dă share dacă ești de acord."):
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertIn("minor|engagement_bait", iesire, text)
+
+    def test_intrebare_reala_nu_e_engagement_bait(self):
+        for text in ("Spune-mi în comentarii ce hotel recomanzi în Sibiu, mergem în martie.",
+                     "Recomandați-mi un instalator bun din Cluj, vă rog.",
+                     "Cine a mai trecut printr-o mutare în iarnă? Povestiți-mi."):
+            cod, iesire = ruleaza_stdin("check-tipare.py", text)
+            self.assertNotIn("engagement_bait", iesire, text)
+
     def test_fraza_umana_cu_perfect_nu_e_artefact(self):
         text = "Cafeaua era perfect fierbinte. Perfect, a zis ea, și a plecat."
         cod, iesire = ruleaza_stdin("check-tipare.py", text)
@@ -596,9 +613,22 @@ class TestReclame(unittest.TestCase):
         self.assertEqual(cod, 1)
         self.assertIn("structura_rsa", iesire)
 
+    def test_rand_de_hashtag_nu_e_heading(self):
+        """Un rând care începe cu `#hashtag` nu resetează platforma curentă."""
+        text = ("# Campanie Meta\n\nText: Cafea de specialitate, prăjită azi.\n"
+                "#cafea #instagram #prajitorie\nTitlu: " + "x" * 28)
+        cod, iesire = ruleaza_stdin("check-reclame.py", text)
+        self.assertIn("titlu_peste_recomandat", iesire)
+
+    def test_description_sub_heading_meta_se_verifica_ca_meta(self):
+        text = "# Campanie Meta\n\nText: Cafea.\nDescription: " + "z" * 300
+        cod, iesire = ruleaza_stdin("check-reclame.py", text)
+        self.assertIn("limita_caractere", iesire)
+        self.assertIn("maximul Meta", iesire)
+
     def test_limitele_recomandate_meta(self):
         cod, iesire = ruleaza_stdin(
-            "check-reclame.py", "Titlu: " + "x" * 41 + "\nText: " + "y" * 126)
+            "check-reclame.py", "Titlu: " + "x" * 28 + "\nText: " + "y" * 151)
         self.assertEqual(cod, 1)
         self.assertIn("titlu_peste_recomandat", iesire)
         self.assertIn("text_peste_recomandat", iesire)
