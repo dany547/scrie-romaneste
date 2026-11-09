@@ -521,4 +521,4 @@ Paragraf scris fără diacritice (`tarziu`, `ramas`, `ciorba`). Lexiconul e plia
 deci semnalul vine din proporția cuvintelor cu diacritice pe paragraf (sub 8%
 la cel puțin 18 cuvinte) sau din cel puțin două forme care nu există fără ele
 (`si`, `fara`, `dupa`, `cand`…). De la două paragrafe e `critic`. Hashtag-urile,
-URL-urile, titlurile și listele nu se numără.
+URL-urile, titlurile, listele și blocurile de cod nu se numără.

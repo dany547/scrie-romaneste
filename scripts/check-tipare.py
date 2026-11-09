@@ -497,6 +497,19 @@ TOKEN_RE = re.compile(rf"[{LITERE_RO}]+(?:-[{LITERE_RO}]+)?", re.IGNORECASE)
 MIN_CUVINTE_PARAGRAF = 18
 PRAG_DIACRITICE = 0.08
 
+FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
+
+
+def _fara_blocuri_cod(text):
+    """Blochează fence-urile de cod, păstrând lungimea și newline-urile.
+
+    Ca în `check-ritm.py`: codul nu e proză și nu se numără. Înlocuirea
+    păstrează offset-urile și liniile, ca raportarea să rămână pe poziții reale.
+    Un fence neînchis nu se potrivește (ca în `check-ritm.py`) și cade pe garda
+    de cod inline de mai jos.
+    """
+    return FENCE_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
+
 
 def detecteaza_diacritice_lipsa(text):
     """Detector extra pentru `_comun.scaneaza` — vezi contractul acolo.
@@ -504,11 +517,13 @@ def detecteaza_diacritice_lipsa(text):
     Un paragraf e semnalat dacă are ≥ MIN_CUVINTE_PARAGRAF cuvinte și sub 8%
     cu diacritice, sau dacă are ≥ 10 cuvinte și ≥ 2 cuvinte distincte din
     FARA_DIACRITICE scrise fără ele. Două paragrafe semnalate sau mai multe urcă severitatea la
-    `critic`. Titlurile, listele, tabelele, URL-urile și hashtag-urile nu se numără.
+    `critic`. Titlurile, listele, tabelele, URL-urile, hashtag-urile și blocurile
+    de cod nu se numără.
     """
+    text_fara_cod = _fara_blocuri_cod(text)
     probleme = []
-    for start, end in _comun.indici_paragrafe(text):
-        bucata = text[start:end]
+    for start, end in _comun.indici_paragrafe(text_fara_cod):
+        bucata = text_fara_cod[start:end]
         linii = [l for l in bucata.split("\n")
                  if l.strip() and not re.match(r"\s*(#{1,6}\s|[|\-*>])", l)]
         proza = re.sub(r"https?://\S+|#\w+|@\w+|`[^`]*`", " ", "\n".join(linii))
