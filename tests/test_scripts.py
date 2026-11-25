@@ -1344,11 +1344,10 @@ class TestTrimiteriDocumentatie(unittest.TestCase):
         skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
         scripts = skill.split("## scripts/", 1)[1]
         rutare = scripts.split("### Manual CLI — încărcare condiționată", 1)[1]
-        rutare = " ".join(rutare.split("`evaluare-contextuala.py`", 1)[0].split())
+        rutare = " ".join(rutare.split("### Cum citești raportul", 1)[0].split())
         self.assertIn("references/limba/cli-verificare.md", rutare)
-        self.assertIn("Agentul", rutare)
         self.assertIn("înainte", rutare)
-        self.assertIn("Nu încărca manualul pentru o sarcină simplă", rutare)
+        self.assertIn("Nu încărca manualul", rutare)
 
     def test_modurile_ruteaza_referintele_inainte_de_folosire(self):
         skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
@@ -1356,7 +1355,7 @@ class TestTrimiteriDocumentatie(unittest.TestCase):
         audit = moduri.split("- **audit**", 1)[1].split("- **editare**", 1)[0]
         self.assertLess(audit.index("scripts/verifica.py"),
                         audit.index("references/"))
-        self.assertIn("încarcă din `references/` doar ce-ți trebuie", audit)
+        self.assertIn("doar ce-ți trebuie", audit)
         human_voice = moduri.split("- **human-voice**", 1)[1]
         self.assertIn("references/limba/human-voice-validator.md", human_voice)
         self.assertIn("Nu rescrie", human_voice)
@@ -1375,20 +1374,63 @@ class TestTrimiteriDocumentatie(unittest.TestCase):
 
     def test_rutarea_seo_ramane_specifica_taskului(self):
         skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
-        seo = skill.split("Rutare SEO", 1)[1].split("Încarcă doar fișierele relevante", 1)[0]
-        self.assertIn("articol de blog | `core.md`, `blog-keyword.md`", seo)
-        self.assertIn("text de reclamă Google/Meta", seo)
-        self.assertIn("grounding.md", seo)
+        rutare = skill.split("## Rutare și structura", 1)[1].split("## scripts/", 1)[0]
+        # Rândul implicit de articol/blog încarcă doar titluri, flux și revizie contextuală —
+        # NU încarcă automat GEO, keyword research sau SEO tehnic core.
+        rand_blog = next(
+            (l for l in rutare.splitlines() if "articol simplu / blog" in l), None)
+        self.assertIsNotNone(rand_blog, "lipsește rândul implicit de articol/blog")
+        for inclus in ("seo/titluri.md", "seo/flux-articol.md", "limba/revizie-contextuala.md"):
+            self.assertIn(inclus, rand_blog, f"lipsește din rândul implicit de blog: {inclus}")
+        for exclus in ("seo/geo.md", "seo/blog-keyword.md", "seo/core.md", "seo/grounding.md"):
+            self.assertNotIn(exclus, rand_blog,
+                             f"rândul implicit de blog nu trebuie să încarce {exclus}")
+        # Extra-urile au propriile triggere separate și rămân rutate.
+        for separat in ("seo/core.md", "seo/blog-keyword.md", "seo/geo.md",
+                        "seo/grounding.md", "reclame/platforme.md",
+                        "social/README.md", "seo/markup.md", "limba/cli-verificare.md"):
+            self.assertIn(separat, rutare, f"lipsește din tabelul de rutare: {separat}")
         self.assertIn("nu e nevoie să citești tot `references/`", skill)
 
     def test_formatul_ritmului_documenteaza_lipsa_liniilor(self):
-        skill = (RADACINA / "SKILL.md").read_text(encoding="utf-8")
+        skill = " ".join((RADACINA / "SKILL.md").read_text(encoding="utf-8").split())
         manual = (RADACINA / "references/limba/cli-verificare.md").read_text(
             encoding="utf-8")
-        self.assertIn("`ritm` emite linii\n  `metrici|...` și `<semnal>|incredere=...|detaliu`, fără `L<n>`",
+        self.assertIn("`ritm` emite `metrici|...` și `<semnal>|incredere=...|detaliu`, fără `L<n>`",
                       skill)
         self.assertIn("`ritm`: `metrici|...` și `<semnal>|incredere=<nivel>|<detaliu>`, fără `L<n>`.",
                       manual)
+
+    def test_skill_ramane_compact_cu_rute_explicite(self):
+        skill_path = RADACINA / "SKILL.md"
+        skill = skill_path.read_text(encoding="utf-8")
+        self.assertLessEqual(skill_path.stat().st_size, 18000,
+                             f"SKILL.md depășește bugetul de 18000 bytes: {skill_path.stat().st_size}")
+        for ruta in ("editare/rescriere scurtă", "audit", "articol simplu / blog",
+                     "reclame/", "social/", "markup.md",
+                     "cli-verificare.md", "revizie-contextuala.md"):
+            self.assertIn(ruta, skill, f"rută lipsă din SKILL.md: {ruta}")
+        # Proiecția markup are prioritate față de verifica.py crud, inclusiv în audit și pe drafturi lungi.
+        self.assertIn("inclusiv în modul `audit` și pe drafturi lungi", skill)
+
+    def test_revizie_pe_campuri_si_markup_sunt_documentate(self):
+        revizie = (RADACINA / "references/limba/revizie-contextuala.md").read_text(
+            encoding="utf-8")
+        for termen in ("SEO title", "H1", "meta", "excerpt", "H2", "H3",
+                       "SEO title și H1 pot coincide legitim",
+                       "nu cere și nu inventa o înlocuire",
+                       "context proaspăt", "auto-review", "nu editează markup crud",
+                       "doar metadate/heading-uri"):
+            self.assertIn(termen, revizie, f"lipsește din revizie-contextuala.md: {termen}")
+        markup = (RADACINA / "references/seo/markup.md").read_text(encoding="utf-8")
+        for termen in ("check-markup.py", "--mode page|fragment|wp-body",
+                       "gutenberg_compatibility", "--fara-seo",
+                       "numai în modul `page`",
+                       "marcatori de bloc WordPress recunoscuți",
+                       "validitatea HTML generală",
+                       "versiunea țintă de WordPress",
+                       "unverified", "producție"):
+            self.assertIn(termen, markup, f"lipsește din markup.md: {termen}")
 
     def test_manualul_distinge_verdictele_evaluatorului_de_bucketuri(self):
         manual = (RADACINA / "references/limba/cli-verificare.md").read_text(

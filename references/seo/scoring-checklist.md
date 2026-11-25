@@ -13,15 +13,15 @@ SEO. Pentru text pur literar sări peste tot fișierul.
    scanabilă când conținutul o cere (liste, bold cu moderație).
 
    Pentru conținut destinat publicării, verifică suplimentar (`geo.md`,
-   „tactici GEO cu dovezi măsurate"):
-   - Răspunsul la întrebarea principală apare în primele ~200 de cuvinte, nu după
-     trei paragrafe de context.
-   - Secțiunile dintre heading-uri stau în jur de 120-180 de cuvinte — fără blocuri
-     de 600 de cuvinte fără subtitlu, dar și fără fragmentare artificială.
-   - Subtitlurile sunt formulate cum ar tasta cititorul, nu ca într-un cuprins.
-   - Paragrafele au sens scoase din context (fără deschideri de tip „Acest lucru
-     înseamnă că…" care depind de paragraful anterior).
-   - Termenii centrali au o definiție explicită, autonomă.
+   fără cote fixe de lungime sau de cuvinte-cheie):
+   - Răspunsul la întrebarea sau decizia principală apare devreme, în deschidere,
+     fără paragrafe de încălzire.
+   - Lungimea secțiunilor urmează subiectul — fără pereți masivi de text și fără
+     fragmentare artificială.
+   - Subtitlurile reflectă ce caută sau decide cititorul, nu un cuprins plat.
+   - Referenții sunt clari (fără „Acest lucru înseamnă că…" ambiguu), păstrând
+     proza legată și incertitudinea reală unde datele au limite.
+   - Termenii centrali sunt definiți clar doar unde cititorul are nevoie de asta.
 
    Specific pentru română (`core.md`, secțiunea specifică românei): text cu diacritice, diacritice cu
    virgulă (`ș`/`ț`) nu cu sedilă, slug-uri transliterate ASCII, romgleză doar
@@ -32,25 +32,28 @@ SEO. Pentru text pur literar sări peste tot fișierul.
    Fiecare propoziție adaugă ceva; nimic nu repetă o idee deja spusă doar ca umplutură.
    Vezi regula reducerii cu 10% din `references/limba/scris-eficient.md` §6.
 
-   Punctajul maxim cere și **densitate factuală**: cifre concrete în locul
-   cuantificărilor vagi, surse atribuite pe nume, cel puțin o informație care nu se
-   găsește în primele zece rezultate pe același subiect. Sunt exact modificările
-   care cresc șansa de citare în motoarele generative — și, separat, criteriul care
-   distinge un text util de unul de umplutură.
+   **Densitate factuală**: cifre concrete și dovezi confirmate din brief în locul
+   cuantificărilor vagi, surse atribuite pe nume, perspectivă proprie care nu se
+   găsește în primele zece rezultate pe același subiect, cu incertitudinea reală
+   declarată onest unde există. Sunt exact elementele care fac textul util și
+   citabil.
 
    **Fără să inventezi nimic.** O statistică fabricată, o sursă inexistentă sau un
-   preț aproximat scad criteriul la 0, indiferent cât de bine sună textul. Dacă
+   preț aproximat blochează livrarea, indiferent cât de bine sună textul. Dacă
    datele reale lipsesc, textul rămâne mai sărac și se marchează
    `[DE COMPLETAT: …]` — vezi `grounding.md`.
 
 ## 3. Titlu, subtitluri, deschidere și final
 
-   Titlul are o promisiune concretă și corpul o plătește. Nu e etichetă („Centrale
-   termice pe gaz") și nu e clickbait de tabloid. Subtitlurile citite în șir spun
-   povestea articolului, nu cuprinsul unui manual. Deschiderea nu e încălzire —
-   promisiunea titlului se atinge în primele propoziții. Finalul nu e rezumat și
-   nu e formulă de politețe. Există cel puțin o propoziție care nu putea fi
-   scrisă de altcineva.
+   SEO title, H1, meta descrierea, excerptul separat (dacă există) și fiecare
+   H2/H3 trec prin revizia pe câmpuri din `references/limba/revizie-contextuala.md`
+   (citite ca snippet/outline și confruntate cu secțiunea reală și decizia
+   cititorului). Titlul are o promisiune concretă și corpul o plătește. Nu e
+   etichetă („Centrale termice pe gaz") și nu e clickbait de tabloid. Subtitlurile
+   citite în șir spun povestea articolului, nu cuprinsul unui manual. Deschiderea
+   nu e încălzire — promisiunea titlului se atinge în primele propoziții. Finalul
+   nu e rezumat și nu e formulă de politețe. Există cel puțin o propoziție care nu
+   putea fi scrisă de altcineva.
 
    Detalii: `titluri.md`, `flux-articol.md`. Intrare mecanică, grosieră:
    `scripts/check-seo.py` (clickbait, șablon, etichetă, subtitluri plate).

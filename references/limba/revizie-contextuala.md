@@ -93,6 +93,34 @@ Două mini-cazuri, ca principiu (nu ca listă de interdicții):
   substantivul; altfel întrebi înainte să alegi — o rescriere care alege singură
   poate inversa sensul.
 
+## revizie pe câmpuri (articole și pagini online)
+
+Aceasta este extinderea obligatorie a reviziei contextuale înainte de livrarea unui articol sau a unei pagini online (în același flux AUTOCORECȚIE → PASUL DOI → POARTĂ, nu ca o a doua poartă separată).
+
+**Câmpuri obligatorii de parcurs:**
+- **SEO title** (`<title>` / câmpul SEO din plugin), dacă există;
+- **H1** (titlul vizibil al paginii / `post_title`);
+- **meta descrierea**;
+- **excerpt-ul separat**, dacă se aplică (`EXCERPT_RO`, rezumat de card/listă, `post_excerpt`);
+- **fiecare H2 și H3**, în ordinea din pagină.
+
+**Ordinea de citire (în doi pași):**
+1. **Ca snippet și outline (standalone):** citește perechea SEO title + meta/excerpt ca rezultat de căutare și lista H1 → H2/H3 ca schelet al paginii. Verifică: referenți proprii fără corp, promisiune clară fără șablon sau clickbait, fără etichete plate. **SEO title și H1 pot coincide legitim** — nu cere variație artificială între ele; evită însă repetarea inutilă a titlului în meta descriere (meta continuă promisiunea, nu o parafrazează gol).
+2. **Față de secțiunea reală și decizia cititorului (brief):** confruntă fiecare câmp cu corpul efectiv al secțiunii și cu decizia cititorului + dovezile confirmate din CONTRACT/CONTEXT. Promisiunea din titlu, meta, excerpt și fiecare subtitlu trebuie onorată de textul real, fără fapte inventate și fără exagerări.
+
+**Formatul rezultatului per câmp:**
+- Fiecare câmp listat primește un **verdict explicit** (`OK`, `eroare susținută`, `suspiciune contextuală`, `preferință`, `neclar`).
+- Pentru `eroare susținută` (și pentru `suspiciune contextuală` susținută de sursă/context), raportează: **citatul exact**, **motivul concret** și **înlocuirea minimă susținută de dovezi** (fără fapte inventate; textul deja bun rămâne neatins).
+- Pentru `neclar` și `preferință`, **nu cere și nu inventa o înlocuire**: la `neclar` notează exact ce dovadă/clarificare lipsește (întrebi); la `preferință` păstrează formularea existentă (sau notează că rămâne la alegerea autorului).
+
+**Context separat, auto-review și separarea de markup:**
+- Când gazda sau coordonatorul suportă și permite un reviewer în **context proaspăt**, trimite un prompt mărginit: câmpurile + textul final + decizia cititorului / brieful + dovezile confirmate — **fără** raționamentul intern sau justificările scriitorului.
+- Dacă un context separat nu e disponibil sau nu e permis, rulează aceeași revizie pe câmpuri ca **auto-review** și declară explicit asta.
+- **Reviewer-ul nu editează markup crud** (HTML, blocuri Gutenberg, fișiere sursă): livrează doar verdictul, citatul, motivul și înlocuirea minimă de text; aplicarea în markup urmează `references/seo/markup.md`.
+
+**Traseu scurt (doar metadate/heading-uri):**
+- Când cerința cere doar scrierea, auditul sau repararea metadatelor ori a heading-urilor (SEO title, H1, meta, excerpt, H2/H3), rulează revizia pe câmpuri față de corpul existent și brief **fără să editezi corpul**.
+
 ## exemple greșit → bun, cu control
 
 Cinci familii frecvente, fiecare cu perechea greșit/bun (a cincea e alta:

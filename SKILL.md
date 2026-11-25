@@ -3,7 +3,7 @@ name: scrie-romaneste
 description: >
   Scrie, rescrie si revizuieste text in limba romana care suna natural si uman,
   nu ca text de model: fara clisee AI (tranzitii mecanice, "in concluzie",
-  introduceri formulaice, hedging), fara romgleza si calcuri din engleza, cu
+  introduceri formulaice, ezitari goale pastrand incertitudinea reala), fara romgleza si calcuri din engleza, cu
   diacritice si acord corecte, in registrul cerut de gen si de cititor.
   Foloseste acest skill cand utilizatorul cere sa scrii, rescrii, editezi sau
   revizuiesti orice text in limba romana - articol, email, descriere de produs,
@@ -23,52 +23,12 @@ să o strice pe cealaltă.
 
 Alege modul din cerință. Dacă nu e clar, e **rescriere**.
 
-- **rescriere** (implicit) — livrează textul final, curat. Fără metacomentarii,
-  fără „Iată textul rescris conform regulilor", fără listă de modificări. Doar
-  textul.
-- **audit** — raportează tiparele găsite, grupate pe severitate (`critic`,
-  `important`, `minor`), fiecare cu citatul și motivul. **Nu rescrie.** Unele
-  alegeri sunt intenționate; decizia e a autorului. Se cere cu „ce e în neregulă
-  cu textul", „verifică", „analizează". **Începe cu `scripts/verifica.py
-  <fișier>`** (textul e de obicei în conversație — rețeta cu `-` e în „Cum le
-  rulezi") — raportul dă direct citatele, severitatea și sugestiile de
-  corecție; încarcă din `references/` doar ce-ți trebuie pentru judecata
-  calitativă (ritm, naturalitate) sau pentru categoriile semnalate.
-  Majoritatea expresiilor din lista Interzis apar în raport din prima apariție;
-  doar 7 sunt pe densitate și lipsesc sub ~3 apariții („prin urmare",
-  „de asemenea", „totodată", „impresionant", „o serie de", „este posibil ca",
-  „s-ar putea ca"). Pentru ele, rulează
-  `python3 <cale-skill>/scripts/check-tipare.py <fișier> --tot`: potrivirile
-  `sub_prag` sunt semnale de recitire, nu erori (regulile de decizie 2 și 4).
-  Un audit nu se poate încheia cu „0 semnale = text curat" fără o recitire a
-  listei din `references/limba/anti-tipare-ai.md` §A-§H.
-  Scriptul prinde un singur tip de acord, adjectiv + substantiv-număr
-  (`acord_numerale`: „acești milioane", „câțiva sute"); restul, inclusiv
-  „doi/două" și „primii/primele", rămâne la recitirea manuală — ca și topica
-  și alegerea lexicală. Nici `verifica.py`, nici `--human-voice` nu au
-  dicționar: un raport curat nu dovedește că vorbele există — rulează separat
-  `scripts/check-cuvinte.py` (detalii la Obligatoriu). Recitește
-  oricum textul integral, în special titlul și excerptul, pentru acord, forme
-  verbale și cuvinte inexistente (`references/limba/tipare-ro.md`
-  §cuvant_inexistent).
-- **editare** — modificări minime și țintite în fișier. Păstrează intacte
-  pasajele care sunt deja bune. Nu rescrie ce nu e stricat. Corecția intră
-  în fișierul indicat de utilizator: nu lăsa varianta bună doar în răspuns
-  sau într-o copie alăturată, cât timp sursa rămâne greșită.
-- **human-voice** — audit separat pentru reflexe mecanice de voce. Rulează
-  `scripts/verifica.py <fișier> --human-voice`; raportează citatele, scorul
-  `AI_PATTERN_SCORE/30`, `STATUS` (`PASS`/`EDITED`/`REWRITE`) și blocerele.
-  **Nu rescrie** în acest mod. Un `PASS` aici nu e pașaport lexical și nu
-  atestă corectitudinea/sensul: validatorul nu vede cuvintele inexistente.
-  Regulile, excepțiile și schema sunt în
-  `references/limba/human-voice-validator.md`.
+- **rescriere** (implicit) — livrează doar textul final, curat; fără metacomentarii sau liste de modificări.
+- **audit** — raportează tiparele grupate pe severitate (`critic`, `important`, `minor`), cu citat și motiv. **Nu rescrie.** Începe cu `scripts/verifica.py <fișier>` (sau stdin `-`; **excepție obligatorie:** dacă intrarea e HTML/Gutenberg, proiectează-o întâi prin `references/seo/markup.md` înainte de `verifica.py`); încarcă din `references/` doar ce-ți trebuie pentru judecata calitativă sau categoriile semnalate. 7 expresii sunt pe densitate și lipsesc sub ~3 apariții (pentru ele: `check-tipare.py --tot`, detalii în `references/limba/cli-verificare.md`). Nu încheia un audit cu „0 semnale = text curat” fără recitire manuală: scriptul prinde doar `acord_numerale`, iar nici `verifica.py`, nici `--human-voice` nu au dicționar — rulează separat `scripts/check-cuvinte.py` și recitește integral (inclusiv titlul și excerptul) pentru acord, forme verbale și cuvinte inexistente (`references/limba/tipare-ro.md` §cuvant_inexistent).
+- **editare** — modificări minime și țintite direct în fișierul indicat de utilizator (nu într-o copie alăturată); păstrează pasajele deja bune.
+- **human-voice** — audit separat pentru reflexe mecanice de voce: `scripts/verifica.py <fișier> --human-voice` (`AI_PATTERN_SCORE/30`, `STATUS`, blocere). **Nu rescrie.** Un `PASS` aici nu atestă corectitudinea lexicală sau sensul. Reguli și excepții: `references/limba/human-voice-validator.md`.
 
-Când cererea cere două lucruri deodată („verifică textul și fă-l mai bun",
-„zi-mi ce e prost și repară"), **fă rescrierea și pune raportul după text**, în
-câteva rânduri: ce ai schimbat și de ce. Nu livra doar auditul — utilizatorul a
-cerut și textul. Nu livra nici doar textul — a cerut și explicația. Dacă textul
-e într-un fișier al utilizatorului, modul e `editare`, nu `rescriere`: nu
-rescrie un fișier întreg când ți s-a cerut să-l repari.
+Când cererea cere și audit, și rescriere („verifică și repară”), **livrează textul reparat urmat de un raport scurt** (ce ai schimbat și de ce). Pe un fișier al utilizatorului, modul e `editare`, nu `rescriere`.
 
 ## Profil de voce
 
@@ -83,297 +43,90 @@ Stabilește de la început și **tu** sau **dumneavoastră**, și nu comuta.
 ## Reguli critice (rezumat — detalii în references/)
 
 Patru reguli de decizie, înaintea oricărei liste:
-
 1. Spune concret cine face ce și de ce contează.
-2. Păstrează o formulare convențională dacă se potrivește genului, vocii și
-   scopului — nu o tăia doar fiindcă apare des în text de model.
+2. Păstrează o formulare convențională dacă se potrivește genului, vocii și scopului — nu o tăia doar fiindcă apare des în text de model.
 3. Elimin-o dacă nu adaugă sens, dovadă, ritm sau relație cu cititorul.
-4. Nu transforma un semnal stilistic într-o corecție automată. Erorile certe se
-   corectează; alegerile stilistice se recitesc în context.
+4. Nu transforma un semnal stilistic într-o corecție automată. Erorile certe se corectează; alegerile stilistice se recitesc în context.
 
-**Interzis** (vezi `references/limba/anti-tipare-ai.md` pentru liste complete și
-praguri):
-- Tranziții mecanice: „în concluzie", „prin urmare", „de asemenea", „totodată",
-  „mai mult decât atât", „pe de o parte... pe de altă parte".
-- Introduceri formulaice: „în lumea de astăzi", „în era digitală", „în contextul
-  actual".
-- Umpluturi meta-text: „este important de menționat că", „merită subliniat".
-- Adjective corporatiste: „revoluționar", „impresionant"; sintagme ca „adoptă o
-  abordare", „schimbare de paradigmă", „abordare holistică".
-- Cuantificări vagi: „o serie de", „un număr semnificativ", „o gamă largă de".
-- Hedging: „este posibil ca", „s-ar putea ca" — fii asertiv.
-- Romgleză și calcuri: „face sens" → „are sens"; „a adresa o problemă" → „a
-  aborda"; „în termeni de" → „în ceea ce privește".
-- „Capcana concluziei" — nu încheia cu un rezumat forțat.
-- **Afirmații goale** — propoziția care rămâne la fel de adevărată fără
-  subiectul/actorul/produsul ei nu promite nimic („Seara cureți tenul,
-  dimineața îl simți moale”; „Te pieptănești, părul e neted”). În text
-  persuasiv, trece fiecare promisiune prin testul în 3 întrebări din
-  `references/limba/anti-tipare-ai.md` §J. În text literar, redundanța poate
-  fi stil — recitie, nu tăiere automată.
-- Paragrafe simetrice și ritm monoton — variază lungimea frazelor.
-- Abuz de simboluri: emoji decorative, liste cu „-" în locul prozei, liniuța ca
-  paranteză improvizată, bold/italic dese — toate cu prag de abuz, nu interzicere
-  absolută (`references/limba/anti-tipare-ai.md` §I).
-- Liniuța-cârjă: `—` sau `-` ca singur conector, frază după frază, în locul
-  virgulei sau al punctului. Dialogul și intervalele numerice rămân neatinse
-  (`references/limba/tipare-ro.md` `punctuatie_carja`).
-- En-dash `–`: niciodată, în niciun context. Cratimă în compuse și intervale
-  („10-12 zile"), linie de pauză `—` în incize (`liniuta_engleza`).
-- Bullet Unicode „•" în loc de „-", și `§ ¶ † ‡` presărate ca ornament: artefacte
-  de fereastră de chat, nu punctuație românească.
-- Clickbait de tabloid și titlul-șablon de agenție: „nu-ți vine să crezi",
-  „Ghidul suprem pentru X", „Tot ce trebuie să știi despre X"
-  (`references/seo/titluri.md`).
+**Interzis** (liste și praguri în `references/limba/anti-tipare-ai.md`):
+- Tranziții mecanice („în concluzie”, „prin urmare”, „de asemenea”, „totodată”, „mai mult decât atât”, „pe de o parte... pe de altă parte”), introduceri formulaice („în lumea de astăzi”, „în era digitală”), umpluturi meta-text („este important de menționat că”, „merită subliniat”).
+- Adjective corporatiste („revoluționar”, „impresionant”, „abordare holistică”), cuantificări vagi („o serie de”, „o gamă largă de”), hedging gol („este posibil ca”, „s-ar putea ca” — dar **păstrează incertitudinea reală** când datele au limite).
+- Romgleză și calcuri („face sens” → „are sens”; „a adresa o problemă” → „a aborda”; „în termeni de” → „în ceea ce privește”).
+- „Capcana concluziei” (rezumat forțat la final), ritm monoton/paragrafe simetrice și **afirmații goale** fără agent sau mecanism (`anti-tipare-ai.md` §J; în text literar, redundanța poate fi stil).
+- Abuz de simboluri (`anti-tipare-ai.md` §I), liniuța-cârjă repetată (`tipare-ro.md`, `punctuatie_carja`; dialogul și intervalele rămân neatinse), bullet Unicode „•” și ornamente `§ ¶ † ‡`.
+- **En-dash `–`: niciodată.** Cratimă în compuse/intervale („10-12 zile”), linie de pauză `—` în incize (`liniuta_engleza`).
+- Clickbait de tabloid și titlu-șablon de agenție („Ghidul suprem”, „Tot ce trebuie să știi” — `references/seo/titluri.md`).
 
 **Obligatoriu**:
-- Diateza activă în locul pasivului birocratic (`references/limba/gramatica-stil.md` §4).
-- Un cititor-țintă concret în minte înainte de a scrie (`references/limba/scris-eficient.md`).
-- Verifică sursele înainte de a afirma fapte, cifre sau citate. Nu inventa
-  precizie (`references/limba/tipare-ro.md`, `sursa_fabricata`). Se aplică și
-  datelor de business — nume, adrese, telefoane, prețuri, autori: dacă nu le ai
-  confirmate, cere-le sau lasă `[DE COMPLETAT: …]`.
-- Diacritice cu virgulă (`ș`, `ț`), nu cu sedilă (`ş`, `ţ`).
-- Nu livra un cuvânt pe care nu-l poți susține. `verifica.py` nu are
-  dicționar; `scripts/check-cuvinte.py` dă lista formelor lipsă din lexicon —
-  de verificat, nu verdict. Lipsa = neatestat în sursa consultată, nu inexistent.
-  Verifici forma, lema, sensul și registrul în surse permise (poate fi un termen
-  valid absent) și accepți doar sensul confirmat. Lookup extern numai ca în
-  `references/limba/revizie-contextuala.md` §acces; sugestiile nu confirmă.
-  La neclar întrebi, nu judeci absența (`references/limba/tipare-ro.md`
-  §cuvant_inexistent).
-- Titlul are o promisiune concretă și un element de precizie, nu e etichetă
-  (`references/seo/titluri.md`).
-- Deschiderea intră direct în subiect: fără încălzire, iar promisiunea titlului
-  e onorată în primele propoziții (`references/seo/flux-articol.md`).
+- Diateza activă (`references/limba/gramatica-stil.md` §4), cititor concret (`references/limba/scris-eficient.md`) și diacritice cu virgulă (`ș`, `ț`), nu sedilă (`ş`, `ţ`).
+- Fără fapte, cifre, citate sau date de business inventate (`references/limba/tipare-ro.md`, `sursa_fabricata`, `references/seo/grounding.md`): ce lipsește se cere sau rămâne `[DE COMPLETAT: …]`. Fără date reale/personale de client neautorizate.
+- Nu livra cuvinte pe care nu le poți susține. `verifica.py` și `--human-voice` nu au dicționar; `scripts/check-cuvinte.py` dă suspecți de verificat, nu verdicte (lipsa ≠ inexistență). Verifici forma, lema, sensul și registrul doar în surse permise, manual, fără scraping (`references/limba/revizie-contextuala.md` §acces); sugestiile nu confirmă; la neclar întrebi (`references/limba/tipare-ro.md` §cuvant_inexistent).
+- Pentru conținut online: titlu cu promisiune concretă (`references/seo/titluri.md`) și deschidere directă (`references/seo/flux-articol.md`).
 
-**Regulile de mai sus sunt suficiente ca să scrii un text bun.** Fișierele din
-`references/` adaugă praguri, excepții și cazuri de graniță — le deschizi când
-ai nevoie de ele, nu ca să ai voie să scrii. Dacă nu încarci un fișier, scrii
-fără partea lui; **nu reconstitui din numele fișierului ce crezi că scrie în
-el.** Un text corect și mai puțin nuanțat bate un text scris după o regulă
-inventată.
+**Regulile de mai sus sunt suficiente ca să scrii un text bun.** Deschide din `references/` doar ce cere task-ul; **nu reconstitui din numele fișierului ce crezi că scrie în el.**
 
 ## Fluxul de lucru
 
-Dacă e prima dată când rulezi fluxul ăsta, `references/limba/flux-exemplu.md`
-îl arată aplicat cap-coadă pe o descriere de produs, cu rapoartele reale ale
-scripturilor și cu deciziile luate pe fiecare semnal.
+Exemplu cap-coadă: `references/limba/flux-exemplu.md`.
 
-1. **LOAD** — citește cerința, stabilește modul și profilul de voce.
-   - **audit**: nu încărca nimic încă — rulează întâi `scripts/verifica.py`
-     (pasul 5) și încarcă referințe doar la nevoie.
-   - **rescriere/editare**: încarcă `references/limba/anti-tipare-ai.md`
-     (interdicțiile trebuie știute *înainte* de a scrie — scriptul doar
-     detectează, nu previne) și, dacă textul trebuie să sune viu, nu doar
-     curat, `references/limba/exemple-voce.md` (transformări înainte/după).
-     Dacă textul are destinație online/comercială, alege din `references/seo/`
-     după tabelul de rutare de mai jos; `titluri.md` se încarcă odată cu
-     `core.md`. Dacă e text pur literar, sari peste partea SEO și protejează
-     repetiția intenționată, ritmul și dialogul.
-2. **CONTRACT** — înainte de a scrie, stabilește intern (nu în livrare):
-   scopul textului și ce vrei să facă cititorul; cine e cititorul concret și
-   cât știe deja; canalul și genul (email, pagină de produs, articol, anunț
-   Google/Meta, documentație, comunicat, text literar); registrul, persoana de
-   adresare (`tu`/`dumneavoastră`) și formalitatea; lungimea — pentru anunțuri,
-   limitele de caractere ale platformei (`references/reclame/platforme.md`);
-   faptele confirmate și
-   incertitudinile pe care le vei declara. Dacă lipsește ceva indispensabil,
-   cere-l o singură dată și grupat; dacă nu e indispensabil, scrie fără să
-   inventezi. Contractul rămâne intern — nu-l livra ca preambul.
-3. **CONTEXT** — pentru conținut comercial, adună datele reale înainte de a scrie.
-   Grounding-ul poate fi în orice format (Markdown, YAML, JSON, PDF, o pagină
-   publicată, un mesaj din conversație) — **caută conținutul, nu un nume de
-   fișier**. Ordine: ce a indicat utilizatorul explicit → instrucțiunile
-   proiectului (`CLAUDE.md`/`AGENTS.md`) → un brif sub orice nume → date deja
-   prezente în cod și pe site → întreabă, o singură dată și grupat. Nu inventa
-   nume de firmă, adrese, telefoane, prețuri, autori sau statistici proprii. După
-   ce afli date noi, oferă-te să le salvezi în formatul proiectului. Detalii,
-   tabelul de câmpuri și tratarea surselor contradictorii:
-   `references/seo/grounding.md`. Pentru text literar sau fără date de business,
-   sari peste pas.
-4. **DRAFT** — scrie dintr-o trecere completă, fără să te oprești să corectezi
-   propoziție cu propoziție (`references/limba/scris-eficient.md` §1).
-   Pe text lung sau pe un set de formate, scrie pe bucăți: după fiecare bucată
-   rulează `scripts/verifica.py`, apoi treci la următoarea. Modelele mici
-   degenerează spre final (cuvinte inventate, imagini fără referent) și
-   scripturile nu prind asta dacă verifici abia la sfârșit. Dacă lungimea cerută
-   nu mai poate fi onorată coerent, livrează mai puțin.
-5. **AUTOCORECȚIE** — rulează `scripts/verifica.py <fișier>` (textul din conversație
-   pe stdin — rețeta e în „Cum le rulezi"; `--fara-seo` pentru text literar).
-   Raportul acoperă clișee, calcuri, pleonasme, paronime, ritm și SEO dintr-o
-   trecere; citește-l ca în „Cum citești raportul" — `→` e corecție canonică,
-   aplicată cu acord și topică. Dacă textul are titlu sau excerpt separat de corp (TITLE_RO/EXCERPT_RO,
-   frontmatter), verifică-le ca text separat, lângă corp — nu le scoate din
-   inputul verificat. Pentru problemele semnalate fără sugestie, sau ca să
-   înțelegi o
-   categorie, deschide referința relevantă (`anti-tipare-ai.md`,
-   `tipare-ro.md`, `modelisme.md`). După acest audit, rulează separat
-   `scripts/verifica.py <fișier> --human-voice`. Nu amesteca auditul de voce cu
-   editarea: citește fiecare semnal în context, blochează doar garbage-ul,
-   contaminarea și placeholder-ele, iar pentru restul editează minim.
-   Apoi treci textul propoziție cu propoziție prin
-   `references/limba/revizie-contextuala.md` (context de paragraf și public;
-   titluri/excerpt/etichete de anunț citite și standalone; urmă internă
-   OK/RESCRIU/NECLAR pe fiecare propoziție; corecția se recitește și ea —
-   sens, repetiție, adresare, registru, fapte): scripturile nu prind
-   construcții noi nefirești și nu învață modelul.
-   Dacă textul e anunț (fișier cu etichete H1:/D1:/Text:/Titlu:), rulează și
-   `scripts/verifica.py <fișier> --reclame` — limitele de caractere, politicile
-   platformei și afirmările goale structurale. Pe un fișier cu etichete de anunț,
-   stratul SEO se reduce la verificarea sedilei (ca la `--fara-seo`): semnalele de
-   titlu de articol (etichetă, șablon, subtitluri plate) veneau din heading-ul
-   markdown `# …` al fișierului, nu din eticheta `Titlu:` — limitele de anunț sunt
-   în `check-reclame.py` și `references/reclame/platforme.md`.
-   Pentru orice text persuasiv,
-   aplică testul în 3 întrebări din `anti-tipare-ai.md` §J pe fiecare
-   promisiune.
-6. **PASUL DOI** — reauditează **textul deja corectat**, nu draftul. Rescrierea
-   își introduce propriile tipare: tranziții reciclate, sinonime rotite peste
-   aceeași idee, „reprezintă" strecurat în locul lui „este", ritm care s-a
-   uniformizat la curățenie. Pasul ăsta prinde ce a apărut la pasul 5. Pe FINAL,
-   maxim 2 cicluri audit → editare minimă → reverificare; dacă rămâne dezacord
-   sau necunoscut, escaladează (întrebi), nu itera. Auditul nu editează (vezi
-   Moduri); observațiile intermediare rămân interne, nu intră în livrare.
-7. **POARTA DE LIVRARE** — `scripts/verifica.py <fișier> --scor` dă partea
-   deterministă (`scor_automat=X/13`, penalizări, nu notă). Restul se
-   verifică pe listă, nu pe punctaj — treci textul doar dacă toate se
-   confirmă:
-   - niciun fapt, citat, preț sau date de business inventate;
-   - niciun artefact de chat, markup rezidual sau placeholder publicabil;
-   - erorile certe (calc, sedilă, acord, artefact) sunt corectate — inclusiv în
-     titlu și excerpt, unde acordul se recitește manual: neutre la plural
-     (virusuri funcționale, nu virusuri funcționali), numeral+substantiv
-     (primii/primele, doi/două), genul adjectivelor;
-   - textul a fost citit integral, nu doar pe semnalele din raport. Formele
-     fără suport (neatestate în sursele permise), acordurile neprinse de script
-     și formele verbale greșite sunt corectate sau escaladate. `scor_automat` și
-     `--human-voice` nu fac controlul ăsta: `arămriu` și `petechelui` ies curate.
-     `scripts/check-cuvinte.py` pe text: formele listate se tratează ca la
-     regula „Nu livra un cuvânt pe care nu-l poți susține"; procedura de
-     verificare e în `references/limba/revizie-contextuala.md` — neclar se
-     întreabă, nu se înlocuiește din burtă;
-   - semnalele stilistice (ritm, concluzie, paralelism, listă) au fost
-     recitite în context și păstrate sau tăiate deliberat;
-   - textul respectă contractul de la pasul 2 — gen, registru, cititor,
-     lungime;
-   - auditul separat `--human-voice` nu are blocere; semnalele editoriale au
-     fost păstrate sau tăiate deliberat, nu rescrise mecanic. Un PASS aici nu
-     atestă corectitudinea/sensul;
-   - revizia contextuală e trecută (`references/limba/revizie-contextuala.md`):
-     citat exact + motiv concret + corecție minimă + verdict per problemă; pasajele
-     bune intacte; metaforele/registrul nu au fost „corectate" automat; fiecare
-     corecție recitită pentru sens, repetiție, adresare, registru, fapte;
-   - dacă textul e de citit cap-coadă online: titlul promite ceva concret și
-     corpul îl plătește; deschiderea nu e încălzire; subtitlurile citite în
-     șir spun povestea articolului;
-   - dacă textul e anunț: `--reclame` nu are semnale — headline-urile și
-     descrierile în limitele platformei, fără politici încălcate, fiecare
-     promisiune cu agent și mecanism;
-   - fiecare paragraf justifică spațiul prin informație, exemplu, cauză,
-     consecință, decizie sau efect stilistic intenționat.
+1. **LOAD** — stabilește modul, profilul de voce și ruta din tabel:
+   - **editare/rescriere scurtă**: `references/limba/anti-tipare-ai.md` la rescriere; nu încărca restul `references/` și nici manualul CLI.
+   - **audit**: rulează întâi `scripts/verifica.py` (pe HTML/Gutenberg, proiectează întâi via `references/seo/markup.md`), apoi încarcă referințe doar la nevoie.
+   - **articol simplu / blog (implicit)**: `references/limba/anti-tipare-ai.md`, `references/limba/exemple-voce.md` (pentru voce vie), `titluri.md`, `flux-articol.md` și `revizie-contextuala.md`. Încarcă `grounding.md` **doar** la date comerciale/de business, iar `blog-keyword.md`, `core.md`, `geo.md` **doar** pe trigger separat. La **text pur literar**, sari peste partea SEO și protejează repetiția, ritmul și dialogul.
+   - **reclame / social / markup / CLI avansat / doar metadate**: urmează direct rândul din tabel (`reclame/`, `social/`, `markup.md`, `cli-verificare.md`; pentru doar metadate/heading-uri, nu edita corpul).
+2. **CONTRACT** (intern, nu în livrare) — fixează **decizia cititorului**, **dovezile confirmate**, publicul, canalul/genul, registrul, `tu`/`dumneavoastră`, limitele de platformă la reclame (`references/reclame/platforme.md`) și incertitudinile reale (fără cote fixe de lungime/cuvinte-cheie). Cere o singură dată, grupat, doar ce e indispensabil.
+3. **CONTEXT** — la conținut comercial, adună datele reale după conținut (`CLAUDE.md`/`AGENTS.md`, proiect, pagină publicată, conversație); detalii în `references/seo/grounding.md`. Sari la text literar sau fără date de business.
+4. **DRAFT** — dintr-o trecere (`references/limba/scris-eficient.md` §1); pe text lung, pe bucăți cu `scripts/verifica.py` între ele (pe HTML/Gutenberg, proiectează întâi via `references/seo/markup.md`).
+5. **AUTOCORECȚIE** — rulează `scripts/verifica.py <fișier>` (pe HTML/Gutenberg, proiectează **întâi** via `references/seo/markup.md` și rulează `verifica.py --fara-seo` pe proiecții; combină `--human-voice` unde e util; `--fara-seo` pentru non-online/literar; `--reclame` pentru anunțuri `H1:`/`D1:`/`Text:`/`Titlu:`). Verifică titlul, meta și excerptul separat lângă corp. Aplică `→` cu acord și topică; citește `human-voice` în context (blochează doar garbage, contaminare, placeholder-e).
+   Apoi `references/limba/revizie-contextuala.md`: propoziție cu propoziție + **revizia obligatorie pe câmpuri** înainte de livrarea articolelor/paginilor online (SEO title, H1, meta, excerpt separat dacă se aplică, fiecare H2/H3 — snippet/outline, apoi față de secțiunea reală și decizia cititorului; verdict per câmp, citat/motiv/înlocuire minimă cu dovezi; textul bun rămâne neatins). Pe text persuasiv, testul §J din `anti-tipare-ai.md`.
+6. **PASUL DOI** — reauditează textul corectat; maxim 2 cicluri pe FINAL, apoi escaladează. Observațiile rămân interne.
+7. **POARTA DE LIVRARE** — verifică pe raportul deja rulat (fără rulare obligatorie doar cu `--scor`; `scor_automat=X/13` e penalizare deterministă, nu notă):
+   - fără fapte, cifre, citate sau date de business inventate; incertitudinea reală păstrată;
+   - fără artefacte de chat, markup rezidual sau placeholder publicabil;
+   - erori certe + acord manual în titlu, meta, excerpt și heading-uri;
+   - citire integrală + `scripts/check-cuvinte.py` (`revizie-contextuala.md` §acces, fără lookup automat; neclar se întreabă);
+   - semnale stilistice și `--human-voice` fără blocere (`PASS` ≠ corectitudine/sens);
+   - revizia contextuală + revizia pe câmpuri trecute (`references/limba/revizie-contextuala.md`);
+   - online: titlu concret onorat în corp, deschidere directă, subtitluri coerente; HTML/WP: `references/seo/markup.md` + status explicit Gutenberg (`unverified` fără mediu disposable autorizat); reclame: `--reclame` curat.
+   Liste opționale: `references/limba/scoring-checklist.md`, `references/seo/scoring-checklist.md`.
+8. **LIVRARE** — conform modului; livrabilul intră în răspuns, iar la `editare` modificarea e în fișierul indicat cu poarta rerulată și confirmarea scurtă (citire integrală + `--human-voice` fără blocere). Semnalează separat `[DE COMPLETAT: …]`.
+   În flux agentic: audit limbă + human-voice → editare minimă → reverificare → citire integrală lexic → reviewer editorial în **context proaspăt** când gazda/coordonatorul suportă și permite (prompt mărginit: text final + câmpuri + brief/decizia cititorului + dovezi confirmate, fără raționamentul scriitorului), altfel **auto-review** declarat; **reviewer-ul nu editează markup crud** și nu rescrie pasaje curate.
 
-   Rubricile din `references/limba/scoring-checklist.md` și
-   `references/seo/scoring-checklist.md` rămân utile ca listă de citit, nu ca
-   prag numeric.
-8. **LIVRARE** — conform modului ales la pasul 1. Scrierea unui fișier nu
-   închide taskul. Gata înseamnă că livrabilul modului e în răspuns și că
-   poarta de la pasul 7 a fost trecută pe textul acela, nu pe draft.
+## Rutare și structura `references/`
 
-   - **rescriere** — livrabilul e textul, în răspuns. Poarta rămâne internă;
-     nu atașa un raport de verificări.
-   - **audit** și **human-voice** — livrabilul e raportul, în răspuns. Un
-     fișier salvat fără raport nu e gata.
-   - **editare**, și orice flux care atinge un fișier al utilizatorului —
-     corecția e în fișierul indicat, poarta e rerulată pe el, iar răspunsul
-     spune, în una-două propoziții, ce scriptul nu poate spune: textul a fost
-     citit integral pentru cuvinte inexistente, acord și verbe, și
-     `--human-voice` nu are blocere. Nu declara gata doar fiindcă fișierul
-     a fost scris.
+Încarcă doar fișierele relevante — nu e nevoie să citești tot `references/` pentru o sarcină scurtă.
 
-   Semnalează separat, la final, orice `[DE COMPLETAT: …]` rămas în text.
-   Când fluxul e agentic, păstrează ordinea: audit de limbă → audit
-   human-voice → editare minimă → reverificare a ambelor → citire integrală
-   pentru lexic → reviewer independent. Reviewerul validează contextul,
-   excepțiile și vorbele pe care scriptul nu le vede; nu rescrie pasaje curate.
-   În context separat când gazda suportă; altfel declari auto-review.
-
-## Structura references/
-
-```
-references/
-├── limba/
-│   ├── anti-tipare-ai.md      # clișee, vocabular, praguri — obligatoriu la scriere
-│   ├── exemple-voce.md        # transformări înainte/după, pe registre — modele pozitive
-│   ├── revizie-contextuala.md # propoziție cu propoziție, pe sens: verdict + dovadă
-│   ├── human-voice-validator.md # audit separat: A–J, scor, blocere, procedură
-│   ├── cli-verificare.md      # manual CLI detaliat — doar înainte de uz avansat/individual
-│   ├── flux-exemplu.md        # un traseu complet: cerere → contract → draft → raport → livrare
-│   ├── tipare-ro.md           # acord, prepoziții, flexiune, cuvinte inexistente, calc
-│   ├── gramatica-stil.md      # punctuație, ortografie, pleonasm — normă
-│   ├── scris-eficient.md      # tehnici de proces: draft/editare, ritm, concizie
-│   ├── modelisme.md           # pleonasme etimologice, anglicisme, paronimie
-│   ├── calcuri.json           # registry static de colocări de recitit (check-calcuri.py, opt-in)
-│   └── scoring-checklist.md   # criteriile de limbă, ca listă de citit
-└── seo/
-    ├── core.md                # tehnic, on-page, conținut, specific română
-    ├── grounding.md           # date care nu se inventă + salvarea lor
-    ├── titluri.md             # titlu, H1, subtitluri, meta — nu etichete
-    ├── flux-articol.md        # deschidere, ritm, final, perspectiva proprie
-    ├── geo.md                 # optimizare pentru AI search
-    ├── schema.md              # JSON-LD / structured data
-    ├── ecommerce.md           # pagini de produs și categorie
-    ├── blog-keyword.md        # blog + cercetarea cuvintelor-cheie
-    ├── local.md               # NAP, Google Business Profile
-    ├── avansat.md             # link building, tehnic avansat, audit, competitiv
-    └── scoring-checklist.md   # criteriile SEO/densitate, ca listă de citit
-```
-
-Plus `references/reclame/` pentru anunțuri plătite — un strat subțire care
-referă regulile generale, nu le duplică:
-
-```
-references/
-└── reclame/
-    ├── platforme.md           # limite Google/Meta/PMax, TikTok (neverificat), format de fișier
-    └── voce.md                # promisiune→dovadă→CTA, modele pozitive, reclame native
-```
-
-Plus `references/social/` pentru postări organice și blog personal (nu articol SEO):
-
-```
-references/
-└── social/
-    ├── README.md              # index pe gen + regula „cifre doar cu sursă"
-    ├── organic.md             # Instagram, Facebook, LinkedIn, TikTok, forum
-    └── blog-personal.md       # voce de blog personal/lifestyle
-```
-
-Rutare SEO — încarcă doar ce cere task-ul (plus `grounding.md` la orice conținut
-comercial, `titluri.md` la orice conținut cu titlu vizibil și `flux-articol.md`
-la orice text de citit cap-coadă):
-
-| Task | Fișiere |
+| Rută / Task | Fișiere de încărcat |
 |---|---|
-| articol de blog | `core.md`, `blog-keyword.md`, `geo.md`, `titluri.md`, `flux-articol.md` |
-| pagină de produs/categorie | `core.md`, `ecommerce.md`, `titluri.md`, `flux-articol.md` |
-| text de reclamă Google/Meta/TikTok | `../reclame/platforme.md`, `../reclame/voce.md`, `../limba/anti-tipare-ai.md` §J, `grounding.md` |
-| postare organică (Instagram, Facebook, LinkedIn, TikTok, forum) | `../social/README.md`, `../social/organic.md`, `../limba/anti-tipare-ai.md` §K, `grounding.md` |
-| blog personal, lifestyle | `../social/README.md`, `../social/blog-personal.md`, `../limba/anti-tipare-ai.md` §K |
-| afacere locală / pagină de contact | `core.md`, `local.md` |
-| schema / date structurate | `schema.md` |
-| audit SEO complet, link building | `core.md`, `avansat.md` |
+| editare/rescriere scurtă | `limba/anti-tipare-ai.md` (opțional `limba/exemple-voce.md`) |
+| audit | întâi `scripts/verifica.py` (sau `seo/markup.md` întâi pe HTML/WP); apoi doar ce semnalează |
+| articol simplu / blog (implicit) | `seo/titluri.md`, `seo/flux-articol.md`, `limba/revizie-contextuala.md` (+ `limba/anti-tipare-ai.md`) |
+| conținut comercial / date de business | adaugă `seo/grounding.md` (doar când există date de firmă/produs/preț) |
+| cercetare cuvinte-cheie / intenție | `seo/blog-keyword.md` |
+| SEO tehnic, on-page, specific RO | `seo/core.md` |
+| GEO / optimizare AI search | `seo/geo.md` |
+| pagină de produs/categorie | `seo/core.md`, `seo/ecommerce.md`, `seo/titluri.md`, `seo/flux-articol.md`, `seo/grounding.md` |
+| doar metadate / heading-uri | `seo/titluri.md`, `limba/revizie-contextuala.md` (fără editarea corpului) |
+| markup HTML / WordPress (Gutenberg) | `seo/markup.md` (+ `limba/revizie-contextuala.md` pentru câmpuri/text) |
+| text de reclamă Google/Meta/TikTok | `reclame/platforme.md`, `reclame/voce.md`, `limba/anti-tipare-ai.md` §J, `seo/grounding.md` |
+| postare organică (IG/FB/LI/TikTok/forum) | `social/README.md`, `social/organic.md`, `limba/anti-tipare-ai.md` §K, `seo/grounding.md` |
+| blog personal, lifestyle | `social/README.md`, `social/blog-personal.md`, `limba/anti-tipare-ai.md` §K |
+| afacere locală / contact | `seo/core.md`, `seo/local.md`, `seo/grounding.md` |
+| schema / date structurate | `seo/schema.md` |
+| audit SEO complet, link building | `seo/core.md`, `seo/avansat.md` |
+| CLI avansat / script individual | `limba/cli-verificare.md` |
 
-Încarcă doar fișierele relevante — nu e nevoie să citești tot `references/` pentru
-o singură propoziție de rescris.
+Index `references/`:
+- `limba/`: `anti-tipare-ai.md`, `exemple-voce.md`, `revizie-contextuala.md`, `human-voice-validator.md`, `cli-verificare.md`, `flux-exemplu.md`, `tipare-ro.md`, `gramatica-stil.md`, `scris-eficient.md`, `modelisme.md`, `calcuri.json`, `scoring-checklist.md`.
+- `seo/`: `core.md`, `grounding.md`, `titluri.md`, `flux-articol.md`, `geo.md`, `schema.md`, `ecommerce.md`, `blog-keyword.md`, `local.md`, `avansat.md`, `markup.md`, `scoring-checklist.md`.
+- `reclame/`: `platforme.md`, `voce.md`.
+- `social/`: `README.md`, `organic.md`, `blog-personal.md`.
 
 ## scripts/
 
 ### Rețeta minimă și contracte critice
 
-Scripturile stau în directorul skill-ului, nu în proiectul utilizatorului; rezolvă
-calea relativ la `SKILL.md` o singură dată. Punctul de intrare recomandat este
-`verifica.py`:
+Scripturile stau în directorul skill-ului; rezolvă calea relativ la `SKILL.md` o singură dată. Punctul de intrare recomandat: `verifica.py`.
 
 ```bash
 python3 <cale-skill>/scripts/verifica.py - <<'TEXT'
@@ -387,82 +140,25 @@ sau, dacă textul e deja într-un fișier al proiectului:
 python3 <cale-skill>/scripts/verifica.py drafts/articol.md
 ```
 
-Pe Windows/PowerShell, pune textul din conversație într-un fișier temporar, nu
-încerca escaping. Opțiunile uzuale: `--fara-seo`, `--scor`, `--json`, `--prag N`,
-`--human-voice`, `--reclame`, `--platform google|meta`, `--brand "Nume"`.
+Pe Windows/PowerShell folosește un fișier temporar (nu escaping). Opțiuni uzuale: `--fara-seo`, `--scor`, `--json`, `--prag N`, `--human-voice`, `--reclame`, `--platform google|meta`, `--brand "Nume"`.
 
-- Exit 0 = curat, 1 = semnale (rezultat normal, nu eșec), 2 = eroare de input
-  (inclusiv non-UTF-8; convertește cu `iconv -f WINDOWS-1250 -t UTF-8`, nu
-  reîncerca escaping). Nu raporta exit 1 ca eroare.
-- Pentru text fără destinație online (literar, email, document intern), folosește
-  `--fara-seo`. Sedila se verifică oricum și rămâne în secțiunea `seo` (cheia
-  `seo` în JSON); nu elimina acea secțiune din filtrare.
-- `tipare` și `modelisme` folosesc liniile
-  `severitate|categorie|L<linie>|fragment[|→ sugestie]`. `ritm` emite linii
-  `metrici|...` și `<semnal>|incredere=...|detaliu`, fără `L<n>`; SEO are
-  schema `severitate|categorie|detaliu|context`. `human-voice` și `reclame` au
-  scheme proprii, cu `L<n>` și câmpuri specifice. Formatele detaliate sunt în
-  manualul CLI. `--json` oferă structură pentru procesare programatică, fiindcă
-  fragmentele din raportul text pot conține `|`.
-- `scor_automat=X/13` este doar penalizare deterministă, nu notă; SEO nu intră
-  în scor. `--human-voice` e audit separat, nu corectură lexicală; combinația
-  `--human-voice --json` adaugă `human_voice` fără să schimbe scorul /13.
-- `--reclame` se folosește pentru anunțuri cu etichetele H1:/D1:/Text:/Titlu:;
-  păstrează limitele platformei și afirmările goale în verificare.
-- `check-cuvinte.py` e separat, nu intră în `verifica.py` și nu are scor:
-  listele sunt suspecți de verificat, nu verdicte. Exit 0 = niciun suspect,
-  1 = forme de verificat, 2 = eroare de input/lexicon; cu `--sugestii`, exit 2
-  poate indica și motorul Hunspell sau dicționarul indisponibil/defect când
-  există suspecți afișați. Vezi manualul CLI pentru condiția exactă.
-- `check-calcuri.py` e separat, opt-in (rulezi doar la cerere), nu intră în
-  `verifica.py` și nu are scor: semnalizează colocări de recitit din
-  `references/limba/calcuri.json` — deocamdată o singură regulă, forme de
-  «a frâna» lângă forme de «încărcare», pe aceeași propoziție, la cel mult
-  `--fereastra` cuvinte distanță (implicit 10; se acceptă și `--fereastra=N`).
-  Perechea e de recitit în context — calc, metaforă sau frânare fizică
-  legitimă («Camionul frânează la rampa de încărcare» e fals pozitiv
-  acceptat) —, nu un verdict: fereastra numără cuvinte, nu sintaxă, iar
-  semnalul trimite la revizia contextuală, nu la o corecție; un semnal nu e
-  automat o eroare. «încărcătura» (sarcina, nu procesul) e exclusă. Exit 0 =
-  nimic de recitit, 1 = cel puțin o colocare (caz normal), 2 = eroare de
-  input, registry lipsă/defect sau argument necunoscut; `--registry`
-  înlocuiește registry-ul. Limitele, formatul și creșterea manuală a
-  registry-ului: manualul CLI.
-- Dacă `python3` nu există, nu căuta alternative: sari peste pasul mecanic,
-  spune-o pe scurt și fă verificarea pe listă, din
-  `references/limba/anti-tipare-ai.md`.
+- **Exit codes**: `0` curat, `1` semnale (normal, nu eșec), `2` eroare de input/UTF-8 (convertește cu `iconv -f WINDOWS-1250 -t UTF-8`).
+- **`--fara-seo`**: pentru text non-online sau fragmente proiectate; sedila se verifică oricum și rămâne sub `seo` (nu elimina cheia `seo`).
+- **Scheme text**: `tipare`/`modelisme` emit `severitate|categorie|L<linie>|fragment[|→ sugestie]`; `ritm` emite `metrici|...` și `<semnal>|incredere=...|detaliu`, fără `L<n>`; `seo` emite `severitate|categorie|detaliu|context`; `human-voice` și `reclame` au scheme proprii cu `L<n>`. Pentru procesare programatică folosește `--json` (fragmentele pot conține `|`).
+- **Scor și voce**: `scor_automat=X/13` e penalizare deterministă, nu notă (SEO nu intră); `--scor` e opțional. `--human-voice` se poate combina în același apel cu `verifica.py` (și cu `--json`, fără să schimbe `/13`); nu e corectură lexicală.
+- **`--reclame`**: pentru fișiere cu etichete `H1:`/`D1:`/`Text:`/`Titlu:`; limite platformă, politici și afirmații goale (stratul SEO se reduce la sedilă).
+- **`check-cuvinte.py`** (separat, fără scor): suspecți de verificat, nu verdicte; exit 0/1/2 (cu `--sugestii`, exit 2 poate indica Hunspell sau dicționarul indisponibil/defect când există suspecți afișați).
+- **`check-calcuri.py`** (separat, opt-in, fără scor): colocări de recitit din `references/limba/calcuri.json`, semnal neutru către revizia contextuală (exit 0/1/2; detalii în manualul CLI).
+- **Markup HTML/WordPress**: regula de proiecție din `references/seo/markup.md` are prioritate față de apelul direct `verifica.py <fișier>`, inclusiv în modul `audit` și pe drafturi lungi pe bucăți (proiectează întâi, apoi rulează `verifica.py --fara-seo` pe proiecții).
+- Dacă `python3` lipsește, sari peste pasul mecanic, spune-o pe scurt și verifică pe `references/limba/anti-tipare-ai.md`.
 
 ### Manual CLI — încărcare condiționată
 
-Agentul care folosește un script individual cu opțiuni sau comportament care
-nu sunt rezumate aici, un flag în afara rețetei minime, automatizează/filtrează
-rapoarte, depanează un apel sau rulează evaluatorul contextual citește
-`references/limba/cli-verificare.md` **înainte** de comandă sau de interpretarea
-rezultatului. Acolo sunt contractele detaliate de
-intrare/ieșire, limitele și opțiunile scripturilor. Nu încărca manualul pentru
-o sarcină simplă care folosește doar comenzile și contractele critice de mai sus.
-
-`evaluare-contextuala.py` nu verifică text și nu rulează modele: numără
-predicții deja furnizate față de corpusul draft
-`tests/fixtures/evaluare-contextuala.json` (`draft_nevalidat_uman`), deci nu
-produce benchmark. `--split referinta|holdout` limitează validarea și numărarea
-la splitul ales; trebuie acoperite toate ID-urile lui. Exit 0 evaluare completă,
-1 predicții incomplete/invalide, 2 eroare de fișier/JSON/corpus. Nu face parte
-din fluxul de scriere.
+Citește `references/limba/cli-verificare.md` **înainte** de comandă sau interpretare dacă folosești un script individual, flag-uri în afara rețetei minime, filtrare/automatizare, depanare ori `evaluare-contextuala.py` (pilot offline pe corpus draft, în afara fluxului de scriere). Nu încărca manualul pentru sarcini simple acoperite de rețeta de mai sus.
 
 ### Cum citești raportul
 
-- `critic` se corectează; `important` se verifică în fragment; `minor` e semnal
-  de recitire, nu corecție automată. `prag_depasit` explică densitatea, nu o
-  eroare izolată.
-- `→` e o corecție canonică posibilă: adapteaz-o la acord și topică, nu o
-  aplica mecanic.
+- `critic` se corectează; `important` se verifică în fragment; `minor` e semnal de recitire, nu corecție automată; `prag_depasit` explică densitatea.
+- `→` e corecție canonică: adapteaz-o la acord și topică.
 
-Manualul detaliat de format al raportului, praguri, ieșiri și comportamentul
-fiecărui script este în `references/limba/cli-verificare.md`. Înainte de uz
-individual/avansat, urmează instrucțiunea de încărcare condiționată de mai sus.
-
-Instrumentele sunt sprijin, nu verdicte; limitele reale de execuție le impune
-harness-ul. `check-ritm.py` are praguri provenite din corpusuri englezești și
-poate da fals pozitive pe registru formal. Judecata asupra ritmului,
-naturaleții și relevanței rămâne manuală.
+Instrumentele sunt sprijin, nu verdicte; limitele reale le impune harness-ul. `check-ritm.py` are praguri din corpusuri englezești (posibile fals-pozitive pe registru formal). Judecata de ritm, naturalețe și sens rămâne manuală.

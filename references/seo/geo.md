@@ -43,8 +43,9 @@ experiența de căutare.
 
 - **Întrebare → Răspuns scurt → Explicație**: începe secțiunea cu o formulare clară a
   întrebării/subiectului, oferă un răspuns direct în 1-2 propoziții, apoi dezvoltă.
-- **Definiții clare și autonome**: o propoziție care definește termenul central trebuie
-  să aibă sens chiar scoasă din context — motoarele generative citează fragmente izolate.
+- **Definiții clare unde sunt utile**: când cititorul chiar are nevoie de definirea
+  unui termen central, formuleaz-o clar și concis — fără să forțezi o definiție pe
+  fiecare pagină sau să rupi cursul firesc al prozei.
 - **Date factuale verificabile**: cifre, date concrete, atribuiri corecte. Conținutul
   cu fapte verificabile are șanse mai mari de a fi citat ca sursă de încredere.
 - **Organizare pe paragrafe și secțiuni** cu heading-uri clare — AI-ul poate extrage
@@ -91,7 +92,10 @@ au crescut vizibilitatea în răspunsurile generative cu 30-41%:
    un link ascuns în „aici".
 3. **Include citate directe** (+28-40%) — o frază între ghilimele, atribuită unei
    persoane sau instituții reale.
-4. **Voce autoritară** — afirmă, nu ezita. Coincide cu interdicția de hedging.
+4. **Claritate fără hedging gol** — taie ezitarea de umplutură („este posibil să",
+   „ar putea reprezenta"), dar **păstrează incertitudinea reală**, condițiile și
+   limitele datelor. Certitudinea fabricată distruge încrederea mai repede decât o
+   limită declarată onest.
 5. **Fluență** — fraze curate, fără îmbâcseală. Coincide cu tot ce cere
    `references/limba/scris-eficient.md`.
 
@@ -99,24 +103,26 @@ Atenție: regula de bază rămâne cea din `references/limba/tipare-ro.md` — *
 inventa cifre, citate sau surse** ca să bifezi punctele de mai sus. O statistică
 fabricată e o greșeală mai gravă decât absența ei.
 
-**La nivel de structură**:
+**La nivel de structură** (corelații observaționale din studii, **nu cote obligatorii de scriere**):
 
-- **Răspunsul în prima treime a paginii**: o analiză pe 100 de AI Overviews a găsit
-  că 55% dintre citări provin din primele 30% ale paginii. Concret: pune răspunsul
-  direct la întrebarea principală în primele ~200 de cuvinte, nu după trei paragrafe
-  de context. Se potrivește oricum cu regula anti-introduceri-formulaice.
-- **Secțiuni de 120-180 de cuvinte** între heading-uri: pe 216.000 de pagini,
-  acestea au avut în medie 4,6 citări, față de 2,7 pentru secțiuni mai scurte.
-  Nu fragmenta artificial (Google confirmă că înțelege pagini lungi), dar nici nu
-  lăsa blocuri de 600 de cuvinte fără subtitlu.
-- **Heading-uri formulate ca întrebarea utilizatorului**: „Ce este GEO?" se
-  potrivește mai bine cu interogarea decât „Despre GEO" sau „Prezentare generală".
-  În română, formulează subtitlul cum ar tasta cititorul, nu cum sună într-un
-  cuprins academic.
-- **Paragrafe autonome**: fiecare paragraf trebuie să aibă sens scos din context —
-  motoarele generative extrag fragmente izolate. Evită deschideri de paragraf care
-  depind de anafora din paragraful anterior („Acest lucru înseamnă că…").
-- **Definiții explicite** pentru termenii centrali, într-o singură propoziție.
+- **Răspunsul timpuriu**: o analiză pe 100 de AI Overviews a găsit că 55% dintre
+  citări provin din primele 30% ale paginii. Practic: pune răspunsul direct în
+  deschidere, fără paragrafe de încălzire (nu după un prag fix de cuvinte). Se
+  potrivește oricum cu regula anti-introduceri-formulaice.
+- **Lungimea secțiunilor**: pe 216.000 de pagini, secțiunile de 120-180 de cuvinte
+  au avut în medie 4,6 citări față de 2,7 pentru cele mai scurte — e o corelație de
+  corpus, **nu o cotă de lungime**. Lungimea unei secțiuni urmează subiectul și
+  decizia cititorului: nu fragmenta artificial și nu lăsa blocuri masive fără
+  structură.
+- **Heading-uri formulate cum ar întreba sau decide cititorul**: „Ce este GEO?" sau
+  o formulare concretă se potrivește mai bine cu interogarea decât „Despre GEO" sau
+  „Prezentare generală".
+- **Referenți clari fără să rupi proza**: evită deschideri vagi care pierd
+  referentul („Acest lucru înseamnă că…"), dar **nu** transforma proza legată în
+  blocuri robotice izolate — conectorii firești și continuitatea între paragrafe
+  rămân proză legitimă.
+- **Definiții explicite doar când cititorul are nevoie de ele**: concise și clare,
+  nu inserate mecanic la început de articol.
 
 **La nivel de pagină și site**:
 
