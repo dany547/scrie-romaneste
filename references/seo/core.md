@@ -42,9 +42,14 @@ Aplică regulile **fără a compromite naturalitatea textului** — vezi `refere
 - **Conținut actualizat**: verifică periodic conținutul publicat și actualizează-l la nevoie;
   șterge conținutul care nu mai este relevant. Paginile actualizate au șanse mai mari de
   ranking decât cele abandonate.
-- **Calitate peste cantitate**: nu există un număr magic de cuvinte țintă. Scrie natural,
-  variază vocabularul — cu cât folosești mai multe cuvinte relevante, cu atât ai mai multe
-  șanse să apări în rezultate, dar nu umple textul artificial.
+- **Calitate peste cantitate**: nu există un număr magic de cuvinte țintă și nici o cotă
+  fixă de cuvinte-cheie. Pornește de la **decizia cititorului** și **dovezile confirmate**
+  din brief; păstrează incertitudinea reală și nuanțele legitime în loc să le înlocuiești cu
+  certitudini fabricate. Scrie natural, variază vocabularul, fără umplutură.
+- **Revizie pe câmpuri și markup**: înainte de livrare, SEO title, H1, meta descrierea,
+  excerptul separat (dacă există) și fiecare H2/H3 trec prin revizia editorială din
+  `references/limba/revizie-contextuala.md`. Dacă sursa e HTML sau conținut WordPress
+  (Gutenberg), urmează `markup.md`.
 
 ## Ce evită un text SEO natural (interzis)
 

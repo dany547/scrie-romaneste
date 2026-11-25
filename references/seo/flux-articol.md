@@ -16,10 +16,10 @@ vedea", „X este un proces prin care". Reflexele astea sunt deja numite în
 Funcționează: o scenă, o cifră care contrazice așteptarea, o întrebare pe care
 cititorul și-a pus-o deja, un verdict direct.
 
-Promisiunea titlului se atinge în primele două-trei propoziții. E aceeași
-regulă ca răspunsul în primele ~200 de cuvinte din `geo.md`, văzută dinspre
-cititor: a venit pentru ce-a citit în titlu, nu ca să fie pregătit pentru
-subiect. Contractul titlu–corp e în `titluri.md`.
+Promisiunea titlului se atinge în primele propoziții, fără încălzire. E aceeași
+regulă ca răspunsul timpuriu din `geo.md`, văzută dinspre cititor: a venit
+pentru ce-a citit în titlu, nu ca să fie pregătit pentru subiect. Contractul
+titlu–corp e în `titluri.md`.
 
 ## 2. Ritmul secțiunilor
 
@@ -38,15 +38,18 @@ recitește.
 
 ## 3. Paragrafe
 
-Maximum ~4 rânduri, dar nu toate de 4. Un paragraf de o propoziție după o
-explicație lungă e accent, nu sărăcie. Cinci paragrafe identice ca lungime
-sunt metronom.
+Paragrafe lizibile și variate, fără cotă fixă de rânduri. Un paragraf de o
+propoziție după o explicație lungă e accent, nu sărăcie; un paragraf mai lung
+rămâne legitim când dezvoltă o demonstrație sau o nuanță legată. Cinci
+paragrafe identice ca lungime sunt metronom.
 
 ## 4. Dovada
 
 Orice afirmație contestabilă stă lângă o cifră, un exemplu, un caz, un citat
 atribuit sau o sursă pe nume. Fără ele, afirmația e opinie — și atunci se
-declară ca opinie.
+declară ca opinie. Păstrează incertitudinea reală (limite ale datelor, condiții
+în care regula nu se aplică): o limită declarată onest bate o certitudine
+falsă.
 
 Interdicția rămâne: nu inventa. Cifra, cazul, citatul și sursa vin din
 CONTEXT, nu din obișnuința de a suna precis (`grounding.md`,
@@ -67,8 +70,9 @@ grupat, o dată. Textul rămâne mai sărac până vine.
 
 ## 6. Legături interne
 
-Două-trei pagini proprii relevante, cu anchor descriptiv — ce se găsește la
-destinație, nu „click aici" și nu „articol" (`core.md`).
+Pagini proprii relevante, doar unde chiar ajută cititorul să ia decizia sau să
+aprofundeze — fără o cotă fixă per articol — cu anchor descriptiv (ce se
+găsește la destinație, nu „click aici" și nu „articol", `core.md`).
 
 Doar pagini care există. Nu inventa URL-uri, nu inventa titluri de articole
 „pe care le vom publica", nu trimite la o categorie goală. Dacă nu cunoști
@@ -92,6 +96,7 @@ Ultima frază e a doua cea mai citită după titlu. Nu o irosi pe o formulă.
 Întrebări, nu prag. Un „nu" la ultimele trei nu se repară din editare — cere
 alt contract, alt unghi sau alt subiect.
 
+- Care e decizia concretă cu care pleacă cititorul și ce dovezi confirmate o susțin?
 - Cine a scris, și e evident cititorului?
 - Dacă e generat, se declară?
 - Pagina există ca să ajute pe cineva concret sau ca să prindă o interogare?

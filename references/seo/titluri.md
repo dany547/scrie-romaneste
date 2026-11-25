@@ -19,7 +19,9 @@ Un titlu care lucrează are două-trei din patru piese. Toate patru înghesuie.
   inventat.
 - **Unghi** — o restricție, un contrast, o consecință, o experiență.
 
-Keyword-ul stă în prima treime. Restul frazei spune de ce merită deschis.
+De regulă, termenul principal stă devreme în titlu, dar fără să rupă topica
+românească sau să înghesuie cuvinte-cheie. Restul frazei spune de ce merită
+deschis, legat de decizia cititorului.
 
 ## 2. Titluri duble
 
@@ -93,23 +95,25 @@ aceeași piesă. Se recitește separat de corp.
 
 ## 9. Contractul titlu–corp
 
-Dacă titlul dă o cifră, cifra apare în primele ~200 de cuvinte. Dacă promite
-„fără instalator", pagina spune concret cum. Dacă promite un calculator, e un
-calculator, nu un articol cu un tabel.
+Dacă titlul dă o cifră sau o condiție, ea apare devreme în deschidere, nu
+ascunsă după paragrafe de încălzire. Dacă promite „fără instalator", pagina
+spune concret cum. Dacă promite un calculator, e un calculator, nu un articol
+cu un tabel.
 
-Aceeași regulă ca răspunsul în primele 200 de cuvinte din `geo.md`, văzută
-dinspre cititor: a venit pentru ce-a citit în titlu. Primele două-trei
-propoziții trebuie să-i confirme că n-a greșit pagina. Deschiderea e în
+Aceeași regulă ca răspunsul timpuriu din `geo.md`, văzută dinspre cititor: a
+venit pentru ce-a citit în titlu. Primele propoziții trebuie să-i confirme că
+n-a greșit pagina și că promisiunea se leagă de decizia lui. Deschiderea e în
 `flux-articol.md`.
 
 ## 10. Procedura
 
-Scrie cinci variante, nu una. Prima e întotdeauna cea de model — eticheta cu
-keyword-ul în față. Taie-o. Din cele patru rămase, păstreaz-o pe cea care are
-promisiune și precizie fără să mintă.
+Nu te opri la prima variantă dacă e etichetă sau șablon de agenție. Compară
+2-3 unghiuri pornind de la decizia cititorului și de la dovezile confirmate
+din brief, apoi păstrează varianta care are promisiune și precizie fără să
+inventeze date.
 
-Dacă nu poți scrie cinci fără să repeți aceeași frază, n-ai unghi. Întoarce-te
-la contract: cine e cititorul și cu ce pleacă.
+Dacă nu poți formula un unghi concret fără să repeți aceeași etichetă,
+întoarce-te la CONTRACT: ce decizie ia cititorul și ce dovezi reale ai.
 
 ## 11. Înainte / după
 
@@ -140,11 +144,13 @@ la contract: cine e cititorul și cu ce pleacă.
 Transformarea contează, nu formularea exactă. Cifrele din exemple sunt formă,
 nu date de publicat — dacă nu le ai confirmate, nu le pune (`grounding.md`).
 
-## 12. Acordul din titlu și excerpt
+## 12. Acordul și revizia pe câmpuri
 
-Titlul și excerptul se recitesc ca text separat, nu ca restul paginii. Pică
-des: neutre la plural, numeral + substantiv, genul adjectivului. Fără majuscule
-la fiecare cuvânt — regulă englezească, nu românească (`tipare-ro.md`).
+Titlul, meta descrierea, excerptul și fiecare H2/H3 se recitesc ca unități
+separate (snippet și outline) și apoi față de secțiunea reală și decizia
+cititorului (`references/limba/revizie-contextuala.md`). Pică des acordul:
+neutre la plural, numeral + substantiv, genul adjectivului. Fără majuscule la
+fiecare cuvânt — regulă englezească, nu românească (`tipare-ro.md`).
 
-Poarta de livrare din `SKILL.md` cere recitirea manuală a acordului aici.
-Scriptul nu o face.
+Poarta de livrare din `SKILL.md` cere recitirea manuală a acordului și a
+fiecărui câmp editorial aici. Scriptul nu o face.

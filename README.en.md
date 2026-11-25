@@ -19,7 +19,8 @@ Combines Romanian language rules (grammar, style, anti-AI patterns) with SEO/GEO
 - **Four modes** — `rescriere` (clean output), `audit` (report patterns without rewriting), `editare` (minimal targeted edits), `human-voice` (separate audit for mechanical voice reflexes, with a 30-point score and hard blockers)
 - **Anti-AI patterns** — mechanical transitions, corporate jargon, hedging, vague quantifiers. Each entry has a **replacement** and a **threshold**: some phrases are always wrong, others only when they cluster. One "de asemenea" in a 2000-word article is fine; six are not.
 - **Romanian-specific failure modes** — the part an English skill cannot have: long-distance agreement, prepositional government, inflection errors, invented words (the lexicon filter lists suspects; suspects require source/context verification with permitted access, manual lookup only, no automated extraction), syntactic calques, false friends, borrowed-word articulation, diacritic restoration
-- **Contextual revision** — a sentence-by-sentence pass over the final text (`references/limba/revizie-contextuala.md`): verb–object, expression sense, referent, transformation/comparison/causality coherence, reader role, jargon/register. Verdicts (`eroare susținută` / `suspiciune contextuală` / `preferință` / `neclar`) with evidence; at most 2 audit→edit→reverify cycles, then escalate
+- **Contextual & field-level review** — a sentence-by-sentence pass over the final text (`references/limba/revizie-contextuala.md`): verb–object, expression sense, referent, transformation/comparison/causality coherence, reader role, jargon/register, plus **required field-level review** before article/online-page delivery (SEO title, H1, meta, separate excerpt if applicable, each H2/H3 — read as snippet/outline and against the actual section promise and reader decision, with fresh-context review where supported/permitted or explicit self-review fallback, never editing raw markup, plus a short metadata/heading-only path). Verdicts (`eroare susținută` / `suspiciune contextuală` / `preferință` / `neclar`) come with evidence; at most 2 audit→edit→reverify cycles, then escalate
+- **HTML & WordPress (Gutenberg) markup workflow** — dedicated guide (`references/seo/markup.md`) separating offline preflight from WordPress editor verification (preview → save → reopen in an authorized disposable environment, never production), running `verifica.py --fara-seo` independently on projected body and metadata, and preserving attributes, anchors, links, and block wrappers on copy edits
 - **Grammar & style** — punctuation, agreement, spelling, diathesis, language registers (400+ rules from Romanian school manuals)
 - **Positive voice models** — annotated before/after rewrites per register, so the skill shows what to write, not only what to delete
 - **Writing techniques** — rhythm, conciseness, structure, audience calibration
@@ -245,6 +246,7 @@ scrie-romaneste/
 │       ├── blog-keyword.md         # Blog content + keyword research
 │       ├── local.md                # NAP, Google Business Profile
 │       ├── avansat.md              # Link building, advanced technical, audits
+│       ├── markup.md               # HTML/WordPress (Gutenberg) preflight & safe editing
 │       └── scoring-checklist.md    # Pre-delivery SEO/information-density checklist
 │   ├── reclame/                    # Paid ads — thin layer over the general rules
 │   │   ├── platforme.md            # Google/Meta/PMax limits, TikTok (unverified), file format

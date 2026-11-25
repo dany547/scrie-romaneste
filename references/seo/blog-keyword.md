@@ -24,9 +24,10 @@ Bazele on-page (titlu, meta, heading-uri, `alt`, anchor text, imagini) sunt în
 - **Anticipează vocabularul cititorului**: un expert caută termeni diferiți decât un
   începător pe același subiect. Include variații naturale de exprimare — nu doar termenul
   „oficial" (ex. „asigurare auto" vs. „RCA" vs. „poliță de asigurare").
-- **Un cuvânt-cheie per pagină**: fiecare pagină țintește un cuvânt-cheie principal și
-  2-3 variante secundare. Nu comprima 10 cuvinte-cheie pe o singură pagină — diluezi
-  relevanța.
+- **O temă și o decizie clară per pagină**: construiește pagina în jurul unei
+  intenții de căutare și al deciziei concrete a cititorului, folosind vocabularul
+  natural al subiectului (termenul central și variații firești), fără o cotă fixă
+  de cuvinte-cheie și fără să amesteci intenții incompatibile pe aceeași pagină.
 - **Intenția de căutare (search intent)**: clasifică fiecare cuvânt-cheie după intenție:
   - **Informativă** („ce este SEO") → articol explicativ, ghid
   - **Navigațională** („Google Search Console login") → pagină dedicată
@@ -45,6 +46,5 @@ Bazele on-page (titlu, meta, heading-uri, `alt`, anchor text, imagini) sunt în
   backlinks) necesită timp și efort semnificativ. Prioritizează cuvinte cu competiție
   moderată/scăzută pentru rezultate rapide.
 - **Actualizează cercetarea periodic**: tendințele de căutare se schimbă. Re-verifică
-  cuvintele-cheie la fiecare 3-6 luni, mai ales pentru subiecte sezoniere sau în
-  schimbare rapidă.
+  cuvintele-cheie când se schimbă piața, sezonalitatea sau datele din Search Console.
 
