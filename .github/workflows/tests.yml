@@ -8,7 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # `ubuntu-latest` a trecut la Ubuntu 26.04, iar manifestul setup-python nu are
+    # Python 3.9 pentru imaginea aceea: jobul murea la instalare, înainte de teste.
+    # 3.9 rămâne acoperit pe 24.04 (ultima imagine care îl are); 3.11/3.13 rulează pe
+    # `ubuntu-latest`. Când 3.9 iese din suport, se scoate din matrice, nu se mută imaginea.
+    runs-on: ${{ matrix.python-version == '3.9' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
