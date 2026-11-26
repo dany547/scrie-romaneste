@@ -38,7 +38,8 @@ Punct de intrare: `scripts/verifica.py`; documentația de contract: `SKILL.md` +
 - Fără date reale de client în repo public sau în exemple.
 
 ## Ce nu se atinge (regulă pentru orice agent)
-Secrete, `.github/workflows/*`, releases/tags, `main`, Administration. Fix-urile: branch + PR; merge = Dan.
+Secrete, `.github/workflows/*`, releases/tags și Administration. Schimbările se trimit pe branch separat, prin PR; fără push direct pe `main`.
+Un agent poate face merge pe `main` doar prin PR, după ce Dan confirmă explicit acel PR și toate verificările CI cerute au trecut. Fără ocolirea protecțiilor de branch.
 
 ## Severitate
 - `BLOCK`: date reale/personale în repo public · schimbare de format fără test + fără update în `SKILL.md` ·
