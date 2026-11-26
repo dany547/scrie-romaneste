@@ -1668,8 +1668,8 @@ class TestParitateFlaguri(unittest.TestCase):
 
     SCRIPTURI = ("verifica", "check-tipare", "check-ritm", "check-modelisme",
                  "check-seo", "check-human-voice", "check-reclame", "check-cuvinte",
-                 "check-calcuri", "evaluare-contextuala")  # evaluatorul:
-                 # contract de exit propriu, nu e în TOATE; check-calcuri e opt-in
+                 "check-calcuri", "check-markup", "evaluare-contextuala")  # evaluatorul:
+                 # contract de exit propriu, nu e în TOATE; check-calcuri și check-markup sunt opt-in
 
     def _flaguri_help(self):
         import re
