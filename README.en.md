@@ -268,6 +268,7 @@ scrie-romaneste/
 │   ├── check-modelisme.py          # Pleonasms (incl. commercial), anglicisms, paronyms
 │   ├── check-reclame.py            # Ad copy only: character limits, platform policies, empty claims
 │   ├── check-seo.py                # Headings and keyword stuffing
+│   ├── check-markup.py             # Offline HTML/Gutenberg preflight: headings, block pairing, JSON attrs
 │   ├── evaluare-contextuala.py     # Offline pilot: counts supplied predictions vs the draft corpus (no models)
 │   └── _comun.py                   # Shared scanning engine (not a CLI)
 ├── LICENSE                         # MIT (the lexicon word list keeps its own licence)
@@ -299,6 +300,7 @@ python3 scripts/check-calcuri.py <file|-> --fereastra N --registry PATH  # word 
 python3 scripts/check-modelisme.py <file>   # pleonasms/paronyms only
 python3 scripts/check-seo.py <file>         # SEO structure + title register (clickbait, template, label)
 python3 scripts/check-reclame.py <file>     # ad copy only: limits, policies, empty claims
+python3 scripts/check-markup.py --mode page|fragment|wp-body <file|->  # offline HTML/Gutenberg preflight: JSON report on stdout, exit 1 on findings
 ```
 
 <a id="spelling-suggestions-opt-in-hunspell"></a>
@@ -398,6 +400,7 @@ A commit on `main` whose subject is `vX.Y.Z: summary` is a release. A pre-releas
 
 ## Version
 
+- **v0.15.0** — Field-level editorial review and HTML/Gutenberg preflight. Contextual revision is now required at field level before delivering articles and online pages: SEO title, H1, meta description, a separate excerpt when applicable, and every H2/H3 are read as a snippet/outline and against the section's actual promise and the reader's decision, with a fresh-context reviewer where the host supports and permits it, otherwise a declared self-review; the reviewer never edits raw markup, and metadata/headings get a short path of their own. The new `scripts/check-markup.py` runs a read-only offline preflight on HTML and Gutenberg block markup (`--mode page|fragment|wp-body`): a single H1, heading-level skips, `wp:`/`/wp:` marker pairing (including markers left open at EOF), attributes that must be a valid JSON object, and the projected text that `verifica.py --fara-seo` runs on separately from the metadata. The report is JSON on stdout, exit 1 means findings; it does not validate rendering and does not replace a test in the target editor. `references/seo/markup.md` separates offline preflight from WordPress verification (preview → save → reopen in an authorized disposable environment, never production), requires an explicit `gutenberg_compatibility: unverified` status until that test happens, and protects attributes, anchors, links and blocks during edits. `SKILL.md` is rewritten shorter, with the minimal recipe up front; `verifica.py`, the report format and the /13 score are unchanged. 369 tests.
 - **v0.14.1** — Age test for platform limits: `platforme.md` must carry a verification date in its header, and past 6 months the test warns (does not fail). 355 tests.
 - **v0.14.0** — Audit on small-model text and a new social-media layer. The audit showed that text from three cheap models passed with `PASS` despite missing diacritics, code leftovers and chat reflexes. New detectors in `check-tipare.py`: `diacritice_lipsa` (per paragraph, no lexicon: share of words with diacritics and forms that do not exist without them), `rest_cod` (code, HTML and template variables in prose), `engagement_bait` (artificial interaction requests, `minor`), and an extended `artefact_chatbot` for chat openers and closers. `check-human-voice.py` gains `testat_pe_mine` (unconfirmed personal-testing claim, no context exemption). `check-cuvinte.py` no longer checks hashtags as words. Meta correction: primary text 150 and headline 27 characters per the official guide read on 2026-11-05; the 125/40/25 figures have no current official source and the description has no recommendation. The `check-reclame.py` parser no longer treats a hashtag line as a heading and checks `Description:` under a Meta heading. New references: `references/social/` (`README.md`, `organic.md`, `blog-personal.md`) with limits from official sources only and the rest marked "unverified"; `platforme.md` adds Performance Max and TikTok (official CTAs, text limits unverified); `voce.md` adds native ads. `anti-tipare-ai.md` §K covers literary reflexes of small models; the DRAFT step now asks for chunked writing. `docs/audit-modele/` keeps findings, plans and reviews. 354 tests. A TikTok mode in `check-reclame.py` and a hashtag-diacritics detector were deliberately deferred (no official limits; false positives on `#romania`).
 - **v0.13.0** — Adds the optional `check-calcuri.py`
